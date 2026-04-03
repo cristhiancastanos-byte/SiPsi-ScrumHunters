@@ -23,7 +23,6 @@ public class PacienteBean implements Serializable {
     private List<String> listaDias;
     private List<String> listaAnios;
 
-    // Bandera para el mensaje de duplicado
     private boolean duplicadoError = false;
 
     private PacienteDelegate delegate = new PacienteDelegate();
@@ -63,9 +62,8 @@ public class PacienteBean implements Serializable {
     }
 
     public void guardar() {
-        duplicadoError = false; // Resetear error antes de validar
+        duplicadoError = false;
 
-        // 1. Validaciones de obligatorios
         if (pacienteNuevo.getNombre() == null || pacienteNuevo.getNombre().trim().isEmpty() ||
                 dia == null || dia.isEmpty() || mes == null || mes.isEmpty() || anio == null || anio.isEmpty() ||
                 pacienteNuevo.getGenero() == null || pacienteNuevo.getGenero().isEmpty()) {
@@ -74,25 +72,21 @@ public class PacienteBean implements Serializable {
         }
 
         try {
-            // 2. Construir fecha para la validación
             Calendar cal = Calendar.getInstance();
             cal.set(Integer.parseInt(anio), Integer.parseInt(mes) - 1, Integer.parseInt(dia));
             Date fechaNac = cal.getTime();
             pacienteNuevo.setFechaNac(fechaNac);
 
-            // 3. VALIDACIÓN DE DUPLICADO (Nombre + Fecha)
             if (persistence.checkDuplicate(pacienteNuevo.getNombre(), fechaNac)) {
                 duplicadoError = true;
                 FacesContext.getCurrentInstance().validationFailed();
                 return;
             }
 
-            // 4. Limpieza de correo para evitar el lío del "" vs NULL
             if (pacienteNuevo.getCorreo() != null && pacienteNuevo.getCorreo().trim().isEmpty()) {
                 pacienteNuevo.setCorreo(null);
             }
 
-            // 5. Registrar
             delegate.registrarPaciente(pacienteNuevo);
 
             FacesContext.getCurrentInstance().addMessage(null,
@@ -115,7 +109,6 @@ public class PacienteBean implements Serializable {
         actualizarDias();
     }
 
-    // Getters y Setters
     public PacienteEntity getPacienteNuevo() { return pacienteNuevo; }
     public void setPacienteNuevo(PacienteEntity p) { this.pacienteNuevo = p; }
     public String getDia() { return dia; }
