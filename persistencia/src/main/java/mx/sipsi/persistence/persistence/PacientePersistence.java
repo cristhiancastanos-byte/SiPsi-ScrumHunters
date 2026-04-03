@@ -33,4 +33,12 @@ public class PacientePersistence {
         query.setParameter("correoParam", correo);
         return query.getSingleResult() > 0;
     }
+
+    public boolean checkDuplicate(String nombre, java.util.Date fecha) {
+        String hql = "SELECT COUNT(p) FROM PacienteEntity p WHERE p.nombre = :nombre AND p.fechaNac = :fecha";
+        TypedQuery<Long> query = em.createQuery(hql, Long.class);
+        query.setParameter("nombre", nombre);
+        query.setParameter("fecha", fecha);
+        return query.getSingleResult() > 0;
+    }
 }
