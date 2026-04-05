@@ -44,7 +44,6 @@ public class PacienteEntity implements Serializable {
         this.activo = true;
     }
 
-    // GETTERS Y SETTERS (C)
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
