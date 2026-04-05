@@ -22,90 +22,136 @@ public class PacienteBean implements Serializable {
 
     private final PacienteFacade facade = new PacienteFacade();
 
-    // LISTADO
-    private List<PacienteEntity> listaPacientes = new ArrayList<>();
-    private String terminoBusqueda;
-
-    // REGISTRO
-    private PacienteEntity pacienteNuevo = new PacienteEntity();
-    private boolean duplicadoError;
+    private PacienteEntity pacienteNuevo;
     private String dia = "";
     private String mes = "";
     private String anio = "";
+    private List<String> listaDias;
+    private List<String> listaAnios;
+    private boolean duplicadoError = false;
 
-    // EDICIÓN
+    private List<PacienteEntity> listaPacientes;
+    private String terminoBusqueda;
+
     private PacienteEntity pacienteEditar = new PacienteEntity();
     private String diaEditar = "";
     private String mesEditar = "";
     private String anioEditar = "";
+    private List<String> listaDiasEditar;
     private boolean errorNombreEditar;
     private boolean errorFechaEditar;
     private boolean errorGeneroEditar;
     private boolean duplicadoEditar;
 
-    // APOYO
-    private List<String> listaDias = new ArrayList<>();
-    private List<String> listaAnios = new ArrayList<>();
-
     @PostConstruct
     public void init() {
-        cargarAnios();
-        actualizarDias();
-        cargarPacientes();
+        int anioActual = Calendar.getInstance().get(Calendar.YEAR);
+        listaAnios = new ArrayList<>();
+        for (int i = anioActual; i >= 1926; i--) {
+            listaAnios.add(String.valueOf(i));
+        }
+        limpiar();
+        cargarTodosActivos();
     }
 
-    // =========================
-    // LISTADO
-    // =========================
-    public void cargarPacientes() {
-        if (terminoBusqueda == null || terminoBusqueda.trim().isEmpty()) {
+    public void cargarTodosActivos() {
+        try {
             listaPacientes = facade.buscarTodosActivos();
-        } else {
-            listaPacientes = facade.buscarPorNombreActivos(terminoBusqueda.trim());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void filtrarPorNombre() {
-        cargarPacientes();
+        try {
+            if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
+                listaPacientes = facade.buscarPorNombreActivos(terminoBusqueda.trim());
+            } else {
+                cargarTodosActivos();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    // =========================
-    // REGISTRO
-    // =========================
+    public void actualizarDias() {
+        int maxDias = 31;
+        if (mes != null && !mes.isEmpty()) {
+            int mesInt = Integer.parseInt(mes);
+            int anioInt = (anio != null && !anio.isEmpty()) ? Integer.parseInt(anio) : Calendar.getInstance().get(Calendar.YEAR);
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, anioInt);
+            cal.set(Calendar.MONTH, mesInt - 1);
+            maxDias = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        }
+
+        listaDias = new ArrayList<>();
+        for (int i = 1; i <= maxDias; i++) {
+            listaDias.add(String.format("%02d", i));
+        }
+
+        if (dia != null && !dia.isEmpty() && Integer.parseInt(dia) > maxDias) {
+            this.dia = String.format("%02d", maxDias);
+        }
+    }
+
+    public void actualizarDiasEditar() {
+        int maxDias = 31;
+        if (mesEditar != null && !mesEditar.isEmpty()) {
+            int mesInt = Integer.parseInt(mesEditar);
+            int anioInt = (anioEditar != null && !anioEditar.isEmpty()) ? Integer.parseInt(anioEditar) : Calendar.getInstance().get(Calendar.YEAR);
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, anioInt);
+            cal.set(Calendar.MONTH, mesInt - 1);
+            maxDias = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        }
+
+        listaDiasEditar = new ArrayList<>();
+        for (int i = 1; i <= maxDias; i++) {
+            listaDiasEditar.add(String.format("%02d", i));
+        }
+
+        if (diaEditar != null && !diaEditar.isEmpty() && Integer.parseInt(diaEditar) > maxDias) {
+            this.diaEditar = String.format("%02d", maxDias);
+        }
+    }
+
     public void guardar() {
         duplicadoError = false;
 
-        try {
-            if (pacienteNuevo.getNombre() == null || pacienteNuevo.getNombre().trim().isEmpty()
-                    || dia == null || dia.isEmpty()
-                    || mes == null || mes.isEmpty()
-                    || anio == null || anio.isEmpty()
-                    || pacienteNuevo.getGenero() == null || pacienteNuevo.getGenero().trim().isEmpty()) {
-                FacesContext.getCurrentInstance().validationFailed();
-                return;
-            }
+        if (pacienteNuevo.getNombre() == null || pacienteNuevo.getNombre().trim().isEmpty() ||
+                dia == null || dia.isEmpty() || mes == null || mes.isEmpty() || anio == null || anio.isEmpty() ||
+                pacienteNuevo.getGenero() == null || pacienteNuevo.getGenero().isEmpty()) {
+            FacesContext.getCurrentInstance().validationFailed();
+            return;
+        }
 
-            Date fecha = construirFecha(dia, mes, anio);
-            pacienteNuevo.setFechaNac(fecha);
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Integer.parseInt(anio), Integer.parseInt(mes) - 1, Integer.parseInt(dia));
+            Date fechaNac = cal.getTime();
+            pacienteNuevo.setFechaNac(fechaNac);
+
+            if (pacienteNuevo.getCorreo() != null && pacienteNuevo.getCorreo().trim().isEmpty()) {
+                pacienteNuevo.setCorreo(null);
+            }
 
             facade.procesarAlta(pacienteNuevo);
 
+            cargarTodosActivos();
+
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO,
-                            "Paciente registrado correctamente",
-                            "Paciente registrado correctamente"));
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente registrado correctamente"));
 
             limpiar();
-            cargarPacientes();
+            org.primefaces.PrimeFaces.current().executeScript("PF('dlgRegistro').hide()");
 
         } catch (IllegalArgumentException e) {
             if ("Paciente ya existe".equalsIgnoreCase(e.getMessage())) {
                 duplicadoError = true;
                 FacesContext.getCurrentInstance().validationFailed();
-                return;
             } else if ("Complete todos los campos obligatorios".equalsIgnoreCase(e.getMessage())) {
                 FacesContext.getCurrentInstance().validationFailed();
-                return;
             } else {
                 FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
@@ -113,27 +159,19 @@ public class PacienteBean implements Serializable {
         } catch (Exception e) {
             e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Error",
-                            "No se pudo registrar el paciente"));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo registrar el paciente: " + e.getMessage()));
         }
     }
 
     public void limpiar() {
         pacienteNuevo = new PacienteEntity();
+        dia = ""; mes = ""; anio = "";
         duplicadoError = false;
-        dia = "";
-        mes = "";
-        anio = "";
         actualizarDias();
     }
 
-    // =========================
-    // EDICIÓN
-    // =========================
     public void abrirEdicion(int id) {
         limpiarErroresEdicion();
-
         pacienteEditar = facade.procesarConsultaPorId(id);
 
         if (pacienteEditar != null && pacienteEditar.getFechaNac() != null) {
@@ -144,57 +182,58 @@ public class PacienteBean implements Serializable {
             diaEditar = sdfDia.format(pacienteEditar.getFechaNac());
             mesEditar = sdfMes.format(pacienteEditar.getFechaNac());
             anioEditar = sdfAnio.format(pacienteEditar.getFechaNac());
+
+            actualizarDiasEditar();
         }
     }
 
     public void actualizarPaciente() {
         limpiarErroresEdicion();
+        boolean hasErrors = false;
 
         if (pacienteEditar.getNombre() == null || pacienteEditar.getNombre().trim().isEmpty()) {
             errorNombreEditar = true;
+            hasErrors = true;
         }
 
-        if (diaEditar == null || diaEditar.isEmpty()
-                || mesEditar == null || mesEditar.isEmpty()
-                || anioEditar == null || anioEditar.isEmpty()) {
+        if (diaEditar == null || diaEditar.isEmpty() || mesEditar == null || mesEditar.isEmpty() || anioEditar == null || anioEditar.isEmpty()) {
             errorFechaEditar = true;
+            hasErrors = true;
         }
 
         if (pacienteEditar.getGenero() == null || pacienteEditar.getGenero().trim().isEmpty()) {
             errorGeneroEditar = true;
+            hasErrors = true;
         }
 
-        if (errorNombreEditar || errorFechaEditar || errorGeneroEditar) {
+        if (hasErrors) {
             FacesContext.getCurrentInstance().validationFailed();
             return;
         }
 
         try {
-            Date fecha = construirFecha(diaEditar, mesEditar, anioEditar);
-            pacienteEditar.setFechaNac(fecha);
+            Calendar cal = Calendar.getInstance();
+            cal.set(Integer.parseInt(anioEditar), Integer.parseInt(mesEditar) - 1, Integer.parseInt(diaEditar));
+            Date fechaNac = cal.getTime();
+            pacienteEditar.setFechaNac(fechaNac);
+
+            if (pacienteEditar.getCorreo() != null && pacienteEditar.getCorreo().trim().isEmpty()) {
+                pacienteEditar.setCorreo(null);
+            }
 
             facade.procesarActualizacion(pacienteEditar);
 
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO,
-                            "Paciente actualizado correctamente",
-                            "Paciente actualizado correctamente"));
+            cargarTodosActivos();
 
-            cargarPacientes();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente actualizado correctamente"));
+
+            org.primefaces.PrimeFaces.current().executeScript("PF('dlgEditar').hide()");
 
         } catch (IllegalArgumentException e) {
             if ("Paciente ya existe".equalsIgnoreCase(e.getMessage())) {
                 duplicadoEditar = true;
                 FacesContext.getCurrentInstance().validationFailed();
-                return;
-            } else if ("Complete todos los campos obligatorios".equalsIgnoreCase(e.getMessage())) {
-                errorNombreEditar = pacienteEditar.getNombre() == null || pacienteEditar.getNombre().trim().isEmpty();
-                errorFechaEditar = diaEditar == null || diaEditar.isEmpty()
-                        || mesEditar == null || mesEditar.isEmpty()
-                        || anioEditar == null || anioEditar.isEmpty();
-                errorGeneroEditar = pacienteEditar.getGenero() == null || pacienteEditar.getGenero().trim().isEmpty();
-                FacesContext.getCurrentInstance().validationFailed();
-                return;
             } else {
                 FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
@@ -202,9 +241,7 @@ public class PacienteBean implements Serializable {
         } catch (Exception e) {
             e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Error",
-                            "No se pudo actualizar el paciente"));
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo actualizar el paciente"));
         }
     }
 
@@ -219,189 +256,57 @@ public class PacienteBean implements Serializable {
         duplicadoEditar = false;
     }
 
-    // =========================
-    // APOYO
-    // =========================
-    public void actualizarDias() {
-        listaDias.clear();
+    public List<PacienteEntity> getListaPacientes() { return listaPacientes; }
+    public void setListaPacientes(List<PacienteEntity> listaPacientes) { this.listaPacientes = listaPacientes; }
 
-        if (mes == null || mes.isEmpty() || anio == null || anio.isEmpty()) {
-            for (int i = 1; i <= 31; i++) {
-                listaDias.add(String.format("%02d", i));
-            }
-            return;
-        }
+    public String getTerminoBusqueda() { return terminoBusqueda; }
+    public void setTerminoBusqueda(String terminoBusqueda) { this.terminoBusqueda = terminoBusqueda; }
 
-        int mesInt = Integer.parseInt(mes);
-        int anioInt = Integer.parseInt(anio);
+    public PacienteEntity getPacienteNuevo() { return pacienteNuevo; }
+    public void setPacienteNuevo(PacienteEntity pacienteNuevo) { this.pacienteNuevo = pacienteNuevo; }
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, anioInt);
-        calendar.set(Calendar.MONTH, mesInt - 1);
+    public boolean isDuplicadoError() { return duplicadoError; }
+    public void setDuplicadoError(boolean duplicadoError) { this.duplicadoError = duplicadoError; }
 
-        int maxDias = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+    public String getDia() { return dia; }
+    public void setDia(String dia) { this.dia = dia; }
 
-        for (int i = 1; i <= maxDias; i++) {
-            listaDias.add(String.format("%02d", i));
-        }
+    public String getMes() { return mes; }
+    public void setMes(String mes) { this.mes = mes; }
 
-        if (dia != null && !dia.isEmpty()) {
-            int diaInt = Integer.parseInt(dia);
-            if (diaInt > maxDias) {
-                dia = "";
-            }
-        }
-    }
+    public String getAnio() { return anio; }
+    public void setAnio(String anio) { this.anio = anio; }
 
-    private void cargarAnios() {
-        listaAnios.clear();
-        int actual = Calendar.getInstance().get(Calendar.YEAR);
+    public PacienteEntity getPacienteEditar() { return pacienteEditar; }
+    public void setPacienteEditar(PacienteEntity pacienteEditar) { this.pacienteEditar = pacienteEditar; }
 
-        for (int i = actual; i >= 1950; i--) {
-            listaAnios.add(String.valueOf(i));
-        }
-    }
+    public String getDiaEditar() { return diaEditar; }
+    public void setDiaEditar(String diaEditar) { this.diaEditar = diaEditar; }
 
-    private Date construirFecha(String d, String m, String a) throws Exception {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setLenient(false);
-        return sdf.parse(d + "/" + m + "/" + a);
-    }
+    public String getMesEditar() { return mesEditar; }
+    public void setMesEditar(String mesEditar) { this.mesEditar = mesEditar; }
 
-    // GETTERS Y SETTERS
-    public List<PacienteEntity> getListaPacientes() {
-        return listaPacientes;
-    }
+    public String getAnioEditar() { return anioEditar; }
+    public void setAnioEditar(String anioEditar) { this.anioEditar = anioEditar; }
 
-    public void setListaPacientes(List<PacienteEntity> listaPacientes) {
-        this.listaPacientes = listaPacientes;
-    }
+    public boolean isErrorNombreEditar() { return errorNombreEditar; }
+    public void setErrorNombreEditar(boolean errorNombreEditar) { this.errorNombreEditar = errorNombreEditar; }
 
-    public String getTerminoBusqueda() {
-        return terminoBusqueda;
-    }
+    public boolean isErrorFechaEditar() { return errorFechaEditar; }
+    public void setErrorFechaEditar(boolean errorFechaEditar) { this.errorFechaEditar = errorFechaEditar; }
 
-    public void setTerminoBusqueda(String terminoBusqueda) {
-        this.terminoBusqueda = terminoBusqueda;
-    }
+    public boolean isErrorGeneroEditar() { return errorGeneroEditar; }
+    public void setErrorGeneroEditar(boolean errorGeneroEditar) { this.errorGeneroEditar = errorGeneroEditar; }
 
-    public PacienteEntity getPacienteNuevo() {
-        return pacienteNuevo;
-    }
+    public boolean isDuplicadoEditar() { return duplicadoEditar; }
+    public void setDuplicadoEditar(boolean duplicadoEditar) { this.duplicadoEditar = duplicadoEditar; }
 
-    public void setPacienteNuevo(PacienteEntity pacienteNuevo) {
-        this.pacienteNuevo = pacienteNuevo;
-    }
+    public List<String> getListaDias() { return listaDias; }
+    public void setListaDias(List<String> listaDias) { this.listaDias = listaDias; }
 
-    public boolean isDuplicadoError() {
-        return duplicadoError;
-    }
+    public List<String> getListaDiasEditar() { return listaDiasEditar; }
+    public void setListaDiasEditar(List<String> listaDiasEditar) { this.listaDiasEditar = listaDiasEditar; }
 
-    public void setDuplicadoError(boolean duplicadoError) {
-        this.duplicadoError = duplicadoError;
-    }
-
-    public String getDia() {
-        return dia;
-    }
-
-    public void setDia(String dia) {
-        this.dia = dia;
-    }
-
-    public String getMes() {
-        return mes;
-    }
-
-    public void setMes(String mes) {
-        this.mes = mes;
-    }
-
-    public String getAnio() {
-        return anio;
-    }
-
-    public void setAnio(String anio) {
-        this.anio = anio;
-    }
-
-    public PacienteEntity getPacienteEditar() {
-        return pacienteEditar;
-    }
-
-    public void setPacienteEditar(PacienteEntity pacienteEditar) {
-        this.pacienteEditar = pacienteEditar;
-    }
-
-    public String getDiaEditar() {
-        return diaEditar;
-    }
-
-    public void setDiaEditar(String diaEditar) {
-        this.diaEditar = diaEditar;
-    }
-
-    public String getMesEditar() {
-        return mesEditar;
-    }
-
-    public void setMesEditar(String mesEditar) {
-        this.mesEditar = mesEditar;
-    }
-
-    public String getAnioEditar() {
-        return anioEditar;
-    }
-
-    public void setAnioEditar(String anioEditar) {
-        this.anioEditar = anioEditar;
-    }
-
-    public boolean isErrorNombreEditar() {
-        return errorNombreEditar;
-    }
-
-    public void setErrorNombreEditar(boolean errorNombreEditar) {
-        this.errorNombreEditar = errorNombreEditar;
-    }
-
-    public boolean isErrorFechaEditar() {
-        return errorFechaEditar;
-    }
-
-    public void setErrorFechaEditar(boolean errorFechaEditar) {
-        this.errorFechaEditar = errorFechaEditar;
-    }
-
-    public boolean isErrorGeneroEditar() {
-        return errorGeneroEditar;
-    }
-
-    public void setErrorGeneroEditar(boolean errorGeneroEditar) {
-        this.errorGeneroEditar = errorGeneroEditar;
-    }
-
-    public boolean isDuplicadoEditar() {
-        return duplicadoEditar;
-    }
-
-    public void setDuplicadoEditar(boolean duplicadoEditar) {
-        this.duplicadoEditar = duplicadoEditar;
-    }
-
-    public List<String> getListaDias() {
-        return listaDias;
-    }
-
-    public void setListaDias(List<String> listaDias) {
-        this.listaDias = listaDias;
-    }
-
-    public List<String> getListaAnios() {
-        return listaAnios;
-    }
-
-    public void setListaAnios(List<String> listaAnios) {
-        this.listaAnios = listaAnios;
-    }
+    public List<String> getListaAnios() { return listaAnios; }
+    public void setListaAnios(List<String> listaAnios) { this.listaAnios = listaAnios; }
 }

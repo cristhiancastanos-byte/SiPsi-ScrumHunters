@@ -96,10 +96,12 @@ public class PacientePersistence {
         try {
             String hql = "FROM PacienteEntity p "
                     + "WHERE LOWER(TRIM(p.nombre)) = LOWER(TRIM(:nombreParam)) "
+                    + "AND p.fechaNac = :fechaNacParam "
                     + "AND p.id <> :idActualParam";
 
             TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
             query.setParameter("nombreParam", nombre);
+            query.setParameter("fechaNacParam", fechaNac);
             query.setParameter("idActualParam", idActual);
             query.setMaxResults(1);
 
