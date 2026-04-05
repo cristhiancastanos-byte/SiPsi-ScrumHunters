@@ -13,7 +13,7 @@ public class UsuarioDAO {
     private EntityManager em;
 
     public UsuarioDAO() {
-        this.emf = Persistence.createEntityManagerFactory("SiPsiPU");
+        this.emf = Persistence.createEntityManagerFactory("SipsiPU");
         this.em = emf.createEntityManager();
     }
 
