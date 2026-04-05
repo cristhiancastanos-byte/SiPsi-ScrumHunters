@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Editar Paciente</title>
+
+    <f:metadata>
+        <f:viewParam name="id" value="#{pacienteBean.idPaciente}" />
+        <f:viewAction action="#{pacienteBean.inicializar}" />
+    </f:metadata>
+
+    <style>
+        body {
+            margin: 0;
+            background: #a6a6a6;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .frame {
+            min-height: 100vh;
+            background: #a6a6a6;
+            position: relative;
+        }
+
+        .top-band {
+            height: 88px;
+            background: #DEAFAD;
+            border-bottom: 5px solid #c59795;
+            display: flex;
+            align-items: center;
+            padding-left: 70px;
+            color: #d8d8d8;
+            font-size: 18px;
+        }
+
+        .overlay {
+            min-height: calc(100vh - 88px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 18px 0;
+        }
+
+        .modal-box {
+            width: 580px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            box-shadow: 6px 6px 9px rgba(0,0,0,0.22);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: #CF8080;
+            color: white;
+            text-align: center;
+            font-size: 26px;
+            padding: 14px 0 12px 0;
+            border-bottom: 5px solid #efdfde;
+        }
+
+        .modal-body {
+            padding: 20px 20px 18px 20px;
+        }
+
+        .field-block {
+            margin-bottom: 14px;
+        }
+
+        .field-label {
+            display: block;
+            color: #7b463f;
+            font-weight: bold;
+            font-size: 17px;
+            margin: 0 0 7px 2px;
+        }
+
+        .ui-inputfield,
+        .ui-selectonemenu {
+            border-radius: 6px !important;
+            box-shadow: none !important;
+            border: 1px solid #d0d0d0 !important;
+        }
+
+        .full-input,
+        .full-input input {
+            width: 100% !important;
+            box-sizing: border-box;
+            font-size: 16px !important;
+        }
+
+        .full-input input {
+            padding: 8px 10px !important;
+        }
+
+        .date-row {
+            display: flex;
+            gap: 10px;
+            margin-left: 2px;
+        }
+
+        .date-menu {
+            width: 72px !important;
+        }
+
+        .date-menu .ui-selectonemenu-label,
+        .gender-menu .ui-selectonemenu-label {
+            font-size: 16px !important;
+            padding: 7px 10px !important;
+        }
+
+        .gender-menu {
+            width: 100% !important;
+        }
+
+        .small-error {
+            color: #ff2e1f;
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: 2px;
+        }
+
+        .optional-text {
+            color: #666;
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: 2px;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .cancel-btn.ui-button {
+            background: #ffffff !important;
+            color: #666 !important;
+            border: 1px solid #dadada !important;
+            border-radius: 4px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.18) !important;
+            padding: 7px 18px !important;
+            font-size: 15px !important;
+        }
+
+        .save-btn.ui-button {
+            background: #CF8080 !important;
+            color: white !important;
+            border: 1px solid #c77979 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.18) !important;
+            padding: 7px 18px !important;
+            font-size: 15px !important;
+        }
+
+        .growl-wrap {
+            position: fixed;
+            top: 102px;
+            right: 18px;
+            z-index: 9999;
+        }
+
+        .ui-growl {
+            width: 300px !important;
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <h:form id="formEditar">
+        <div class="growl-wrap">
+            <p:growl id="growl" showDetail="true" life="3500" />
+        </div>
+
+        <div class="frame">
+            <div class="top-band">Pacientes</div>
+
+            <div class="overlay">
+                <div class="modal-box">
+                    <div class="modal-header">Editar Paciente</div>
+
+                    <div class="modal-body">
+
+                        <div class="field-block">
+                            <label class="field-label">Nombre Completo:</label>
+                            <p:inputText id="nombre"
+                                         value="#{pacienteBean.pacienteSeleccionado.nombre}"
+                                         styleClass="full-input" />
+
+                            <ui:fragment rendered="#{pacienteBean.errorNombre}">
+                                <div class="small-error">Campo Obligatorio</div>
+                            </ui:fragment>
+
+                            <ui:fragment rendered="#{pacienteBean.errorDuplicado}">
+                                <div class="small-error">◉ Paciente ya registrado</div>
+                            </ui:fragment>
+                        </div>
+
+                        <div class="field-block">
+                            <label class="field-label">Fecha de nacimiento:</label>
+                            <div class="date-row">
+                                <p:selectOneMenu id="dia"
+                                                 value="#{pacienteBean.diaSeleccionado}"
+                                                 styleClass="date-menu">
+                                    <f:selectItem itemLabel="Día" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{pacienteBean.dias}" />
+                                </p:selectOneMenu>
+
+                                <p:selectOneMenu id="mes"
+                                                 value="#{pacienteBean.mesSeleccionado}"
+                                                 styleClass="date-menu">
+                                    <f:selectItem itemLabel="Mes" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{pacienteBean.meses}" />
+                                </p:selectOneMenu>
+
+                                <p:selectOneMenu id="anio"
+                                                 value="#{pacienteBean.anioSeleccionado}"
+                                                 styleClass="date-menu">
+                                    <f:selectItem itemLabel="Año" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{pacienteBean.anios}" />
+                                </p:selectOneMenu>
+                            </div>
+
+                            <ui:fragment rendered="#{pacienteBean.errorFecha}">
+                                <div class="small-error">Campo Obligatorio</div>
+                            </ui:fragment>
+                        </div>
+
+                        <div class="field-block">
+                            <label class="field-label">Género:</label>
+                            <p:selectOneMenu id="genero"
+                                             value="#{pacienteBean.pacienteSeleccionado.genero}"
+                                             styleClass="gender-menu">
+                                <f:selectItem itemLabel="Seleccionar" itemValue="" noSelectionOption="true" />
+                                <f:selectItem itemLabel="Mujer" itemValue="Mujer" />
+                                <f:selectItem itemLabel="Hombre" itemValue="Hombre" />
+                                <f:selectItem itemLabel="Otro" itemValue="Otro" />
+                            </p:selectOneMenu>
+
+                            <ui:fragment rendered="#{pacienteBean.errorGenero}">
+                                <div class="small-error">Campo Obligatorio</div>
+                            </ui:fragment>
+                        </div>
+
+                        <div class="field-block">
+                            <label class="field-label">Correo:</label>
+                            <p:inputText id="correo"
+                                         value="#{pacienteBean.pacienteSeleccionado.correo}"
+                                         styleClass="full-input" />
+                            <div class="optional-text">Campo Opcional</div>
+                        </div>
+
+                        <div class="button-row">
+                            <p:commandButton value="Cancelar"
+                                             actionListener="#{pacienteBean.cancelar}"
+                                             update="@form"
+                                             process="@this"
+                                             styleClass="cancel-btn" />
+
+                            <p:commandButton value="Guardar"
+                                             actionListener="#{pacienteBean.guardar}"
+                                             update=":frmPrincipal:pnlMod :frmPrincipal:msgs :frmPrincipal:tblPacientes"
+                                             styleClass="btn-guardar" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </h:form>
+</h:body>
+</html>

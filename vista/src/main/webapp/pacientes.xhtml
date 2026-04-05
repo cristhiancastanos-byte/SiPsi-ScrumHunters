@@ -8,23 +8,35 @@
     <style>
         body { font-family: 'Archivo', Arial, sans-serif; margin: 0; padding: 0; background-color: #FFFFFF; }
 
-        /* Barra superior con tu tinto más oscuro */
         .header-top { background-color: #833D3D; color: #FFFFFF; padding: 20px 40px; font-size: 22px; }
 
         .container { padding: 30px; }
         .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
 
-        .btn-add { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; font-family: 'Archivo', Arial, sans-serif; border-radius: 4px; padding: 5px 15px !important;}
+        .btn-add { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; font-family: 'Archivo', Arial, sans-serif; border-radius: 4px; padding: 5px 15px !important; }
         .btn-add:hover { background-color: #833D3D !important; }
 
-        .btn-action { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; margin: 0 8px !important; border-radius: 4px;}
+        .btn-action { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; margin: 0 8px !important; border-radius: 4px; }
         .btn-action:hover { background-color: #833D3D !important; }
 
         .search-bar { width: 350px; padding: 8px; border-radius: 4px; border: 1px solid #EAEAEA; }
         .search-bar:focus { outline: none; border-color: #DDAEAC; box-shadow: 0 0 5px #DDAEAC; }
 
-        .ui-datatable .ui-datatable-header, .ui-datatable .ui-column-title { font-family: 'Archivo', Arial, sans-serif; color: #833D3D !important; font-weight: bold; background: #FFFFFF !important; border: none !important; border-bottom: 2px solid #EAEAEA !important;}
-        .ui-datatable td { border: none !important; border-bottom: 1px solid #EAEAEA !important; padding: 15px !important; }
+        .ui-datatable .ui-datatable-header, .ui-datatable .ui-column-title {
+            font-family: 'Archivo', Arial, sans-serif;
+            color: #833D3D !important;
+            font-weight: bold;
+            background: #FFFFFF !important;
+            border: none !important;
+            border-bottom: 2px solid #EAEAEA !important;
+        }
+
+        .ui-datatable td {
+            border: none !important;
+            border-bottom: 1px solid #EAEAEA !important;
+            padding: 15px !important;
+        }
+
         .ui-datatable .ui-datatable-data tr:hover { background-color: #FFEDEC !important; }
 
         .modal-sipsi.ui-dialog { border: none !important; box-shadow: 0px 5px 15px rgba(0,0,0,0.3); }
@@ -62,19 +74,31 @@
             <div class="toolbar">
                 <div class="ui-input-icon-left">
                     <i class="pi pi-search" style="color: #808080;" />
-                    <p:inputText id="busqueda" value="#{pacienteBean.terminoBusqueda}"
+                    <p:inputText id="busqueda"
+                                 value="#{pacienteBean.terminoBusqueda}"
                                  placeholder="Buscar paciente por nombre"
                                  styleClass="search-bar">
-                        <p:ajax event="keyup" listener="#{pacienteBean.filtrarPorNombre}" update="tblPacientes" delay="300" />
+                        <p:ajax event="keyup"
+                                listener="#{pacienteBean.filtrarPorNombre}"
+                                update=":frmPrincipal:tblPacientes"
+                                delay="300" />
                     </p:inputText>
                 </div>
 
-                <p:commandButton value="Agregar paciente" icon="pi pi-plus" styleClass="btn-add"
-                                 oncomplete="PF('dlgRegistro').show();" update="pnlMod" />
+                <p:commandButton value="Agregar paciente"
+                                 icon="pi pi-plus"
+                                 styleClass="btn-add"
+                                 actionListener="#{pacienteBean.limpiar}"
+                                 update=":frmPrincipal:pnlMod :frmPrincipal:msgs"
+                                 oncomplete="PF('dlgRegistro').show();" />
             </div>
 
-            <p:dataTable id="tblPacientes" value="#{pacienteBean.listaPacientes}" var="paciente"
-                         paginator="true" paginatorPosition="bottom" rows="10"
+            <p:dataTable id="tblPacientes"
+                         value="#{pacienteBean.listaPacientes}"
+                         var="paciente"
+                         paginator="true"
+                         paginatorPosition="bottom"
+                         rows="10"
                          emptyMessage="#{empty pacienteBean.terminoBusqueda ? 'No hay pacientes registrados' : 'No se encontró el registro'}">
 
                 <p:column headerText="Nombre Completo">
@@ -92,21 +116,40 @@
                 </p:column>
 
                 <p:column headerText="Acciones" style="text-align: center; width: 180px;">
-                    <p:commandButton icon="pi pi-pencil" styleClass="btn-action" title="Editar" />
-                    <p:commandButton icon="pi pi-trash" styleClass="btn-action" title="Eliminar" />
-                    <p:commandButton icon="pi pi-folder-open" styleClass="btn-action" title="Expediente" />
+                    <p:commandButton icon="pi pi-pencil"
+                                     styleClass="btn-action"
+                                     title="Editar"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.abrirEdicion(paciente.id)}"
+                                     update=":frmPrincipal:pnlEditar :frmPrincipal:msgs"
+                                     oncomplete="PF('dlgEditarPaciente').show();" />
+
+                    <p:commandButton icon="pi pi-trash"
+                                     styleClass="btn-action"
+                                     title="Eliminar" />
+
+                    <p:commandButton icon="pi pi-folder-open"
+                                     styleClass="btn-action"
+                                     title="Expediente" />
                 </p:column>
             </p:dataTable>
         </div>
 
-        <p:dialog widgetVar="dlgRegistro" modal="true" closable="false" resizable="false"
-                  header="Nuevo Paciente" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi">
+        <p:dialog widgetVar="dlgRegistro"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Nuevo Paciente"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
 
             <p:outputPanel id="pnlMod">
                 <h:panelGrid columns="1" style="width: 100%;">
 
                     <h:outputLabel value="Nombre Completo:" styleClass="lbl-tinto" style="margin-top: 0;"/>
-                    <p:inputText value="#{pacienteBean.pacienteNuevo.nombre}" style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
+                    <p:inputText value="#{pacienteBean.pacienteNuevo.nombre}"
+                                 style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
 
                     <h:outputText value="Campo Obligatorio"
                                   styleClass="msg-error-valid"
@@ -127,18 +170,24 @@
                             <f:selectItem itemLabel="Mes" itemValue="" />
                             <f:selectItems value="#{['01','02','03','04','05','06','07','08','09','10','11','12']}" var="m"
                                            itemLabel="#{m}" itemValue="#{m}"/>
-                            <p:ajax event="change" listener="#{pacienteBean.actualizarDias}"
-                                    process="@this selDia selAnio" update="selDia" />
+                            <p:ajax event="change"
+                                    listener="#{pacienteBean.actualizarDias}"
+                                    process="@this selDia selAnio"
+                                    update="selDia" />
                         </p:selectOneMenu>
 
                         <p:selectOneMenu id="selAnio" value="#{pacienteBean.anio}">
                             <f:selectItem itemLabel="Año" itemValue="" />
                             <f:selectItems value="#{pacienteBean.listaAnios}" />
-                            <p:ajax event="change" listener="#{pacienteBean.actualizarDias}"
-                                    process="@this selDia selMes" update="selDia" />
+                            <p:ajax event="change"
+                                    listener="#{pacienteBean.actualizarDias}"
+                                    process="@this selDia selMes"
+                                    update="selDia" />
                         </p:selectOneMenu>
                     </h:panelGroup>
-                    <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid"
+
+                    <h:outputText value="Campo Obligatorio"
+                                  styleClass="msg-error-valid"
                                   rendered="#{facesContext.validationFailed and (empty pacienteBean.dia or empty pacienteBean.mes or empty pacienteBean.anio)}"/>
 
                     <h:outputLabel value="Género:" styleClass="lbl-tinto"/>
@@ -147,24 +196,119 @@
                         <f:selectItem itemLabel="Masculino" itemValue="Masculino" />
                         <f:selectItem itemLabel="Femenino" itemValue="Femenino" />
                     </p:selectOneMenu>
-                    <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid"
+
+                    <h:outputText value="Campo Obligatorio"
+                                  styleClass="msg-error-valid"
                                   rendered="#{facesContext.validationFailed and empty pacienteBean.pacienteNuevo.genero}"/>
 
                     <h:outputLabel value="Correo:" styleClass="lbl-tinto"/>
-                    <p:inputText value="#{pacienteBean.pacienteNuevo.correo}" placeholder="Ejemplo@sitio.com" style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
-                    <h:outputText value="Campo Opcional" style="color: #808080; font-size: 10px; display: block; margin-top: 4px;"/>
+                    <p:inputText value="#{pacienteBean.pacienteNuevo.correo}"
+                                 placeholder="Ejemplo@sitio.com"
+                                 style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
+                    <h:outputText value="Campo Opcional"
+                                  style="color: #808080; font-size: 10px; display: block; margin-top: 4px;"/>
                 </h:panelGrid>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
-                    <p:commandButton value="Cancelar" onclick="PF('dlgRegistro').hide();"
-                                     process="@this" action="#{pacienteBean.limpiar}" update="pnlMod"
+                    <p:commandButton value="Cancelar"
+                                     onclick="PF('dlgRegistro').hide();"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.limpiar}"
+                                     update=":frmPrincipal:pnlMod"
                                      styleClass="btn-cancelar"/>
 
-                    <p:commandButton value="Guardar" action="#{pacienteBean.guardar}"
-                                     update="pnlMod, msgs, tblPacientes" styleClass="btn-guardar" />
+                    <p:commandButton value="Guardar"
+                                     action="#{pacienteBean.guardar}"
+                                     update=":frmPrincipal:pnlMod :frmPrincipal:msgs :frmPrincipal:tblPacientes"
+                                     styleClass="btn-guardar" />
                 </div>
             </p:outputPanel>
         </p:dialog>
+
+        <p:dialog widgetVar="dlgEditarPaciente"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Editar Paciente"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
+
+            <p:outputPanel id="pnlEditar">
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel value="Nombre Completo:" styleClass="lbl-tinto" style="margin-top: 0;"/>
+                    <p:inputText value="#{pacienteBean.pacienteEditar.nombre}"
+                                 style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
+
+                    <h:outputText value="Campo Obligatorio"
+                                  styleClass="msg-error-valid"
+                                  rendered="#{pacienteBean.errorNombreEditar}"/>
+
+                    <h:outputText value="Paciente ya registrado"
+                                  styleClass="msg-error-valid"
+                                  rendered="#{pacienteBean.duplicadoEditar}"/>
+
+                    <h:outputLabel value="Fecha de nacimiento:" styleClass="lbl-tinto"/>
+                    <h:panelGroup style="display: flex; gap: 5px;">
+                        <p:selectOneMenu id="editDia" value="#{pacienteBean.diaEditar}">
+                            <f:selectItem itemLabel="Día" itemValue="" />
+                            <f:selectItems value="#{pacienteBean.listaDias}" />
+                        </p:selectOneMenu>
+
+                        <p:selectOneMenu id="editMes" value="#{pacienteBean.mesEditar}">
+                            <f:selectItem itemLabel="Mes" itemValue="" />
+                            <f:selectItems value="#{['01','02','03','04','05','06','07','08','09','10','11','12']}" var="m2"
+                                           itemLabel="#{m2}" itemValue="#{m2}" />
+                        </p:selectOneMenu>
+
+                        <p:selectOneMenu id="editAnio" value="#{pacienteBean.anioEditar}">
+                            <f:selectItem itemLabel="Año" itemValue="" />
+                            <f:selectItems value="#{pacienteBean.listaAnios}" />
+                        </p:selectOneMenu>
+                    </h:panelGroup>
+
+                    <h:outputText value="Campo Obligatorio"
+                                  styleClass="msg-error-valid"
+                                  rendered="#{pacienteBean.errorFechaEditar}"/>
+
+                    <h:outputLabel value="Género:" styleClass="lbl-tinto"/>
+                    <p:selectOneMenu value="#{pacienteBean.pacienteEditar.genero}" style="width: 380px;">
+                        <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                        <f:selectItem itemLabel="Masculino" itemValue="Masculino" />
+                        <f:selectItem itemLabel="Femenino" itemValue="Femenino" />
+                    </p:selectOneMenu>
+
+                    <h:outputText value="Campo Obligatorio"
+                                  styleClass="msg-error-valid"
+                                  rendered="#{pacienteBean.errorGeneroEditar}"/>
+
+                    <h:outputLabel value="Correo:" styleClass="lbl-tinto"/>
+                    <p:inputText value="#{pacienteBean.pacienteEditar.correo}"
+                                 placeholder="Ejemplo@sitio.com"
+                                 style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
+
+                    <h:outputText value="Campo Opcional"
+                                  style="color: #808080; font-size: 10px; display: block; margin-top: 4px;"/>
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                    <p:commandButton value="Cancelar"
+                                     onclick="PF('dlgEditarPaciente').hide();"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.cancelarEdicion}"
+                                     update=":frmPrincipal:pnlEditar"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Guardar Cambios"
+                                     actionListener="#{pacienteBean.actualizarPaciente}"
+                                     update=":frmPrincipal:pnlEditar :frmPrincipal:msgs :frmPrincipal:tblPacientes"
+                                     oncomplete="PF('dlgEditarPaciente').hide();"
+                                     styleClass="btn-guardar" />
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+
     </h:form>
 </h:body>
 </html>
