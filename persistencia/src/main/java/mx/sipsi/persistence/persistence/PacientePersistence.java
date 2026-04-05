@@ -5,6 +5,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
+import java.util.List;
 
 public class PacientePersistence {
 
@@ -32,5 +33,27 @@ public class PacientePersistence {
         TypedQuery<Long> query = em.createQuery(hql, Long.class);
         query.setParameter("correoParam", correo);
         return query.getSingleResult() > 0;
+    }
+
+    public boolean checkDuplicate(String nombre, java.util.Date fecha) {
+        String hql = "SELECT COUNT(p) FROM PacienteEntity p WHERE p.nombre = :nombre AND p.fechaNac = :fecha";
+        TypedQuery<Long> query = em.createQuery(hql, Long.class);
+        query.setParameter("nombre", nombre);
+        query.setParameter("fecha", fecha);
+        return query.getSingleResult() > 0;
+    }
+
+
+    public List<PacienteEntity> executeSelectTodosActivos() {
+        String hql = "SELECT p FROM PacienteEntity p WHERE p.activo = true";
+        TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
+        return query.getResultList();
+    }
+
+    public List<PacienteEntity> executeSelectByNombreActivos(String nombre) {
+        String hql = "SELECT p FROM PacienteEntity p WHERE p.nombre LIKE :nombreBusqueda AND p.activo = true";
+        TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
+        query.setParameter("nombreBusqueda", "%" + nombre + "%");
+        return query.getResultList();
     }
 }
