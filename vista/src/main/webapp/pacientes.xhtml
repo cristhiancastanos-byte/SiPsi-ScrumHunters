@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Pacientes</title>
+    <style>
+        body { font-family: 'Archivo', Arial, sans-serif; margin: 0; padding: 0; background-color: #FFFFFF; }
+
+        /* Barra superior con tu tinto más oscuro */
+        .header-top { background-color: #833D3D; color: #FFFFFF; padding: 20px 40px; font-size: 22px; }
+
+        .container { padding: 30px; }
+        .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+
+        .btn-add { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; font-family: 'Archivo', Arial, sans-serif; border-radius: 4px; padding: 5px 15px !important;}
+        .btn-add:hover { background-color: #833D3D !important; }
+
+        .btn-action { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; margin: 0 8px !important; border-radius: 4px;}
+        .btn-action:hover { background-color: #833D3D !important; }
+
+        .search-bar { width: 350px; padding: 8px; border-radius: 4px; border: 1px solid #EAEAEA; }
+        .search-bar:focus { outline: none; border-color: #DDAEAC; box-shadow: 0 0 5px #DDAEAC; }
+
+        .ui-datatable .ui-datatable-header, .ui-datatable .ui-column-title { font-family: 'Archivo', Arial, sans-serif; color: #833D3D !important; font-weight: bold; background: #FFFFFF !important; border: none !important; border-bottom: 2px solid #EAEAEA !important;}
+        .ui-datatable td { border: none !important; border-bottom: 1px solid #EAEAEA !important; padding: 15px !important; }
+        .ui-datatable .ui-datatable-data tr:hover { background-color: #FFEDEC !important; }
+
+        .modal-sipsi.ui-dialog { border: none !important; box-shadow: 0px 5px 15px rgba(0,0,0,0.3); }
+        .modal-sipsi .ui-dialog-titlebar {
+            background-color: #CF8080 !important;
+            color: #FFFFFF !important;
+            text-align: center;
+            border: none !important;
+            padding: 15px !important;
+        }
+        .modal-sipsi .ui-dialog-content {
+            background-color: #FFFFFF !important;
+            padding: 20px 30px !important;
+        }
+        .modal-sipsi .ui-dialog-titlebar-close { display: none !important; }
+
+        .lbl-tinto { color: #833D3D; font-weight: bold; font-size: 14px; display: block; margin-top: 15px; }
+        .msg-error-valid { color: #FF0707; font-size: 12px; display: block; margin-top: 4px; font-weight: bold; }
+
+        .btn-cancelar { background: #FFFFFF !important; color: #808080 !important; border: 1px solid #EAEAEA !important; }
+        .btn-cancelar:hover { background: #EAEAEA !important; color: #833D3D !important; }
+
+        .btn-guardar { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; }
+        .btn-guardar:hover { background-color: #833D3D !important; }
+    </style>
+</h:head>
+<h:body>
+
+    <div class="header-top">Pacientes</div>
+
+    <h:form id="frmPrincipal">
+        <p:growl id="msgs" showDetail="true" globalOnly="true" />
+
+        <div class="container">
+            <div class="toolbar">
+                <div class="ui-input-icon-left">
+                    <i class="pi pi-search" style="color: #808080;" />
+                    <p:inputText id="busqueda" value="#{pacienteBean.terminoBusqueda}"
+                                 placeholder="Buscar paciente por nombre"
+                                 styleClass="search-bar">
+                        <p:ajax event="keyup" listener="#{pacienteBean.filtrarPorNombre}" update="tblPacientes" delay="300" />
+                    </p:inputText>
+                </div>
+
+                <p:commandButton value="Agregar paciente" icon="pi pi-plus" styleClass="btn-add"
+                                 oncomplete="PF('dlgRegistro').show();" update="pnlMod" />
+            </div>
+
+            <p:dataTable id="tblPacientes" value="#{pacienteBean.listaPacientes}" var="paciente"
+                         paginator="true" paginatorPosition="bottom" rows="10"
+                         emptyMessage="#{empty pacienteBean.terminoBusqueda ? 'No hay pacientes registrados' : 'No se encontró el registro'}">
+
+                <p:column headerText="Nombre Completo">
+                    <h:outputText value="#{paciente.nombre}" />
+                </p:column>
+
+                <p:column headerText="Fecha de Nacimiento">
+                    <h:outputText value="#{paciente.fechaNac}">
+                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column headerText="Género">
+                    <h:outputText value="#{paciente.genero}" />
+                </p:column>
+
+                <p:column headerText="Acciones" style="text-align: center; width: 180px;">
+                    <p:commandButton icon="pi pi-pencil" styleClass="btn-action" title="Editar" />
+                    <p:commandButton icon="pi pi-trash" styleClass="btn-action" title="Eliminar" />
+                    <p:commandButton icon="pi pi-folder-open" styleClass="btn-action" title="Expediente" />
+                </p:column>
+            </p:dataTable>
+        </div>
+
+        <p:dialog widgetVar="dlgRegistro" modal="true" closable="false" resizable="false"
+                  header="Nuevo Paciente" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi">
+
+            <p:outputPanel id="pnlMod">
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel value="Nombre Completo:" styleClass="lbl-tinto" style="margin-top: 0;"/>
+                    <p:inputText value="#{pacienteBean.pacienteNuevo.nombre}" style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
+
+                    <h:outputText value="Campo Obligatorio"
+                                  styleClass="msg-error-valid"
+                                  rendered="#{facesContext.validationFailed and empty pacienteBean.pacienteNuevo.nombre and not pacienteBean.duplicadoError}"/>
+
+                    <h:outputText value="Paciente Duplicado"
+                                  styleClass="msg-error-valid"
+                                  rendered="#{pacienteBean.duplicadoError}"/>
+
+                    <h:outputLabel value="Fecha de nacimiento:" styleClass="lbl-tinto"/>
+                    <h:panelGroup id="grpFecha" style="display: flex; gap: 5px;">
+                        <p:selectOneMenu id="selDia" value="#{pacienteBean.dia}">
+                            <f:selectItem itemLabel="Día" itemValue="" />
+                            <f:selectItems value="#{pacienteBean.listaDias}" />
+                        </p:selectOneMenu>
+
+                        <p:selectOneMenu id="selMes" value="#{pacienteBean.mes}">
+                            <f:selectItem itemLabel="Mes" itemValue="" />
+                            <f:selectItems value="#{['01','02','03','04','05','06','07','08','09','10','11','12']}" var="m"
+                                           itemLabel="#{m}" itemValue="#{m}"/>
+                            <p:ajax event="change" listener="#{pacienteBean.actualizarDias}"
+                                    process="@this selDia selAnio" update="selDia" />
+                        </p:selectOneMenu>
+
+                        <p:selectOneMenu id="selAnio" value="#{pacienteBean.anio}">
+                            <f:selectItem itemLabel="Año" itemValue="" />
+                            <f:selectItems value="#{pacienteBean.listaAnios}" />
+                            <p:ajax event="change" listener="#{pacienteBean.actualizarDias}"
+                                    process="@this selDia selMes" update="selDia" />
+                        </p:selectOneMenu>
+                    </h:panelGroup>
+                    <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid"
+                                  rendered="#{facesContext.validationFailed and (empty pacienteBean.dia or empty pacienteBean.mes or empty pacienteBean.anio)}"/>
+
+                    <h:outputLabel value="Género:" styleClass="lbl-tinto"/>
+                    <p:selectOneMenu value="#{pacienteBean.pacienteNuevo.genero}" style="width: 380px;">
+                        <f:selectItem itemLabel="Seleccionar" itemValue="" />
+                        <f:selectItem itemLabel="Masculino" itemValue="Masculino" />
+                        <f:selectItem itemLabel="Femenino" itemValue="Femenino" />
+                    </p:selectOneMenu>
+                    <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid"
+                                  rendered="#{facesContext.validationFailed and empty pacienteBean.pacienteNuevo.genero}"/>
+
+                    <h:outputLabel value="Correo:" styleClass="lbl-tinto"/>
+                    <p:inputText value="#{pacienteBean.pacienteNuevo.correo}" placeholder="Ejemplo@sitio.com" style="width: 380px; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;"/>
+                    <h:outputText value="Campo Opcional" style="color: #808080; font-size: 10px; display: block; margin-top: 4px;"/>
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                    <p:commandButton value="Cancelar" onclick="PF('dlgRegistro').hide();"
+                                     process="@this" action="#{pacienteBean.limpiar}" update="pnlMod"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Guardar" action="#{pacienteBean.guardar}"
+                                     update="pnlMod, msgs, tblPacientes" styleClass="btn-guardar" />
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+    </h:form>
+</h:body>
+</html>
