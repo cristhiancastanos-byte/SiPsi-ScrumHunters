@@ -27,7 +27,7 @@
     </session-config>
 
     <welcome-file-list>
-        <welcome-file>registro.xhtml</welcome-file>
+        <welcome-file>pacientes.xhtml</welcome-file>
     </welcome-file-list>
     <listener>
         <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>

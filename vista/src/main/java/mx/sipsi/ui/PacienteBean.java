@@ -18,12 +18,16 @@ import java.util.List;
 @ViewScoped
 public class PacienteBean implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private PacienteEntity pacienteNuevo;
     private String dia, mes, anio;
     private List<String> listaDias;
     private List<String> listaAnios;
-
     private boolean duplicadoError = false;
+
+    private List<PacienteEntity> listaPacientes;
+    private String terminoBusqueda;
 
     private PacienteDelegate delegate = new PacienteDelegate();
     private PacientePersistence persistence = new PacientePersistence();
@@ -36,6 +40,29 @@ public class PacienteBean implements Serializable {
             listaAnios.add(String.valueOf(i));
         }
         limpiar();
+
+        cargarTodosActivos();
+    }
+
+
+    public void cargarTodosActivos() {
+        try {
+            listaPacientes = delegate.buscarTodosActivos();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void filtrarPorNombre() {
+        try {
+            if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
+                listaPacientes = delegate.buscarPorNombreActivos(terminoBusqueda);
+            } else {
+                cargarTodosActivos();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void actualizarDias() {
@@ -89,6 +116,8 @@ public class PacienteBean implements Serializable {
 
             delegate.registrarPaciente(pacienteNuevo);
 
+            cargarTodosActivos();
+
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente registrado"));
 
@@ -109,15 +138,27 @@ public class PacienteBean implements Serializable {
         actualizarDias();
     }
 
+
     public PacienteEntity getPacienteNuevo() { return pacienteNuevo; }
     public void setPacienteNuevo(PacienteEntity p) { this.pacienteNuevo = p; }
+
     public String getDia() { return dia; }
     public void setDia(String d) { this.dia = d; }
+
     public String getMes() { return mes; }
     public void setMes(String m) { this.mes = m; }
+
     public String getAnio() { return anio; }
     public void setAnio(String a) { this.anio = a; }
+
     public List<String> getListaDias() { return listaDias; }
     public List<String> getListaAnios() { return listaAnios; }
+
     public boolean isDuplicadoError() { return duplicadoError; }
+
+    public List<PacienteEntity> getListaPacientes() { return listaPacientes; }
+    public void setListaPacientes(List<PacienteEntity> listaPacientes) { this.listaPacientes = listaPacientes; }
+
+    public String getTerminoBusqueda() { return terminoBusqueda; }
+    public void setTerminoBusqueda(String terminoBusqueda) { this.terminoBusqueda = terminoBusqueda; }
 }

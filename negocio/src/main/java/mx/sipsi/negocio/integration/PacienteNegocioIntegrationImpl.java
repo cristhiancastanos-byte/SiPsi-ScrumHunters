@@ -3,6 +3,7 @@ package mx.sipsi.negocio.integration;
 import mx.sipsi.entity.PacienteEntity;
 import mx.sipsi.persistence.dao.PacienteDAO;
 import mx.sipsi.persistence.integration.IPacientePersistenciaIntegration;
+import java.util.List;
 
 public class PacienteNegocioIntegrationImpl implements IPacienteNegocioIntegration {
 
@@ -16,5 +17,15 @@ public class PacienteNegocioIntegrationImpl implements IPacienteNegocioIntegrati
         }
 
         persistencia.insertar(paciente);
+    }
+
+    @Override
+    public List<PacienteEntity> buscarTodosActivos() {
+        return persistencia.buscarTodosActivos();
+    }
+
+    @Override
+    public List<PacienteEntity> buscarPorNombreActivos(String nombre) {
+        return persistencia.buscarPorNombreActivos(nombre);
     }
 }
