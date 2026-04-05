@@ -1,11 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
 <h:head>
-    <title>SiPsi - Funcionando</title>
+    <title>SiPsi - Iniciar Sesión</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&amp;family=Kalam&amp;display=swap" rel="stylesheet" />
+
+    <style>
+        body { background-color: #DDAEAC; font-family: 'Archivo', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+
+
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .login-card { background: #FFFFFF; border-radius: 30px; display: flex; width: 900px; height: 550px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+
+        .welcome-side { width: 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #833D3D; background-image: url("#{resource['welcome-bg.png']}"); background-size: cover; background-position: center; }
+        .welcome-side h1 { font-size: 2.8rem; margin-bottom: 10px; font-weight: 400; }
+        .welcome-side p { font-family: 'Kalam', cursive; font-size: 1.1rem; margin-top: 0; }
+
+        .form-side { width: 45%; padding: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+
+        .form-side h2 { color: #833D3D; font-size: 2.5rem; margin-bottom: 25px; font-weight: 400; text-align: center; }
+
+        .input-group { position: relative; width: 100%; max-width: 320px; height: 85px; }
+
+        .input-icon { position: absolute; left: 20px; top: 25px; transform: translateY(-50%); color: #833D3D; font-size: 1.2rem; z-index: 10; }
+
+        .ui-inputfield {
+            background-color: #FFEDEC !important;
+            color: #833D3D !important;
+            border: 2px solid transparent !important;
+            border-radius: 25px !important;
+            padding: 15px 20px 15px 55px !important;
+            width: 100% !important;
+            font-size: 1rem !important;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05) !important;
+        }
+
+
+        .ui-state-error { border: 2px solid transparent !important; box-shadow: none !important; }
+
+
+        .border-error { border: 2px solid #FF0707 !important; }
+
+
+        .message-error {
+            color: #FF0707 !important;
+            font-size: 0.85rem !important;
+            display: block;
+            text-align: left !important;
+            padding-left: 15px;
+            margin-top: 4px;
+
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .ui-message-error { background: none !important; border: none !important; padding: 0 !important; }
+        .ui-message-error-icon { display: none !important; }
+
+        .ui-button {
+            background-color: #CF8080 !important;
+            border: none !important;
+            border-radius: 25px !important;
+            padding: 12px !important;
+            width: 100% !important;
+            max-width: 320px;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            margin-top: 5px;
+        }
+
+        .ui-button:hover { background-color: #CF8080 !important; }
+    </style>
 </h:head>
 <h:body>
-        <h2>Proyecto Base SiPsi</h2>
+    <div class="login-card">
+        <div class="welcome-side no-select">
+            <h1>¡Bienvenido a SiPsi!</h1>
+            <p>Tu consulta psicológica, organizada y segura</p>
+        </div>
+
+        <div class="form-side">
+            <h2 class="no-select">Iniciar sesión</h2>
+            <h:form id="loginForm" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+
+                <div class="input-group">
+                    <i class="fa-solid fa-user-pen input-icon"></i>
+                    <p:inputText id="user" value="#{loginBean.correo}" placeholder="Usuario"
+                                 required="true" requiredMessage="Campo obligatorio"
+                                 styleClass="#{loginBean.errorLogin ? 'border-error' : ''}" />
+                    <p:message for="user" display="text" styleClass="message-error" />
+                </div>
+
+                <div class="input-group">
+                    <i class="fa-solid fa-lock input-icon"></i>
+                    <p:password id="pass" value="#{loginBean.contrasena}" placeholder="Contraseña"
+                                required="true" requiredMessage="Campo obligatorio" feedback="false"
+                                styleClass="#{loginBean.errorLogin ? 'border-error' : ''}" />
+                    <p:message for="pass" display="text" styleClass="message-error" />
+                </div>
+
+                <p:commandButton value="Iniciar sesión"
+                                 action="#{loginBean.entrar()}"
+                                 ajax="false" />
+            </h:form>
+        </div>
+    </div>
 </h:body>
 </html>
