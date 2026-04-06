@@ -1,23 +1,64 @@
 package mx.sipsi.negocio.facade;
 
-import mx.sipsi.entity.PacienteEntity;
-import mx.sipsi.negocio.integration.IPacienteNegocioIntegration;
-import mx.sipsi.negocio.integration.PacienteNegocioIntegrationImpl;
 import java.util.List;
+import mx.sipsi.entity.PacienteEntity;
+import mx.sipsi.persistence.dao.PacienteDAO;
 
 public class PacienteFacade {
 
-    private IPacienteNegocioIntegration integration = new PacienteNegocioIntegrationImpl();
+    private final PacienteDAO pacienteDAO = new PacienteDAO();
 
-    public void procesarAlta(PacienteEntity paciente) throws Exception {
-        integration.llamarIntegracion(paciente);
+    public void procesarAlta(PacienteEntity paciente) {
+        if (paciente == null
+                || paciente.getNombre() == null || paciente.getNombre().trim().isEmpty()
+                || paciente.getFechaNac() == null
+                || paciente.getGenero() == null || paciente.getGenero().trim().isEmpty()) {
+            throw new IllegalArgumentException("Complete todos los campos obligatorios");
+        }
+
+        PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
+                paciente.getNombre(),
+                paciente.getFechaNac(),
+                0
+        );
+
+        if (duplicado != null) {
+            throw new IllegalArgumentException("Paciente ya existe");
+        }
+
+        pacienteDAO.insertar(paciente);
     }
 
     public List<PacienteEntity> buscarTodosActivos() {
-        return integration.buscarTodosActivos();
+        return pacienteDAO.buscarTodosActivos();
     }
 
     public List<PacienteEntity> buscarPorNombreActivos(String nombre) {
-        return integration.buscarPorNombreActivos(nombre);
+        return pacienteDAO.buscarPorNombreActivos(nombre);
+    }
+
+    public PacienteEntity procesarConsultaPorId(int id) {
+        return pacienteDAO.consultarPorId(id);
+    }
+
+    public void procesarActualizacion(PacienteEntity paciente) {
+        if (paciente == null
+                || paciente.getNombre() == null || paciente.getNombre().trim().isEmpty()
+                || paciente.getFechaNac() == null
+                || paciente.getGenero() == null || paciente.getGenero().trim().isEmpty()) {
+            throw new IllegalArgumentException("Complete todos los campos obligatorios");
+        }
+
+        PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
+                paciente.getNombre(),
+                paciente.getFechaNac(),
+                paciente.getId()
+        );
+
+        if (duplicado != null) {
+            throw new IllegalArgumentException("Paciente ya existe");
+        }
+
+        pacienteDAO.actualizar(paciente);
     }
 }
