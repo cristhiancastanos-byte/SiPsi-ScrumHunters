@@ -68,4 +68,13 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
             throw new RuntimeException("Error al actualizar paciente", e);
         }
     }
+
+    @Override
+    public boolean darDeBajaLogica(int idPaciente) {
+        try {
+            return persistence.executeBajaLogica(idPaciente);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al dar de baja lógica al paciente", e);
+        }
+    }
 }

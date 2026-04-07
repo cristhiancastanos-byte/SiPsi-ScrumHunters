@@ -19,4 +19,6 @@ public interface IPacientePersistenciaIntegration {
     PacienteEntity buscarDuplicado(String nombre, Date fechaNac, int idActual);
 
     void actualizar(PacienteEntity paciente);
+
+    boolean darDeBajaLogica(int idPaciente);
 }

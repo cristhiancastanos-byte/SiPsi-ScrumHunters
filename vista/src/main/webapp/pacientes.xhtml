@@ -66,7 +66,9 @@
                     <p:commandButton icon="pi pi-pencil" styleClass="btn-action" title="Editar" process="@this"
                                      actionListener="#{pacienteBean.abrirEdicion(paciente.id)}"
                                      update=":frmPrincipal:pnlEditar" oncomplete="PF('dlgEditar').show();" />
-                    <p:commandButton icon="pi pi-trash" styleClass="btn-action" title="Eliminar" />
+                    <p:commandButton icon="pi pi-trash" styleClass="btn-action" title="Eliminar" process="@this"
+                                     actionListener="#{pacienteBean.prepararEliminacion(paciente.id)}"
+                                     oncomplete="PF('dlgEliminar').show();" />
                     <p:commandButton icon="pi pi-folder-open" styleClass="btn-action" title="Expediente" />
                 </p:column>
             </p:dataTable>
@@ -166,6 +168,25 @@
                     <p:commandButton value="Guardar Cambios" actionListener="#{pacienteBean.actualizarPaciente}" update="pnlEditar msgs tblPacientes" oncomplete="if(!args.validationFailed) PF('dlgEditar').hide();" styleClass="btn-guardar" />
                 </div>
             </p:outputPanel>
+        </p:dialog>
+        <p:dialog widgetVar="dlgEliminar" modal="true" closable="false" resizable="false"
+                  header="Confirmación" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi">
+            <div style="padding: 10px 0; color: #833D3D; font-size: 16px; text-align: center;">
+                ¿Estás segura de que deseas eliminar a este paciente?
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                <p:commandButton value="Cancelar"
+                                 type="button"
+                                 onclick="PF('dlgEliminar').hide();"
+                                 styleClass="btn-cancelar"/>
+
+                <p:commandButton value="Sí, eliminar"
+                                 actionListener="#{pacienteBean.eliminarPaciente}"
+                                 update="msgs tblPacientes"
+                                 oncomplete="PF('dlgEliminar').hide();"
+                                 styleClass="btn-guardar" />
+            </div>
         </p:dialog>
     </h:form>
 </h:body>

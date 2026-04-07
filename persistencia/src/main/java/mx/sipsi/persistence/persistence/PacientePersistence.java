@@ -129,4 +129,29 @@ public class PacientePersistence {
             em.close();
         }
     }
+    public boolean executeBajaLogica(int idPaciente) throws Exception {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            PacienteEntity paciente = em.find(PacienteEntity.class, idPaciente);
+
+            if (paciente == null) {
+                return false;
+            }
+
+            paciente.setActivo(false);
+            em.merge(paciente);
+
+            em.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
 }
