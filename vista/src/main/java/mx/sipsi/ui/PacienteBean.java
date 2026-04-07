@@ -34,6 +34,7 @@ public class PacienteBean implements Serializable {
     private String terminoBusqueda;
 
     private PacienteEntity pacienteEditar = new PacienteEntity();
+    private PacienteEntity pacienteEliminar = new PacienteEntity();
     private String diaEditar = "";
     private String mesEditar = "";
     private String anioEditar = "";
@@ -119,9 +120,9 @@ public class PacienteBean implements Serializable {
     public void guardar() {
         duplicadoError = false;
 
-        if (pacienteNuevo.getNombre() == null || pacienteNuevo.getNombre().trim().isEmpty() ||
-                dia == null || dia.isEmpty() || mes == null || mes.isEmpty() || anio == null || anio.isEmpty() ||
-                pacienteNuevo.getGenero() == null || pacienteNuevo.getGenero().isEmpty()) {
+        if (pacienteNuevo.getNombre() == null || pacienteNuevo.getNombre().trim().isEmpty()
+                || dia == null || dia.isEmpty() || mes == null || mes.isEmpty() || anio == null || anio.isEmpty()
+                || pacienteNuevo.getGenero() == null || pacienteNuevo.getGenero().isEmpty()) {
             FacesContext.getCurrentInstance().validationFailed();
             return;
         }
@@ -165,7 +166,9 @@ public class PacienteBean implements Serializable {
 
     public void limpiar() {
         pacienteNuevo = new PacienteEntity();
-        dia = ""; mes = ""; anio = "";
+        dia = "";
+        mes = "";
+        anio = "";
         duplicadoError = false;
         actualizarDias();
     }
@@ -185,6 +188,10 @@ public class PacienteBean implements Serializable {
 
             actualizarDiasEditar();
         }
+    }
+
+    public void prepararEliminacion(int id) {
+        pacienteEliminar = facade.procesarConsultaPorId(id);
     }
 
     public void actualizarPaciente() {
@@ -245,6 +252,33 @@ public class PacienteBean implements Serializable {
         }
     }
 
+    public void eliminarPaciente() {
+        try {
+            if (pacienteEliminar == null || pacienteEliminar.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
+                return;
+            }
+
+            facade.procesarBajaLogica(pacienteEliminar.getId());
+
+            cargarTodosActivos();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente eliminado correctamente"));
+
+            pacienteEliminar = new PacienteEntity();
+
+        } catch (IllegalArgumentException e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo eliminar el paciente"));
+        }
+    }
+
     public void cancelarEdicion() {
         limpiarErroresEdicion();
     }
@@ -279,6 +313,9 @@ public class PacienteBean implements Serializable {
 
     public PacienteEntity getPacienteEditar() { return pacienteEditar; }
     public void setPacienteEditar(PacienteEntity pacienteEditar) { this.pacienteEditar = pacienteEditar; }
+
+    public PacienteEntity getPacienteEliminar() { return pacienteEliminar; }
+    public void setPacienteEliminar(PacienteEntity pacienteEliminar) { this.pacienteEliminar = pacienteEliminar; }
 
     public String getDiaEditar() { return diaEditar; }
     public void setDiaEditar(String diaEditar) { this.diaEditar = diaEditar; }
