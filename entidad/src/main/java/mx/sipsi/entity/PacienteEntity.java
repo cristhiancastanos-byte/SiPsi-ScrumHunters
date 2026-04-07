@@ -33,7 +33,6 @@ public class PacienteEntity implements Serializable {
     @Column(name = "genero", nullable = false, length = 20)
     private String genero;
 
-    // El correo es opcional, por eso puede ser null pero tiene que ser unico (C)
     @Column(name = "correo", unique = true, length = 100)
     private String correo;
 
