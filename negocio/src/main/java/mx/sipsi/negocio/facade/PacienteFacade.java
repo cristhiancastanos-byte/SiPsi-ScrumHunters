@@ -61,4 +61,16 @@ public class PacienteFacade {
 
         pacienteDAO.actualizar(paciente);
     }
+
+    public void procesarBajaLogica(int idPaciente) {
+        if (idPaciente <= 0) {
+            throw new IllegalArgumentException("Paciente inválido");
+        }
+
+        boolean eliminado = pacienteDAO.darDeBajaLogica(idPaciente);
+
+        if (!eliminado) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+    }
 }
