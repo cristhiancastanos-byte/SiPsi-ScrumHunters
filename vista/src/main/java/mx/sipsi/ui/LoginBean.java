@@ -2,6 +2,7 @@ package mx.sipsi.ui;
 
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import java.io.Serializable;
@@ -17,21 +18,31 @@ public class LoginBean implements Serializable {
     private LoginFacade loginFacade = new LoginFacade();
 
     public String entrar() {
-
         this.errorLogin = false;
-
         UsuarioEntity usuario = loginFacade.validarAcceso(correo, contrasena);
 
         if (usuario != null) {
-
-
             return "agenda.xhtml?faces-redirect=true";
         } else {
             this.errorLogin = true;
             FacesContext.getCurrentInstance().addMessage("loginForm:pass",
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Usuario o contraseña incorrectos", ""));
-
             return null;
+        }
+    }
+
+    public void cerrarSesion() {
+        try {
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            ExternalContext externalContext = facesContext.getExternalContext();
+
+
+            externalContext.invalidateSession();
+
+
+            externalContext.redirect("index.xhtml?logout=true");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
