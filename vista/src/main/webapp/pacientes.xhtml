@@ -7,7 +7,27 @@
     <title>Pacientes</title>
     <style>
         body { font-family: 'Archivo', Arial, sans-serif; margin: 0; padding: 0; background-color: #FFFFFF; }
-        .header-top { background-color: #833D3D; color: #FFFFFF; padding: 20px 40px; font-size: 22px; }
+
+        .header-top {
+            background-color: #833D3D;
+            color: #FFFFFF;
+            padding: 20px 40px;
+            font-size: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-logout-header {
+            background: transparent !important;
+            border: none !important;
+            color: #EAEAEA !important;
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Archivo', Arial, sans-serif;
+        }
+        .btn-logout-header:hover { color: #FFFFFF !important; }
+
         .container { padding: 30px; }
         .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
         .btn-add { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; font-family: 'Archivo', Arial, sans-serif; border-radius: 4px; padding: 5px 15px !important; }
@@ -16,23 +36,42 @@
         .btn-action:hover { background-color: #833D3D !important; }
         .search-bar { width: 350px; padding: 8px; border-radius: 4px; border: 1px solid #EAEAEA; }
         .search-bar:focus { outline: none; border-color: #DDAEAC; box-shadow: 0 0 5px #DDAEAC; }
+
         .ui-datatable .ui-datatable-header, .ui-datatable .ui-column-title { font-family: 'Archivo', Arial, sans-serif; color: #833D3D !important; font-weight: bold; background: #FFFFFF !important; border: none !important; border-bottom: 2px solid #EAEAEA !important; }
         .ui-datatable td { border: none !important; border-bottom: 1px solid #EAEAEA !important; padding: 15px !important; }
         .ui-datatable .ui-datatable-data tr:hover { background-color: #FFEDEC !important; }
+
         .modal-sipsi.ui-dialog { border: none !important; box-shadow: 0px 5px 15px rgba(0,0,0,0.3); }
         .modal-sipsi .ui-dialog-titlebar { background-color: #CF8080 !important; color: #FFFFFF !important; text-align: center; border: none !important; padding: 15px !important; }
         .modal-sipsi .ui-dialog-content { background-color: #FFFFFF !important; padding: 20px 30px !important; }
         .modal-sipsi .ui-dialog-titlebar-close { display: none !important; }
+
+        .modal-sin-header .ui-dialog-titlebar { display: none !important; }
+        .modal-sin-header .ui-dialog-content { border-radius: 8px !important; }
+
         .lbl-tinto { color: #833D3D; font-weight: bold; font-size: 14px; display: block; margin-top: 15px; }
         .msg-error-valid { color: #FF0707; font-size: 12px; display: block; margin-top: 4px; font-weight: bold; }
-        .btn-cancelar { background: #FFFFFF !important; color: #808080 !important; border: 1px solid #EAEAEA !important; }
+
+        .btn-cancelar { background: #FFFFFF !important; color: #808080 !important; border: 1px solid #EAEAEA !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important; }
         .btn-cancelar:hover { background: #EAEAEA !important; color: #833D3D !important; }
         .btn-guardar { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; }
         .btn-guardar:hover { background-color: #833D3D !important; }
+
+        /* Botón rojo para cerrar sesión */
+        .btn-peligro { background-color: #FF0707 !important; border: none !important; color: #FFFFFF !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important;}
+        .btn-peligro:hover { background-color: #cc0000 !important; }
     </style>
 </h:head>
 <h:body>
-    <div class="header-top">Pacientes</div>
+
+    <div class="header-top">
+        <span>Pacientes</span>
+        <h:form style="margin: 0;">
+            <p:commandLink value="Cerrar sesión"
+                           styleClass="btn-logout-header"
+                           onclick="PF('dlgCerrarSesion').show(); return false;" />
+        </h:form>
+    </div>
 
     <h:form id="frmPrincipal">
         <p:growl id="msgs" showDetail="true" globalOnly="true" />
@@ -169,6 +208,7 @@
                 </div>
             </p:outputPanel>
         </p:dialog>
+
         <p:dialog widgetVar="dlgEliminar" modal="true" closable="false" resizable="false"
                   header="Confirmación" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi">
             <div style="padding: 10px 0; color: #833D3D; font-size: 16px; text-align: center;">
@@ -189,5 +229,27 @@
             </div>
         </p:dialog>
     </h:form>
+
+    <h:form id="formModalCerrarSesion">
+        <p:dialog widgetVar="dlgCerrarSesion" modal="true" closable="false" resizable="false" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi modal-sin-header">
+
+            <div style="padding: 10px 20px; color: #833D3D; font-size: 18px; text-align: center; font-weight: bold; font-family: 'Archivo', Arial, sans-serif;">
+                ¿Seguro que quieres cerrar sesión?
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                <p:commandButton value="Cancelar"
+                                 type="button"
+                                 onclick="PF('dlgCerrarSesion').hide();"
+                                 styleClass="btn-cancelar"/>
+
+                <p:commandButton value="Cerrar sesión"
+                                 action="#{loginBean.cerrarSesion()}"
+                                 oncomplete="PF('dlgCerrarSesion').hide();"
+                                 styleClass="btn-peligro" />
+            </div>
+        </p:dialog>
+    </h:form>
+
 </h:body>
 </html>
