@@ -12,7 +12,6 @@
     <style>
         body { background-color: #DDAEAC; font-family: 'Archivo', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
 
-
         .no-select {
             user-select: none;
             -webkit-user-select: none;
@@ -27,7 +26,6 @@
         .welcome-side p { font-family: 'Kalam', cursive; font-size: 1.1rem; margin-top: 0; }
 
         .form-side { width: 45%; padding: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-
 
         .form-side h2 { color: #833D3D; font-size: 2.5rem; margin-bottom: 25px; font-weight: 400; text-align: center; }
 
@@ -46,12 +44,9 @@
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.05) !important;
         }
 
-
         .ui-state-error { border: 2px solid transparent !important; box-shadow: none !important; }
 
-
         .border-error { border: 2px solid #FF0707 !important; }
-
 
         .message-error {
             color: #FF0707 !important;
@@ -82,7 +77,12 @@
             margin-top: 5px;
         }
 
-        .ui-button:hover { background-color: #CF8080 !important; }
+        .ui-button:hover { background-color: #833D3D !important; }
+
+
+        .modal-sin-header .ui-dialog-titlebar { display: none !important; }
+        .modal-sin-header.ui-dialog { background: transparent !important; border: none !important; box-shadow: none !important; }
+        .modal-sin-header .ui-dialog-content { padding: 0 !important; background: transparent !important; }
     </style>
 </h:head>
 <h:body>
@@ -118,5 +118,25 @@
             </h:form>
         </div>
     </div>
+
+    <p:dialog widgetVar="dlgLogoutSuccess" modal="true" closable="false" resizable="false" draggable="false"
+              visible="#{param['logout'] == 'true'}"
+              showEffect="fade" hideEffect="fade"
+              styleClass="modal-sin-header">
+
+        <div style="background-color: #EFEFEF; padding: 30px 40px 25px 40px; border-radius: 10px; box-shadow: 0px 10px 25px rgba(0,0,0,0.3); min-width: 380px;">
+
+            <p style="color: #833D3D; margin-top: 0; margin-bottom: 25px; font-size: 1.15rem; font-family: 'Archivo', sans-serif; font-weight: bold; text-align: center;">
+                Sesión cerrada correctamente
+            </p>
+
+            <div style="text-align: right; margin-top: 10px;">
+                <p:commandButton value="Aceptar"
+                                 type="button"
+                                 onclick="PF('dlgLogoutSuccess').hide();"
+                                 style="background-color: #CF8080 !important; color: #FFFFFF !important; border: none !important; border-radius: 4px !important; padding: 5px 20px !important; font-family: 'Archivo', sans-serif !important; font-weight: bold !important; font-size: 0.85rem !important; box-shadow: none !important; width: auto !important;" />
+            </div>
+        </div>
+    </p:dialog>
 </h:body>
 </html>
