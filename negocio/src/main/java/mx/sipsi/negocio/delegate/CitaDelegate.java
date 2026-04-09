@@ -1,0 +1,24 @@
+package mx.sipsi.negocio.delegate;
+
+import mx.sipsi.entity.CitaEntity;
+import mx.sipsi.negocio.integration.ICitaNegocioIntegration;
+import mx.sipsi.negocio.integration.CitaNegocioIntegrationImpl;
+import java.sql.Time;
+import java.util.Date;
+
+public class CitaDelegate {
+
+    private ICitaNegocioIntegration integracion;
+
+    public CitaDelegate() {
+        this.integracion = new CitaNegocioIntegrationImpl();
+    }
+
+    public void registrarCita(CitaEntity cita) {
+        integracion.enviarAPersistenciaCita(cita);
+    }
+
+    public boolean validarDisponibilidad(Date fecha, Time hora) {
+        return integracion.enviarValidacionHorario(fecha, hora);
+    }
+}
