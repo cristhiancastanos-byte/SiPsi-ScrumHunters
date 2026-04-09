@@ -36,3 +36,13 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# IntelliJ y compilación
+out/
+target/
+.idea/
+*.iml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
