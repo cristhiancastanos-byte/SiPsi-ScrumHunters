@@ -32,12 +32,12 @@ public class CitaPersistence {
         }
     }
 
-    public CitaEntity executeFindEmpalme(Date fecha, Time hora) {
+    public CitaEntity executeFindEmpalme(Date fecha, Time horaInicio) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.createQuery("SELECT c FROM CitaEntity c WHERE c.fecha = :fecha AND c.hora = :hora", CitaEntity.class)
+            return em.createQuery("SELECT c FROM CitaEntity c WHERE c.fecha = :fecha AND c.horaInicio = :horaInicio", CitaEntity.class)
                     .setParameter("fecha", fecha)
-                    .setParameter("hora", hora)
+                    .setParameter("horaInicio", horaInicio)
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;

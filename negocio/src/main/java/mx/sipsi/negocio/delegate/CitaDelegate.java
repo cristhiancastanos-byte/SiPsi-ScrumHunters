@@ -18,7 +18,7 @@ public class CitaDelegate {
         integracion.enviarAPersistenciaCita(cita);
     }
 
-    public boolean validarDisponibilidad(Date fecha, Time hora) {
-        return integracion.enviarValidacionHorario(fecha, hora);
+    public boolean validarDisponibilidad(Date fecha, Time horaInicio) {
+        return integracion.enviarValidacionHorario(fecha, horaInicio);
     }
 }

@@ -19,8 +19,8 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
         persistence.executeTransaction(cita);
     }
 
-    public CitaEntity buscarPorFechaYHora(Date fecha, Time hora) {
-        return persistence.executeFindEmpalme(fecha, hora);
+    public CitaEntity buscarPorFechaYHora(Date fecha, Time horaInicio) {
+        return persistence.executeFindEmpalme(fecha, horaInicio);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
     }
 
     @Override
-    public CitaEntity findByFechaHora(Date fecha, Time hora) {
-        return this.buscarPorFechaYHora(fecha, hora);
+    public CitaEntity findByFechaHora(Date fecha, Time horaInicio) {
+        return this.buscarPorFechaYHora(fecha, horaInicio);
     }
 }

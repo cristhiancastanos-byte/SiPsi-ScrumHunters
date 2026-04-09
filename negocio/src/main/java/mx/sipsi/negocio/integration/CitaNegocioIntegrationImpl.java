@@ -19,7 +19,7 @@ public class CitaNegocioIntegrationImpl implements ICitaNegocioIntegration {
     }
 
     @Override
-    public boolean enviarValidacionHorario(Date fecha, Time hora) {
-        return facade.procesarBusquedaEmpalme(fecha, hora);
+    public boolean enviarValidacionHorario(Date fecha, Time horaInicio) {
+        return facade.procesarBusquedaEmpalme(fecha, horaInicio);
     }
 }

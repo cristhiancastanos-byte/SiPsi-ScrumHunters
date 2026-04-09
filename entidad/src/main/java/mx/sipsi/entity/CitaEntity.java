@@ -23,52 +23,40 @@ public class CitaEntity implements Serializable {
     @Column(name = "fecha", nullable = false)
     private Date fecha;
 
-    @Column(name = "hora", nullable = false)
-    private Time hora;
+    @Column(name = "hora_inicio", nullable = false)
+    private Time horaInicio;
+
+    @Column(name = "hora_fin")
+    private Time horaFin;
+
+    @Column(name = "motivo", length = 255)
+    private String motivo;
 
     @Column(name = "estado", length = 50)
     private String estado;
 
     public CitaEntity() {
+        this.estado = "Agendada";
     }
 
-    public Integer getIdCita() {
-        return idCita;
-    }
+    public Integer getIdCita() { return idCita; }
+    public void setIdCita(Integer idCita) { this.idCita = idCita; }
 
-    public void setIdCita(Integer idCita) {
-        this.idCita = idCita;
-    }
+    public Integer getIdPaciente() { return idPaciente; }
+    public void setIdPaciente(Integer idPaciente) { this.idPaciente = idPaciente; }
 
-    public Integer getIdPaciente() {
-        return idPaciente;
-    }
+    public Date getFecha() { return fecha; }
+    public void setFecha(Date fecha) { this.fecha = fecha; }
 
-    public void setIdPaciente(Integer idPaciente) {
-        this.idPaciente = idPaciente;
-    }
+    public Time getHoraInicio() { return horaInicio; }
+    public void setHoraInicio(Time horaInicio) { this.horaInicio = horaInicio; }
 
-    public Date getFecha() {
-        return fecha;
-    }
+    public Time getHoraFin() { return horaFin; }
+    public void setHoraFin(Time horaFin) { this.horaFin = horaFin; }
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
+    public String getMotivo() { return motivo; }
+    public void setMotivo(String motivo) { this.motivo = motivo; }
 
-    public Time getHora() {
-        return hora;
-    }
-
-    public void setHora(Time hora) {
-        this.hora = hora;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

@@ -6,88 +6,126 @@
 <h:head>
     <title>SiPsi - Mis Citas</title>
     <style>
-        body {
-            font-family: 'Archivo', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #FFFFFF;
-        }
-
-
-        .header-top {
-            background-color: #833D3D;
-            color: #FFFFFF;
-            padding: 20px 40px;
-            font-size: 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-
-        .btn-logout-header {
-            background: transparent !important;
-            border: none !important;
-            color: #EAEAEA !important;
-            font-size: 18px;
-            cursor: pointer;
-            text-decoration: none;
-            font-family: 'Archivo', Arial, sans-serif;
-        }
-        .btn-logout-header:hover {
-            color: #FFFFFF !important;
-        }
-
+        body { font-family: 'Archivo', Arial, sans-serif; margin: 0; padding: 0; background-color: #FFFFFF; }
+        .header-top { background-color: #833D3D; color: #FFFFFF; padding: 20px 40px; font-size: 22px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-item-active { font-weight: bold; color: #FFFFFF; }
+        .nav-item-inactive { color: #EAEAEA; text-decoration: none; opacity: 0.7; transition: opacity 0.3s; }
+        .nav-item-inactive:hover { opacity: 1; }
+        .btn-logout-header { background: transparent !important; border: none !important; color: #EAEAEA !important; font-size: 18px; cursor: pointer; text-decoration: none; font-family: 'Archivo', Arial, sans-serif; }
+        .btn-logout-header:hover { color: #FFFFFF !important; }
         .container { padding: 30px; }
-
-
+        .toolbar { display: flex; justify-content: flex-end; margin-bottom: 20px; align-items: center; }
+        .btn-add { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; font-family: 'Archivo', Arial, sans-serif; border-radius: 4px; padding: 5px 15px !important; }
+        .btn-add:hover { background-color: #833D3D !important; }
         .modal-sipsi.ui-dialog { border: none !important; box-shadow: 0px 5px 15px rgba(0,0,0,0.3); }
-        .modal-sipsi .ui-dialog-content { background-color: #FFFFFF !important; padding: 30px !important; border-radius: 8px !important; }
-
-
+        .modal-sipsi .ui-dialog-titlebar { background-color: #CF8080 !important; color: #FFFFFF !important; text-align: center; border: none !important; padding: 15px !important; }
+        .modal-sipsi .ui-dialog-content { background-color: #FFFFFF !important; padding: 20px 30px !important; }
+        .modal-sipsi .ui-dialog-titlebar-close { display: none !important; }
         .modal-sin-header .ui-dialog-titlebar { display: none !important; }
-
-
-        .btn-cancelar { background: #FFFFFF !important; color: #808080 !important; border: 1px solid #EAEAEA !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important;}
+        .modal-sin-header .ui-dialog-content { border-radius: 8px !important; }
+        .lbl-tinto { color: #833D3D; font-weight: bold; font-size: 14px; display: block; margin-top: 15px; }
+        .msg-error-valid { color: #FF0707; font-size: 12px; display: block; margin-top: 4px; font-weight: bold; }
+        .btn-cancelar { background: #FFFFFF !important; color: #808080 !important; border: 1px solid #EAEAEA !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important; }
         .btn-cancelar:hover { background: #EAEAEA !important; color: #833D3D !important; }
-
-
+        .btn-guardar { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; padding: 5px 15px !important; }
+        .btn-guardar:hover { background-color: #833D3D !important; }
         .btn-peligro { background-color: #FF0707 !important; border: none !important; color: #FFFFFF !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important;}
         .btn-peligro:hover { background-color: #cc0000 !important; }
+        .custom-datepicker .ui-inputfield { width: 100% !important; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;}
+        .ui-selectonemenu { width: 100% !important; }
     </style>
 </h:head>
 <h:body>
 
     <div class="header-top">
-        <span>Mis Citas</span>
-
+        <div class="nav-links">
+            <span class="nav-item-active">Mis Citas</span>
+            <h:outputLink value="pacientes.xhtml" styleClass="nav-item-inactive">Pacientes</h:outputLink>
+        </div>
         <h:form style="margin: 0;">
-            <p:commandLink value="Cerrar sesión"
-                           styleClass="btn-logout-header"
-                           onclick="PF('dlgCerrarSesion').show(); return false;" />
+            <p:commandLink value="Cerrar sesión" styleClass="btn-logout-header" onclick="PF('dlgCerrarSesion').show(); return false;" />
         </h:form>
     </div>
 
-    <div class="container">
-    </div>
+    <h:form id="frmAgenda">
+        <p:growl id="msgs" showDetail="true" globalOnly="true" />
+
+        <div class="container">
+            <div class="toolbar">
+                <p:commandButton value="Agregar cita" icon="pi pi-plus" styleClass="btn-add"
+                                 actionListener="#{citaBean.limpiarFormulario}"
+                                 update="pnlRegistroCita" oncomplete="PF('modalCita').show();" />
+            </div>
+        </div>
+
+        <p:dialog widgetVar="modalCita" modal="true" width="450" resizable="false" header="Agendar cita" closable="false" styleClass="modal-sipsi">
+            <p:outputPanel id="pnlRegistroCita">
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel for="paciente" value="Paciente:" styleClass="lbl-tinto" style="margin-top: 0;"/>
+                    <p:selectOneMenu id="paciente" value="#{citaBean.citaNueva.idPaciente}">
+                        <f:selectItem itemLabel="Selecciona un paciente" itemValue="" noSelectionOption="true"/>
+                        <f:selectItems value="#{pacienteBean.listaPacientes}" var="p" itemLabel="#{p.nombre}" itemValue="#{p.id}" />
+                        <p:ajax update="msgPaciente" />
+                    </p:selectOneMenu>
+                    <h:panelGroup id="msgPaciente">
+                        <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formIntentado and empty citaBean.citaNueva.idPaciente}"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel for="fecha" value="Fecha:" styleClass="lbl-tinto"/>
+                    <p:datePicker id="fecha" value="#{citaBean.citaNueva.fecha}" pattern="dd/MM/yyyy" showIcon="true" styleClass="custom-datepicker">
+                        <p:ajax event="dateSelect" update="msgFecha" />
+                        <p:ajax event="change" update="msgFecha" />
+                    </p:datePicker>
+                    <h:panelGroup id="msgFecha">
+                        <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formIntentado and empty citaBean.citaNueva.fecha}"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel value="Hora:" styleClass="lbl-tinto"/>
+                    <h:panelGrid columns="2" style="width: 100%; gap: 10px;">
+                        <p:datePicker id="horaInicio" value="#{citaBean.horaInicioAux}" timeOnly="true" pattern="HH:mm" placeholder="Inicio" styleClass="custom-datepicker" stepMinute="30">
+                            <p:ajax event="dateSelect" update="msgHora" />
+                            <p:ajax event="change" update="msgHora" />
+                        </p:datePicker>
+                        <p:datePicker id="horaFin" value="#{citaBean.horaFinAux}" timeOnly="true" pattern="HH:mm" placeholder="Fin" styleClass="custom-datepicker" stepMinute="30">
+                            <p:ajax event="dateSelect" update="msgHora" />
+                            <p:ajax event="change" update="msgHora" />
+                        </p:datePicker>
+                    </h:panelGrid>
+                    <h:panelGroup id="msgHora">
+                        <h:outputText value="Campo Obligatorio (Inicio)" styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formIntentado and empty citaBean.horaInicioAux}"/>
+                        <h:outputText value="Duración inválida (máx. 3 horas)" styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formIntentado and citaBean.horaInicioAux != null and citaBean.horaFinAux != null and (citaBean.horaFinAux.time - citaBean.horaInicioAux.time gt 10800000 or citaBean.horaFinAux.time - citaBean.horaInicioAux.time le 0)}"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel for="motivo" value="Motivo:" styleClass="lbl-tinto"/>
+                    <p:inputTextarea id="motivo" value="#{citaBean.citaNueva.motivo}" rows="4" style="width: 95%; padding: 8px; border: 1px solid #EAEAEA; border-radius: 4px;" placeholder="Escribe el motivo..."/>
+
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                    <p:commandButton value="Cancelar" onclick="PF('modalCita').hide();" process="@this" actionListener="#{citaBean.limpiarFormulario}" update="pnlRegistroCita" styleClass="btn-cancelar"/>
+                    <p:commandButton value="Agendar cita"
+                                     action="#{citaBean.guardar}"
+                                     process="@form"
+                                     update="pnlRegistroCita msgs"
+                                     oncomplete="if (!args.validationFailed) PF('modalCita').hide();"
+                                     styleClass="btn-guardar"/>
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+    </h:form>
 
     <h:form id="formModalCerrarSesion">
         <p:dialog widgetVar="dlgCerrarSesion" modal="true" closable="false" resizable="false" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi modal-sin-header">
-
-            <div style="padding: 10px 20px; color: #833D3D; font-size: 18px; text-align: center; font-weight: bold; font-family: 'Archivo', Arial, sans-serif;">
-                ¿Seguro que quieres cerrar sesión?
-            </div>
-
+            <div style="padding: 10px 20px; color: #833D3D; font-size: 18px; text-align: center; font-weight: bold; font-family: 'Archivo', Arial, sans-serif;">¿Seguro que quieres cerrar sesión?</div>
             <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
-                <p:commandButton value="Cancelar"
-                                 type="button"
-                                 onclick="PF('dlgCerrarSesion').hide();"
-                                 styleClass="btn-cancelar"/>
-
-                <p:commandButton value="Cerrar sesión"
-                                 action="#{loginBean.cerrarSesion()}"
-                                 oncomplete="PF('dlgCerrarSesion').hide();"
-                                 styleClass="btn-peligro" />
+                <p:commandButton value="Cancelar" type="button" onclick="PF('dlgCerrarSesion').hide();" styleClass="btn-cancelar"/>
+                <p:commandButton value="Cerrar sesión" action="#{loginBean.cerrarSesion()}" oncomplete="PF('dlgCerrarSesion').hide();" styleClass="btn-peligro" />
             </div>
         </p:dialog>
     </h:form>

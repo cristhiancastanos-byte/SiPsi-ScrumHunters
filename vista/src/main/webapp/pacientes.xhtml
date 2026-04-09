@@ -16,7 +16,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-item-active { font-weight: bold; color: #FFFFFF; }
+        .nav-item-inactive { color: #EAEAEA; text-decoration: none; opacity: 0.7; transition: opacity 0.3s; }
+        .nav-item-inactive:hover { opacity: 1; }
+
         .btn-logout-header {
             background: transparent !important;
             border: none !important;
@@ -57,7 +64,6 @@
         .btn-guardar { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; }
         .btn-guardar:hover { background-color: #833D3D !important; }
 
-        /* Botón rojo para cerrar sesión */
         .btn-peligro { background-color: #FF0707 !important; border: none !important; color: #FFFFFF !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important;}
         .btn-peligro:hover { background-color: #cc0000 !important; }
     </style>
@@ -65,7 +71,10 @@
 <h:body>
 
     <div class="header-top">
-        <span>Pacientes</span>
+        <div class="nav-links">
+            <h:outputLink value="agenda.xhtml" styleClass="nav-item-inactive">Mis Citas</h:outputLink>
+            <span class="nav-item-active">Pacientes</span>
+        </div>
         <h:form style="margin: 0;">
             <p:commandLink value="Cerrar sesión"
                            styleClass="btn-logout-header"

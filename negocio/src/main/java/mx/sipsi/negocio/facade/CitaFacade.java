@@ -18,8 +18,8 @@ public class CitaFacade {
         persistencia.save(cita);
     }
 
-    public boolean procesarBusquedaEmpalme(Date fecha, Time hora) {
-        CitaEntity citaExistente = persistencia.findByFechaHora(fecha, hora);
+    public boolean procesarBusquedaEmpalme(Date fecha, Time horaInicio) {
+        CitaEntity citaExistente = persistencia.findByFechaHora(fecha, horaInicio);
         return citaExistente != null;
     }
 }
