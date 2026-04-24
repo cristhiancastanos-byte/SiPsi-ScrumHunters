@@ -4,6 +4,7 @@ import mx.sipsi.entity.CitaEntity;
 import mx.sipsi.negocio.facade.CitaFacade;
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 public class CitaNegocioIntegrationImpl implements ICitaNegocioIntegration {
 
@@ -21,5 +22,10 @@ public class CitaNegocioIntegrationImpl implements ICitaNegocioIntegration {
     @Override
     public boolean enviarValidacionHorario(Date fecha, Time horaInicio) {
         return facade.procesarBusquedaEmpalme(fecha, horaInicio);
+    }
+
+    @Override
+    public List<CitaEntity> consultarAgenda(int mes, int anio) {
+        return facade.consultarAgenda(mes, anio);
     }
 }

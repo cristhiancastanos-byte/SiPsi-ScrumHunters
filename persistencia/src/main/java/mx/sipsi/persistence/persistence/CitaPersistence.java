@@ -4,9 +4,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 import mx.sipsi.entity.CitaEntity;
+
 import java.sql.Time;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class CitaPersistence {
 
@@ -35,12 +39,52 @@ public class CitaPersistence {
     public CitaEntity executeFindEmpalme(Date fecha, Time horaInicio) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.createQuery("SELECT c FROM CitaEntity c WHERE c.fecha = :fecha AND c.horaInicio = :horaInicio", CitaEntity.class)
+            return em.createQuery(
+                            "SELECT c FROM CitaEntity c WHERE c.fecha = :fecha AND c.horaInicio = :horaInicio",
+                            CitaEntity.class
+                    )
                     .setParameter("fecha", fecha)
                     .setParameter("horaInicio", horaInicio)
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<CitaEntity> executeSelectCitasPorMes(int mes, int anio) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            Calendar inicioMes = Calendar.getInstance();
+            inicioMes.clear();
+            inicioMes.set(Calendar.YEAR, anio);
+            inicioMes.set(Calendar.MONTH, mes - 1);
+            inicioMes.set(Calendar.DAY_OF_MONTH, 1);
+
+            Calendar inicioMesSiguiente = Calendar.getInstance();
+            inicioMesSiguiente.clear();
+            inicioMesSiguiente.set(Calendar.YEAR, anio);
+            inicioMesSiguiente.set(Calendar.MONTH, mes - 1);
+            inicioMesSiguiente.set(Calendar.DAY_OF_MONTH, 1);
+            inicioMesSiguiente.add(Calendar.MONTH, 1);
+
+            TypedQuery<CitaEntity> query = em.createQuery(
+                    "SELECT c FROM CitaEntity c " +
+                            "WHERE c.fecha >= :inicioMes " +
+                            "AND c.fecha < :inicioMesSiguiente " +
+                            "ORDER BY c.fecha ASC, c.horaInicio ASC",
+                    CitaEntity.class
+            );
+
+            query.setParameter("inicioMes", inicioMes.getTime());
+            query.setParameter("inicioMesSiguiente", inicioMesSiguiente.getTime());
+
+            return query.getResultList();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar las citas por mes: " + e.getMessage(), e);
         } finally {
             em.close();
         }

@@ -5,6 +5,7 @@ import mx.sipsi.negocio.integration.ICitaNegocioIntegration;
 import mx.sipsi.negocio.integration.CitaNegocioIntegrationImpl;
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 public class CitaDelegate {
 
@@ -20,5 +21,9 @@ public class CitaDelegate {
 
     public boolean validarDisponibilidad(Date fecha, Time horaInicio) {
         return integracion.enviarValidacionHorario(fecha, horaInicio);
+    }
+
+    public List<CitaEntity> consultarAgenda(int mes, int anio) {
+        return integracion.consultarAgenda(mes, anio);
     }
 }
