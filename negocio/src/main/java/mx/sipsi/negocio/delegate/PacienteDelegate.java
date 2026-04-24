@@ -19,4 +19,8 @@ public class PacienteDelegate {
     public List<PacienteEntity> buscarPorNombreActivos(String nombre) {
         return facade.buscarPorNombreActivos(nombre);
     }
+
+    public PacienteEntity consultarPorId(int idPaciente) {
+        return facade.procesarConsultaPorId(idPaciente);
+    }
 }
