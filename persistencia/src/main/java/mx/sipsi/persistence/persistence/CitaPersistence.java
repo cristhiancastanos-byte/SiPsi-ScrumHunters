@@ -4,9 +4,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 import mx.sipsi.entity.CitaEntity;
+
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 public class CitaPersistence {
 
@@ -41,6 +44,28 @@ public class CitaPersistence {
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<CitaEntity> executeSelectCitasPorMes(int mes, int anio) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            TypedQuery<CitaEntity> query = em.createQuery(
+                    "SELECT c FROM CitaEntity c " +
+                            "WHERE MONTH(c.fecha) = :mes " +
+                            "AND YEAR(c.fecha) = :anio " +
+                            "ORDER BY c.fecha ASC, c.horaInicio ASC",
+                    CitaEntity.class
+            );
+
+            query.setParameter("mes", mes);
+            query.setParameter("anio", anio);
+
+            return query.getResultList();
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar las citas por mes: " + e.getMessage(), e);
         } finally {
             em.close();
         }

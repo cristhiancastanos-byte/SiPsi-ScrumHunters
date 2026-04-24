@@ -6,6 +6,7 @@ import mx.sipsi.persistence.persistence.CitaPersistence;
 
 import java.sql.Time;
 import java.util.Date;
+import java.util.List;
 
 public class CitaDAO implements ICitaPersistenciaIntegration {
 
@@ -31,5 +32,10 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
     @Override
     public CitaEntity findByFechaHora(Date fecha, Time horaInicio) {
         return this.buscarPorFechaYHora(fecha, horaInicio);
+    }
+
+    @Override
+    public List<CitaEntity> obtenerCitasPorMes(int mes, int anio) {
+        return persistence.executeSelectCitasPorMes(mes, anio);
     }
 }
