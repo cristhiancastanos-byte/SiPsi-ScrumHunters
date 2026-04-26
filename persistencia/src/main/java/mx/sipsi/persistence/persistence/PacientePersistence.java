@@ -177,4 +177,89 @@ public class PacientePersistence {
             em.close();
         }
     }
+
+    public void executeArchivarPaciente(int idPaciente) throws Exception {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            PacienteEntity paciente = em.find(PacienteEntity.class, idPaciente);
+
+            if (paciente == null) {
+                throw new RuntimeException("No se encontró el paciente");
+            }
+
+            paciente.setActivo(false);
+            em.merge(paciente);
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public void executeRecuperarPaciente(int idPaciente) throws Exception {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            PacienteEntity paciente = em.find(PacienteEntity.class, idPaciente);
+
+            if (paciente == null) {
+                throw new RuntimeException("No se encontró el paciente");
+            }
+
+            paciente.setActivo(true);
+            em.merge(paciente);
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<PacienteEntity> executeFindAllArchivados() throws Exception {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String hql = "FROM PacienteEntity p WHERE p.activo = false ORDER BY p.nombre ASC";
+            TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void executeDeletePaciente(int idPaciente) throws Exception {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            PacienteEntity paciente = em.find(PacienteEntity.class, idPaciente);
+
+            if (paciente == null) {
+                throw new RuntimeException("No se encontró el paciente");
+            }
+
+            em.remove(paciente);
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
 }

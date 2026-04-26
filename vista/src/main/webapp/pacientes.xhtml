@@ -37,11 +37,36 @@
         .btn-logout-header:hover { color: #FFFFFF !important; }
 
         .container { padding: 30px; }
-        .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+        .toolbar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; gap: 15px; }
+        .toolbar-left { display: flex; align-items: center; gap: 12px; }
+        .toolbar-right { display: flex; align-items: center; gap: 12px; }
+
         .btn-add { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; font-family: 'Archivo', Arial, sans-serif; border-radius: 4px; padding: 5px 15px !important; }
         .btn-add:hover { background-color: #833D3D !important; }
+
         .btn-action { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; margin: 0 8px !important; border-radius: 4px; }
         .btn-action:hover { background-color: #833D3D !important; }
+
+        .btn-archivados {
+            background-color: #CF8080 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            font-family: 'Archivo', Arial, sans-serif;
+            border-radius: 4px;
+            padding: 5px 15px !important;
+        }
+        .btn-archivados:hover { background-color: #833D3D !important; }
+
+        .btn-archivados-activo {
+            background-color: #833D3D !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            font-family: 'Archivo', Arial, sans-serif;
+            border-radius: 4px;
+            padding: 5px 15px !important;
+        }
+        .btn-archivados-activo:hover { background-color: #5f2c2c !important; }
+
         .search-bar { width: 350px; padding: 8px; border-radius: 4px; border: 1px solid #EAEAEA; }
         .search-bar:focus { outline: none; border-color: #DDAEAC; box-shadow: 0 0 5px #DDAEAC; }
 
@@ -78,13 +103,36 @@
             cursor: default;
         }
 
-        .btn-cancelar { background: #FFFFFF !important; color: #808080 !important; border: 1px solid #EAEAEA !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important; }
+        .btn-cancelar {
+            background: #FFFFFF !important;
+            color: #808080 !important;
+            border: 1px solid #EAEAEA !important;
+            border-radius: 4px;
+            font-family: 'Archivo', Arial, sans-serif;
+            padding: 5px 15px !important;
+        }
         .btn-cancelar:hover { background: #EAEAEA !important; color: #833D3D !important; }
+
         .btn-guardar { background-color: #CF8080 !important; border: none !important; color: #FFFFFF !important; }
         .btn-guardar:hover { background-color: #833D3D !important; }
 
-        .btn-peligro { background-color: #FF0707 !important; border: none !important; color: #FFFFFF !important; border-radius: 4px; font-family: 'Archivo', Arial, sans-serif; padding: 5px 15px !important;}
+        .btn-peligro {
+            background-color: #FF0707 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            border-radius: 4px;
+            font-family: 'Archivo', Arial, sans-serif;
+            padding: 5px 15px !important;
+        }
         .btn-peligro:hover { background-color: #cc0000 !important; }
+
+        .modo-titulo {
+            color: #833D3D;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-family: 'Archivo', Arial, sans-serif;
+        }
     </style>
 </h:head>
 <h:body>
@@ -105,21 +153,53 @@
         <p:growl id="msgs" showDetail="true" globalOnly="true" />
 
         <div class="container">
+            <h:outputText value="#{pacienteBean.modoArchivados ? 'Pacientes archivados' : 'Pacientes activos'}"
+                          styleClass="modo-titulo" />
+
             <div class="toolbar">
-                <div class="ui-input-icon-left">
-                    <i class="pi pi-search" style="color: #808080;" />
-                    <p:inputText id="busqueda" value="#{pacienteBean.terminoBusqueda}" placeholder="Buscar paciente por nombre" styleClass="search-bar">
-                        <p:ajax event="keyup" listener="#{pacienteBean.filtrarPorNombre}" update="tblPacientes" delay="300" />
-                    </p:inputText>
+                <div class="toolbar-left">
+                    <div class="ui-input-icon-left">
+                        <i class="pi pi-search" style="color: #808080;" />
+                        <p:inputText id="busqueda"
+                                     value="#{pacienteBean.terminoBusqueda}"
+                                     placeholder="Buscar paciente por nombre"
+                                     styleClass="search-bar">
+                            <p:ajax event="keyup"
+                                    listener="#{pacienteBean.filtrarPorNombre}"
+                                    update="tblPacientes"
+                                    delay="300" />
+                        </p:inputText>
+                    </div>
                 </div>
 
-                <p:commandButton value="Agregar paciente" icon="pi pi-plus" styleClass="btn-add"
-                                 actionListener="#{pacienteBean.limpiar}"
-                                 update="pnlMod" oncomplete="PF('dlgRegistro').show();" />
+                <div class="toolbar-right">
+                    <p:commandButton value="Pacientes archivados"
+                                     icon="pi pi-archive"
+                                     styleClass="#{pacienteBean.modoArchivados ? 'btn-archivados-activo' : 'btn-archivados'}"
+                                     actionListener="#{pacienteBean.alternarModoArchivados}"
+                                     update="@form" />
+
+                    <p:commandButton value="Agregar paciente"
+                                     icon="pi pi-plus"
+                                     styleClass="btn-add"
+                                     actionListener="#{pacienteBean.limpiar}"
+                                     update="pnlMod"
+                                     oncomplete="PF('dlgRegistro').show();"
+                                     rendered="#{not pacienteBean.modoArchivados}" />
+                </div>
             </div>
 
-            <p:dataTable id="tblPacientes" value="#{pacienteBean.listaPacientes}" var="paciente" paginator="true" paginatorPosition="bottom" rows="10"
-                         emptyMessage="#{empty pacienteBean.terminoBusqueda ? 'No hay pacientes registrados' : 'No se encontró el registro'}">
+            <p:dataTable id="tblPacientes"
+                         value="#{pacienteBean.listaPacientes}"
+                         var="paciente"
+                         paginator="true"
+                         paginatorPosition="bottom"
+                         rows="10"
+                         emptyMessage="#{pacienteBean.modoArchivados ? 'No hay pacientes archivados' : (empty pacienteBean.terminoBusqueda ? 'No hay pacientes registrados' : 'No se encontró el registro')}">
+
+                <p:column headerText="Nombre Completo">
+                    <h:outputText value="#{paciente.nombre}" />
+                </p:column>
 
                 <p:column headerText="Nombre Completo">
                     <h:outputText value="#{paciente.nombre}" />
@@ -139,8 +219,15 @@
                     <h:outputText value="#{paciente.genero}" />
                 </p:column>
 
-                <p:column headerText="Acciones" style="text-align: center; width: 180px;">
-                    <p:commandButton icon="pi pi-pencil" styleClass="btn-action" title="Editar" process="@this"
+                <p:column headerText="Género">
+                    <h:outputText value="#{paciente.genero}" />
+                </p:column>
+
+                <p:column headerText="Acciones" style="text-align: center; width: 230px;">
+                    <p:commandButton icon="pi pi-pencil"
+                                     styleClass="btn-action"
+                                     title="Editar"
+                                     process="@this"
                                      actionListener="#{pacienteBean.abrirEdicion(paciente.id)}"
                                      update=":frmPrincipal:pnlEditar"
                                      resetValues="true"
@@ -151,11 +238,52 @@
                                      oncomplete="PF('dlgEliminar').show();" />
 
                     <p:commandButton icon="pi pi-folder-open" styleClass="btn-action" title="Expediente" />
+                                     oncomplete="PF('dlgEditar').show();"
+                                     rendered="#{not pacienteBean.modoArchivados}" />
+
+                    <p:commandButton icon="pi pi-trash"
+                                     styleClass="btn-action"
+                                     title="Archivar"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.prepararArchivar(paciente)}"
+                                     update=":frmPrincipal:dlgEliminar"
+                                     oncomplete="PF('dlgEliminar').show(); PF('dlgEliminar').initPosition();"
+                                     rendered="#{not pacienteBean.modoArchivados}" />
+
+                    <p:commandButton icon="pi pi-folder-open"
+                                     styleClass="btn-action"
+                                     title="Expediente"
+                                     rendered="#{not pacienteBean.modoArchivados}" />
+
+                    <p:commandButton icon="pi pi-refresh"
+                                     styleClass="btn-action"
+                                     title="Recuperar"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.prepararRecuperar(paciente)}"
+                                     update=":frmPrincipal:pnlRecuperar"
+                                     oncomplete="PF('dlgRecuperar').show();"
+                                     rendered="#{pacienteBean.modoArchivados}" />
+
+                    <p:commandButton icon="pi pi-times"
+                                     styleClass="btn-peligro"
+                                     title="Eliminar definitivamente"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.prepararEliminarDefinitivamente(paciente)}"
+                                     update=":frmPrincipal:pnlEliminarDefinitivo"
+                                     oncomplete="PF('dlgEliminarDefinitivo').show();"
+                                     rendered="#{pacienteBean.modoArchivados}" />
                 </p:column>
             </p:dataTable>
         </div>
 
-        <p:dialog widgetVar="dlgRegistro" modal="true" closable="false" resizable="false" header="Nuevo Paciente" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi">
+        <p:dialog widgetVar="dlgRegistro"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Nuevo Paciente"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
             <p:outputPanel id="pnlMod">
                 <h:panelGrid columns="1" style="width: 100%;">
 
@@ -183,6 +311,7 @@
                             <p:ajax event="change" listener="#{pacienteBean.actualizarDias}" process="@this selMes selDia" update="selDia" />
                         </p:selectOneMenu>
                     </h:panelGroup>
+
                     <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid" rendered="#{facesContext.validationFailed and (empty pacienteBean.dia or empty pacienteBean.mes or empty pacienteBean.anio)}"/>
 
                     <h:outputLabel value="Género:" styleClass="lbl-tinto"/>
@@ -210,13 +339,30 @@
                 </h:panelGrid>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
-                    <p:commandButton value="Cancelar" onclick="PF('dlgRegistro').hide();" process="@this" actionListener="#{pacienteBean.limpiar}" update="pnlMod" styleClass="btn-cancelar"/>
-                    <p:commandButton value="Guardar" action="#{pacienteBean.guardar}" update="pnlMod msgs tblPacientes" oncomplete="if(!args.validationFailed) PF('dlgRegistro').hide();" styleClass="btn-guardar" />
+                    <p:commandButton value="Cancelar"
+                                     onclick="PF('dlgRegistro').hide();"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.limpiar}"
+                                     update="pnlMod"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Guardar"
+                                     action="#{pacienteBean.guardar}"
+                                     update="pnlMod msgs tblPacientes"
+                                     oncomplete="if(!args.validationFailed) PF('dlgRegistro').hide();"
+                                     styleClass="btn-guardar" />
                 </div>
             </p:outputPanel>
         </p:dialog>
 
-        <p:dialog widgetVar="dlgEditar" modal="true" closable="false" resizable="false" header="Editar Paciente" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi">
+        <p:dialog widgetVar="dlgEditar"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Editar Paciente"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
             <p:outputPanel id="pnlEditar">
                 <h:panelGrid columns="1" style="width: 100%;">
 
@@ -244,6 +390,7 @@
                             <p:ajax event="change" listener="#{pacienteBean.actualizarDiasEditar}" process="@this editMes editDia" update="editDia" />
                         </p:selectOneMenu>
                     </h:panelGroup>
+
                     <h:outputText value="Campo Obligatorio" styleClass="msg-error-valid" rendered="#{facesContext.validationFailed and (empty pacienteBean.diaEditar or empty pacienteBean.mesEditar or empty pacienteBean.anioEditar)}"/>
 
                     <h:outputLabel value="Género:" styleClass="lbl-tinto"/>
@@ -271,8 +418,18 @@
                 </h:panelGrid>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
-                    <p:commandButton value="Cancelar" onclick="PF('dlgEditar').hide();" process="@this" actionListener="#{pacienteBean.cancelarEdicion}" update="pnlEditar" styleClass="btn-cancelar"/>
-                    <p:commandButton value="Guardar Cambios" actionListener="#{pacienteBean.actualizarPaciente}" update="pnlEditar msgs tblPacientes" oncomplete="if(!args.validationFailed) PF('dlgEditar').hide();" styleClass="btn-guardar" />
+                    <p:commandButton value="Cancelar"
+                                     onclick="PF('dlgEditar').hide();"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.cancelarEdicion}"
+                                     update="pnlEditar"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Guardar Cambios"
+                                     actionListener="#{pacienteBean.actualizarPaciente}"
+                                     update="pnlEditar msgs tblPacientes"
+                                     oncomplete="if(!args.validationFailed) PF('dlgEditar').hide();"
+                                     styleClass="btn-guardar" />
                 </div>
             </p:outputPanel>
         </p:dialog>
@@ -287,12 +444,110 @@
                 <p:commandButton value="Cancelar" type="button" onclick="PF('dlgEliminar').hide();" styleClass="btn-cancelar"/>
                 <p:commandButton value="Sí, eliminar" actionListener="#{pacienteBean.eliminarPaciente}" update="msgs tblPacientes" oncomplete="PF('dlgEliminar').hide();" styleClass="btn-guardar" />
             </div>
+        <p:dialog id="dlgEliminar"
+                  widgetVar="dlgEliminar"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  position="center"
+                  appendTo="@(body)"
+                  header="Confirmación"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
+            <p:outputPanel id="pnlConfirmarArchivo">
+                <div style="padding: 10px 0; color: #833D3D; font-size: 16px; text-align: center; max-width: 430px;">
+                    <h:outputText value="¿Estás segura de que deseas enviar a este paciente a papelera?"
+                                  rendered="#{not pacienteBean.tieneCitasPendientes}" />
+
+                    <h:outputText value="Este paciente tiene citas pendientes. Si lo envías a papelera, sus citas pendientes serán eliminadas. ¿Deseas continuar?"
+                                  rendered="#{pacienteBean.tieneCitasPendientes}" />
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                    <p:commandButton value="Cancelar"
+                                     type="button"
+                                     onclick="PF('dlgEliminar').hide(); PF('dlgEliminar').initPosition();"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Sí, archivar"
+                                     actionListener="#{pacienteBean.archivarPaciente}"
+                                     update="@form"
+                                     oncomplete="PF('dlgEliminar').hide();"
+                                     styleClass="btn-guardar" />
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:dialog widgetVar="dlgRecuperar"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Confirmación"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
+            <p:outputPanel id="pnlRecuperar">
+                <div style="padding: 10px 0; color: #833D3D; font-size: 16px; text-align: center;">
+                    ¿Deseas recuperar este paciente y regresarlo a la lista principal?
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                    <p:commandButton value="Cancelar"
+                                     type="button"
+                                     onclick="PF('dlgRecuperar').hide();"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Sí, recuperar"
+                                     actionListener="#{pacienteBean.recuperarPaciente}"
+                                     update="@form"
+                                     oncomplete="PF('dlgRecuperar').hide();"
+                                     styleClass="btn-guardar" />
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+
+        <p:dialog widgetVar="dlgEliminarDefinitivo"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Advertencia"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi">
+            <p:outputPanel id="pnlEliminarDefinitivo">
+                <div style="padding: 10px 0; color: #833D3D; font-size: 16px; text-align: center;">
+                    Esta acción eliminará definitivamente al paciente y no se podrá recuperar. ¿Deseas continuar?
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+                    <p:commandButton value="Cancelar"
+                                     type="button"
+                                     onclick="PF('dlgEliminarDefinitivo').hide();"
+                                     styleClass="btn-cancelar"/>
+
+                    <p:commandButton value="Sí, eliminar"
+                                     actionListener="#{pacienteBean.eliminarDefinitivamente}"
+                                     update="@form"
+                                     oncomplete="PF('dlgEliminarDefinitivo').hide();"
+                                     styleClass="btn-peligro" />
+                </div>
+            </p:outputPanel>
         </p:dialog>
     </h:form>
 
     <h:form id="formModalCerrarSesion">
         <p:dialog widgetVar="dlgCerrarSesion" modal="true" closable="false" resizable="false" showEffect="fade" hideEffect="fade" styleClass="modal-sipsi modal-sin-header">
             <div style="padding: 10px 20px; color: #833D3D; font-size: 18px; text-align: center; font-weight: bold; font-family: 'Archivo', Arial, sans-serif; user-select: none; cursor: default;">
+        <p:dialog widgetVar="dlgCerrarSesion"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi modal-sin-header">
+
+            <div style="padding: 10px 20px; color: #833D3D; font-size: 18px; text-align: center; font-weight: bold; font-family: 'Archivo', Arial, sans-serif;">
                 ¿Seguro que quieres cerrar sesión?
             </div>
 

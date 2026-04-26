@@ -106,4 +106,40 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
             throw new RuntimeException("Error al dar de baja lógica al paciente", e);
         }
     }
+
+    @Override
+    public void archivarPaciente(int idPaciente) {
+        try {
+            persistence.executeArchivarPaciente(idPaciente);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al archivar paciente", e);
+        }
+    }
+
+    @Override
+    public void recuperarPaciente(int idPaciente) {
+        try {
+            persistence.executeRecuperarPaciente(idPaciente);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al recuperar paciente", e);
+        }
+    }
+
+    @Override
+    public void eliminarDefinitivamente(int idPaciente) {
+        try {
+            persistence.executeDeletePaciente(idPaciente);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar definitivamente al paciente", e);
+        }
+    }
+
+    @Override
+    public List<PacienteEntity> listarPacientesArchivados() {
+        try {
+            return persistence.executeFindAllArchivados();
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar pacientes archivados", e);
+        }
+    }
 }

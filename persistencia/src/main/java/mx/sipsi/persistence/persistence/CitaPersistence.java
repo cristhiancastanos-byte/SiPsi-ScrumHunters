@@ -89,4 +89,58 @@ public class CitaPersistence {
             em.close();
         }
     }
+
+    public boolean executeTieneCitasPendientesPorPaciente(int idPaciente) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            Date fechaActual = new Date();
+
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(c) FROM CitaEntity c " +
+                            "WHERE c.idPaciente = :idPaciente " +
+                            "AND c.fecha >= :fechaActual",
+                    Long.class
+            );
+
+            query.setParameter("idPaciente", idPaciente);
+            query.setParameter("fechaActual", fechaActual);
+
+            return query.getSingleResult() > 0;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar citas pendientes del paciente: " + e.getMessage(), e);
+        } finally {
+            em.close();
+        }
+    }
+
+    public void executeDeleteCitasPendientesPorPaciente(int idPaciente) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            Date fechaActual = new Date();
+
+            em.getTransaction().begin();
+
+            em.createQuery(
+                            "DELETE FROM CitaEntity c " +
+                                    "WHERE c.idPaciente = :idPaciente " +
+                                    "AND c.fecha >= :fechaActual"
+                    )
+                    .setParameter("idPaciente", idPaciente)
+                    .setParameter("fechaActual", fechaActual)
+                    .executeUpdate();
+
+            em.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error al eliminar citas pendientes del paciente: " + e.getMessage(), e);
+        } finally {
+            em.close();
+        }
+    }
 }

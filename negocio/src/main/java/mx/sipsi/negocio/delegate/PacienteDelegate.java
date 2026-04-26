@@ -24,4 +24,20 @@ public class PacienteDelegate {
     public PacienteEntity consultarPorId(int idPaciente) {
         return facade.procesarConsultaPorId(idPaciente);
     }
+
+    public void archivarPaciente(int idPaciente) {
+        facade.procesarArchivado(idPaciente);
+    }
+
+    public void recuperarPaciente(int idPaciente) {
+        facade.procesarRecuperacion(idPaciente);
+    }
+
+    public void eliminarDefinitivamente(int idPaciente) {
+        facade.procesarEliminacionDefinitiva(idPaciente);
+    }
+
+    public List<PacienteEntity> listarPacientesArchivados() {
+        return facade.buscarPacientesArchivados();
+    }
 }
