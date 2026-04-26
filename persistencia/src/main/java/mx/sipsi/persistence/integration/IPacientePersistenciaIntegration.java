@@ -33,4 +33,6 @@ public interface IPacientePersistenciaIntegration {
     void eliminarDefinitivamente(int idPaciente);
 
     List<PacienteEntity> listarPacientesArchivados();
+
+    PacienteEntity obtenerExpedienteCompleto(Long idPaciente);
 }

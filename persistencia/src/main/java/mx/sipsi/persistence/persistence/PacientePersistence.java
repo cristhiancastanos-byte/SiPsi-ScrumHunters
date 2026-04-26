@@ -110,7 +110,6 @@ public class PacientePersistence {
         }
     }
 
-
     public PacienteEntity executeFindDuplicado(String nombre, Date fechaNac, String telefono, int idActual) throws Exception {
         EntityManager em = emf.createEntityManager();
         try {
@@ -258,6 +257,23 @@ public class PacientePersistence {
                 em.getTransaction().rollback();
             }
             throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    public PacienteEntity executeSelectExpediente(Long idPaciente) throws Exception {
+        EntityManager em = emf.createEntityManager();
+        try {
+            String hql = "SELECT DISTINCT p FROM PacienteEntity p "
+                    + "LEFT JOIN FETCH p.notas "
+                    + "LEFT JOIN FETCH p.archivos "
+                    + "WHERE p.id = :idPaciente";
+
+            TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
+            query.setParameter("idPaciente", idPaciente.intValue());
+
+            return query.getSingleResult();
         } finally {
             em.close();
         }
