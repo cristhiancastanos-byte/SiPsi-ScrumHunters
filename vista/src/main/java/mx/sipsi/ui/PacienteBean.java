@@ -12,6 +12,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import mx.sipsi.entity.PacienteEntity;
+import mx.sipsi.negocio.delegate.CitaDelegate;
 import mx.sipsi.negocio.facade.PacienteFacade;
 
 @Named("pacienteBean")
@@ -21,6 +22,7 @@ public class PacienteBean implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final PacienteFacade facade = new PacienteFacade();
+    private final CitaDelegate citaDelegate = new CitaDelegate();
 
     private PacienteEntity pacienteNuevo;
     private String dia = "";
@@ -35,6 +37,9 @@ public class PacienteBean implements Serializable {
 
     private PacienteEntity pacienteEditar = new PacienteEntity();
     private PacienteEntity pacienteEliminar = new PacienteEntity();
+    private PacienteEntity pacienteRecuperar = new PacienteEntity();
+    private PacienteEntity pacienteEliminarDefinitivo = new PacienteEntity();
+
     private String diaEditar = "";
     private String mesEditar = "";
     private String anioEditar = "";
@@ -43,6 +48,9 @@ public class PacienteBean implements Serializable {
     private boolean errorFechaEditar;
     private boolean errorGeneroEditar;
     private boolean duplicadoEditar;
+
+    private boolean modoArchivados = false;
+    private boolean tieneCitasPendientes = false;
 
     @PostConstruct
     public void init() {
@@ -57,18 +65,66 @@ public class PacienteBean implements Serializable {
 
     public void cargarTodosActivos() {
         try {
+            modoArchivados = false;
             listaPacientes = facade.buscarTodosActivos();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public void cargarPacientesArchivados() {
+        try {
+            listaPacientes = facade.buscarPacientesArchivados();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void verPacientesArchivados() {
+        modoArchivados = true;
+        terminoBusqueda = "";
+        cargarPacientesArchivados();
+    }
+
+    public void volverPacientesActivos() {
+        modoArchivados = false;
+        terminoBusqueda = "";
+        cargarTodosActivos();
+    }
+
+    public void alternarModoArchivados() {
+        if (modoArchivados) {
+            volverPacientesActivos();
+        } else {
+            verPacientesArchivados();
+        }
+    }
+
     public void filtrarPorNombre() {
         try {
-            if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
-                listaPacientes = facade.buscarPorNombreActivos(terminoBusqueda.trim());
+            if (modoArchivados) {
+                List<PacienteEntity> archivados = facade.buscarPacientesArchivados();
+
+                if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
+                    String busqueda = terminoBusqueda.trim().toLowerCase();
+                    List<PacienteEntity> filtrados = new ArrayList<>();
+
+                    for (PacienteEntity paciente : archivados) {
+                        if (paciente.getNombre() != null && paciente.getNombre().toLowerCase().contains(busqueda)) {
+                            filtrados.add(paciente);
+                        }
+                    }
+
+                    listaPacientes = filtrados;
+                } else {
+                    listaPacientes = archivados;
+                }
             } else {
-                cargarTodosActivos();
+                if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
+                    listaPacientes = facade.buscarPorNombreActivos(terminoBusqueda.trim());
+                } else {
+                    cargarTodosActivos();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -194,6 +250,123 @@ public class PacienteBean implements Serializable {
         pacienteEliminar = facade.procesarConsultaPorId(id);
     }
 
+    public void prepararArchivar(PacienteEntity paciente) {
+        pacienteEliminar = paciente;
+        tieneCitasPendientes = false;
+
+        if (pacienteEliminar != null && pacienteEliminar.getId() > 0) {
+            tieneCitasPendientes = citaDelegate.tieneCitasPendientesPorPaciente(pacienteEliminar.getId());
+        }
+    }
+
+    public void archivarPaciente() {
+        try {
+            if (pacienteEliminar == null || pacienteEliminar.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
+                return;
+            }
+
+            if (tieneCitasPendientes) {
+                citaDelegate.eliminarCitasPendientesPorPaciente(pacienteEliminar.getId());
+            }
+
+            facade.procesarArchivado(pacienteEliminar.getId());
+
+            cargarTodosActivos();
+
+            String detalle = tieneCitasPendientes
+                    ? "Paciente enviado a papelera correctamente. Sus citas pendientes fueron eliminadas."
+                    : "Paciente enviado a papelera correctamente.";
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", detalle));
+
+            pacienteEliminar = new PacienteEntity();
+            tieneCitasPendientes = false;
+
+        } catch (IllegalArgumentException e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo enviar el paciente a papelera"));
+        }
+    }
+
+    public void prepararRecuperar(PacienteEntity paciente) {
+        pacienteRecuperar = paciente;
+    }
+
+    public void recuperarPaciente() {
+        try {
+            if (pacienteRecuperar == null || pacienteRecuperar.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
+                return;
+            }
+
+            facade.procesarRecuperacion(pacienteRecuperar.getId());
+
+            cargarPacientesArchivados();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente recuperado correctamente"));
+
+            pacienteRecuperar = new PacienteEntity();
+
+        } catch (IllegalArgumentException e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo recuperar el paciente"));
+        }
+    }
+
+    public void recuperarPaciente(PacienteEntity paciente) {
+        prepararRecuperar(paciente);
+        recuperarPaciente();
+    }
+
+    public void prepararEliminarDefinitivamente(PacienteEntity paciente) {
+        pacienteEliminarDefinitivo = paciente;
+    }
+
+    public void eliminarDefinitivamente() {
+        try {
+            if (pacienteEliminarDefinitivo == null || pacienteEliminarDefinitivo.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
+                return;
+            }
+
+            facade.procesarEliminacionDefinitiva(pacienteEliminarDefinitivo.getId());
+
+            cargarPacientesArchivados();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente eliminado definitivamente"));
+
+            pacienteEliminarDefinitivo = new PacienteEntity();
+
+        } catch (IllegalArgumentException e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo eliminar definitivamente al paciente"));
+        }
+    }
+
+    public void eliminarDefinitivamente(PacienteEntity paciente) {
+        prepararEliminarDefinitivamente(paciente);
+        eliminarDefinitivamente();
+    }
+
     public void actualizarPaciente() {
         limpiarErroresEdicion();
         boolean hasErrors = false;
@@ -253,30 +426,7 @@ public class PacienteBean implements Serializable {
     }
 
     public void eliminarPaciente() {
-        try {
-            if (pacienteEliminar == null || pacienteEliminar.getId() <= 0) {
-                FacesContext.getCurrentInstance().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
-                return;
-            }
-
-            facade.procesarBajaLogica(pacienteEliminar.getId());
-
-            cargarTodosActivos();
-
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente eliminado correctamente"));
-
-            pacienteEliminar = new PacienteEntity();
-
-        } catch (IllegalArgumentException e) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo eliminar el paciente"));
-        }
+        archivarPaciente();
     }
 
     public void cancelarEdicion() {
@@ -317,6 +467,12 @@ public class PacienteBean implements Serializable {
     public PacienteEntity getPacienteEliminar() { return pacienteEliminar; }
     public void setPacienteEliminar(PacienteEntity pacienteEliminar) { this.pacienteEliminar = pacienteEliminar; }
 
+    public PacienteEntity getPacienteRecuperar() { return pacienteRecuperar; }
+    public void setPacienteRecuperar(PacienteEntity pacienteRecuperar) { this.pacienteRecuperar = pacienteRecuperar; }
+
+    public PacienteEntity getPacienteEliminarDefinitivo() { return pacienteEliminarDefinitivo; }
+    public void setPacienteEliminarDefinitivo(PacienteEntity pacienteEliminarDefinitivo) { this.pacienteEliminarDefinitivo = pacienteEliminarDefinitivo; }
+
     public String getDiaEditar() { return diaEditar; }
     public void setDiaEditar(String diaEditar) { this.diaEditar = diaEditar; }
 
@@ -337,6 +493,12 @@ public class PacienteBean implements Serializable {
 
     public boolean isDuplicadoEditar() { return duplicadoEditar; }
     public void setDuplicadoEditar(boolean duplicadoEditar) { this.duplicadoEditar = duplicadoEditar; }
+
+    public boolean isModoArchivados() { return modoArchivados; }
+    public void setModoArchivados(boolean modoArchivados) { this.modoArchivados = modoArchivados; }
+
+    public boolean isTieneCitasPendientes() { return tieneCitasPendientes; }
+    public void setTieneCitasPendientes(boolean tieneCitasPendientes) { this.tieneCitasPendientes = tieneCitasPendientes; }
 
     public List<String> getListaDias() { return listaDias; }
     public void setListaDias(List<String> listaDias) { this.listaDias = listaDias; }
