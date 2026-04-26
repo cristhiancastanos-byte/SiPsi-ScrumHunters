@@ -28,4 +28,14 @@ public class CitaNegocioIntegrationImpl implements ICitaNegocioIntegration {
     public List<CitaEntity> consultarAgenda(int mes, int anio) {
         return facade.consultarAgenda(mes, anio);
     }
+
+    @Override
+    public boolean tieneCitasPendientesPorPaciente(int idPaciente) {
+        return facade.procesarValidacionCitasPendientes(idPaciente);
+    }
+
+    @Override
+    public void eliminarCitasPendientesPorPaciente(int idPaciente) {
+        facade.procesarEliminacionCitasPendientes(idPaciente);
+    }
 }

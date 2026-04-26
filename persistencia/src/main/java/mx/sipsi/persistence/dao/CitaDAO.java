@@ -38,4 +38,14 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
     public List<CitaEntity> obtenerCitasPorMes(int mes, int anio) {
         return persistence.executeSelectCitasPorMes(mes, anio);
     }
+
+    @Override
+    public boolean tieneCitasPendientesPorPaciente(int idPaciente) {
+        return persistence.executeTieneCitasPendientesPorPaciente(idPaciente);
+    }
+
+    @Override
+    public void eliminarCitasPendientesPorPaciente(int idPaciente) {
+        persistence.executeDeleteCitasPendientesPorPaciente(idPaciente);
+    }
 }
