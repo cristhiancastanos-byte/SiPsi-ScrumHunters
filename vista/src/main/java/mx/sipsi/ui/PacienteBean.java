@@ -48,7 +48,6 @@ public class PacienteBean implements Serializable {
     private String anioEditar = "";
     private List<String> listaDiasEditar;
 
-
     private boolean errorNombreEditar;
     private boolean errorFechaEditar;
     private boolean errorGeneroEditar;
@@ -64,6 +63,7 @@ public class PacienteBean implements Serializable {
     public void init() {
         int anioActual = Calendar.getInstance().get(Calendar.YEAR);
         listaAnios = new ArrayList<>();
+
         for (int i = anioActual; i >= 1926; i--) {
             listaAnios.add(String.valueOf(i));
         }
@@ -119,7 +119,8 @@ public class PacienteBean implements Serializable {
                     List<PacienteEntity> filtrados = new ArrayList<>();
 
                     for (PacienteEntity paciente : archivados) {
-                        if (paciente.getNombre() != null && paciente.getNombre().toLowerCase().contains(busqueda)) {
+                        if (paciente.getNombre() != null
+                                && paciente.getNombre().toLowerCase().contains(busqueda)) {
                             filtrados.add(paciente);
                         }
                     }
@@ -156,6 +157,7 @@ public class PacienteBean implements Serializable {
         }
 
         listaDias = new ArrayList<>();
+
         for (int i = 1; i <= maxDias; i++) {
             listaDias.add(String.format("%02d", i));
         }
@@ -181,6 +183,7 @@ public class PacienteBean implements Serializable {
         }
 
         listaDiasEditar = new ArrayList<>();
+
         for (int i = 1; i <= maxDias; i++) {
             listaDiasEditar.add(String.format("%02d", i));
         }
@@ -241,6 +244,7 @@ public class PacienteBean implements Serializable {
         try {
             Calendar cal = Calendar.getInstance();
             cal.set(Integer.parseInt(anio), Integer.parseInt(mes) - 1, Integer.parseInt(dia));
+
             Date fechaNac = cal.getTime();
             pacienteNuevo.setFechaNac(fechaNac);
 
@@ -319,7 +323,6 @@ public class PacienteBean implements Serializable {
             }
 
             facade.procesarArchivado(pacienteEliminar.getId());
-
             cargarTodosActivos();
 
             String detalle = tieneCitasPendientes
@@ -342,6 +345,29 @@ public class PacienteBean implements Serializable {
         }
     }
 
+    public void eliminarPaciente() {
+        try {
+            if (pacienteEliminar == null || pacienteEliminar.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
+                return;
+            }
+
+            facade.procesarBajaLogica(pacienteEliminar.getId());
+            cargarTodosActivos();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente eliminado correctamente"));
+
+            pacienteEliminar = new PacienteEntity();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo eliminar el paciente"));
+        }
+    }
+
     public void prepararRecuperar(PacienteEntity paciente) {
         pacienteRecuperar = paciente;
     }
@@ -355,7 +381,6 @@ public class PacienteBean implements Serializable {
             }
 
             facade.procesarRecuperacion(pacienteRecuperar.getId());
-
             cargarPacientesArchivados();
 
             FacesContext.getCurrentInstance().addMessage(null,
@@ -391,7 +416,6 @@ public class PacienteBean implements Serializable {
             }
 
             facade.procesarEliminacionDefinitiva(pacienteEliminarDefinitivo.getId());
-
             cargarPacientesArchivados();
 
             FacesContext.getCurrentInstance().addMessage(null,
@@ -456,6 +480,7 @@ public class PacienteBean implements Serializable {
         try {
             Calendar cal = Calendar.getInstance();
             cal.set(Integer.parseInt(anioEditar), Integer.parseInt(mesEditar) - 1, Integer.parseInt(diaEditar));
+
             Date fechaNac = cal.getTime();
             pacienteEditar.setFechaNac(fechaNac);
 
@@ -550,34 +575,6 @@ public class PacienteBean implements Serializable {
         actualizarDiasEditar();
 
         org.primefaces.PrimeFaces.current().resetInputs("frmPrincipal:pnlEditar");
-    }
-
-    public void prepararEliminacion(int id) {
-        pacienteEliminar = facade.procesarConsultaPorId(id);
-    }
-
-    public void eliminarPaciente() {
-        try {
-            if (pacienteEliminar == null || pacienteEliminar.getId() <= 0) {
-                FacesContext.getCurrentInstance().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó ningún paciente"));
-                return;
-            }
-
-            facade.procesarBajaLogica(pacienteEliminar.getId());
-            cargarTodosActivos();
-
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Éxito", "Paciente eliminado correctamente"));
-
-            pacienteEliminar = new PacienteEntity();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo eliminar el paciente"));
-        }
-        archivarPaciente();
     }
 
     public void cancelarEdicion() {
@@ -679,14 +676,6 @@ public class PacienteBean implements Serializable {
     public void setPacienteEditar(PacienteEntity pacienteEditar) {
         this.pacienteEditar = pacienteEditar;
     }
-    public PacienteEntity getPacienteRecuperar() { return pacienteRecuperar; }
-    public void setPacienteRecuperar(PacienteEntity pacienteRecuperar) { this.pacienteRecuperar = pacienteRecuperar; }
-
-    public PacienteEntity getPacienteEliminarDefinitivo() { return pacienteEliminarDefinitivo; }
-    public void setPacienteEliminarDefinitivo(PacienteEntity pacienteEliminarDefinitivo) { this.pacienteEliminarDefinitivo = pacienteEliminarDefinitivo; }
-
-    public String getDiaEditar() { return diaEditar; }
-    public void setDiaEditar(String diaEditar) { this.diaEditar = diaEditar; }
 
     public PacienteEntity getPacienteEliminar() {
         return pacienteEliminar;
@@ -694,6 +683,22 @@ public class PacienteBean implements Serializable {
 
     public void setPacienteEliminar(PacienteEntity pacienteEliminar) {
         this.pacienteEliminar = pacienteEliminar;
+    }
+
+    public PacienteEntity getPacienteRecuperar() {
+        return pacienteRecuperar;
+    }
+
+    public void setPacienteRecuperar(PacienteEntity pacienteRecuperar) {
+        this.pacienteRecuperar = pacienteRecuperar;
+    }
+
+    public PacienteEntity getPacienteEliminarDefinitivo() {
+        return pacienteEliminarDefinitivo;
+    }
+
+    public void setPacienteEliminarDefinitivo(PacienteEntity pacienteEliminarDefinitivo) {
+        this.pacienteEliminarDefinitivo = pacienteEliminarDefinitivo;
     }
 
     public String getDiaEditar() {
@@ -727,14 +732,22 @@ public class PacienteBean implements Serializable {
     public void setListaDiasEditar(List<String> listaDiasEditar) {
         this.listaDiasEditar = listaDiasEditar;
     }
-    public boolean isModoArchivados() { return modoArchivados; }
-    public void setModoArchivados(boolean modoArchivados) { this.modoArchivados = modoArchivados; }
 
-    public boolean isTieneCitasPendientes() { return tieneCitasPendientes; }
-    public void setTieneCitasPendientes(boolean tieneCitasPendientes) { this.tieneCitasPendientes = tieneCitasPendientes; }
+    public boolean isModoArchivados() {
+        return modoArchivados;
+    }
 
-    public List<String> getListaDias() { return listaDias; }
-    public void setListaDias(List<String> listaDias) { this.listaDias = listaDias; }
+    public void setModoArchivados(boolean modoArchivados) {
+        this.modoArchivados = modoArchivados;
+    }
+
+    public boolean isTieneCitasPendientes() {
+        return tieneCitasPendientes;
+    }
+
+    public void setTieneCitasPendientes(boolean tieneCitasPendientes) {
+        this.tieneCitasPendientes = tieneCitasPendientes;
+    }
 
     public boolean isErrorNombreEditar() {
         return errorNombreEditar;
