@@ -55,25 +55,6 @@ public class PacientePersistence {
         }
     }
 
-    public boolean checkDuplicate(String nombre, Date fechaNac, String telefono) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            String hql = "SELECT COUNT(p) FROM PacienteEntity p "
-                    + "WHERE LOWER(TRIM(p.nombre)) = LOWER(TRIM(:nombreParam)) "
-                    + "AND p.fechaNac = :fechaNacParam "
-                    + "AND p.telefono = :telefonoParam";
-
-            TypedQuery<Long> query = em.createQuery(hql, Long.class);
-            query.setParameter("nombreParam", nombre);
-            query.setParameter("fechaNacParam", fechaNac);
-            query.setParameter("telefonoParam", telefono);
-
-            return query.getSingleResult() > 0;
-        } finally {
-            em.close();
-        }
-    }
-
     public List<PacienteEntity> executeFindAllActivos() throws Exception {
         EntityManager em = emf.createEntityManager();
         try {
@@ -110,20 +91,17 @@ public class PacientePersistence {
         }
     }
 
-
-    public PacienteEntity executeFindDuplicado(String nombre, Date fechaNac, String telefono, int idActual) throws Exception {
+    public PacienteEntity executeFindDuplicado(String nombre, Date fechaNac, int idActual) throws Exception {
         EntityManager em = emf.createEntityManager();
         try {
             String hql = "FROM PacienteEntity p "
                     + "WHERE LOWER(TRIM(p.nombre)) = LOWER(TRIM(:nombreParam)) "
                     + "AND p.fechaNac = :fechaNacParam "
-                    + "AND p.telefono = :telefonoParam "
                     + "AND p.id <> :idActualParam";
 
             TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
             query.setParameter("nombreParam", nombre);
             query.setParameter("fechaNacParam", fechaNac);
-            query.setParameter("telefonoParam", telefono);
             query.setParameter("idActualParam", idActual);
             query.setMaxResults(1);
 
@@ -151,7 +129,6 @@ public class PacientePersistence {
             em.close();
         }
     }
-
     public boolean executeBajaLogica(int idPaciente) throws Exception {
         EntityManager em = emf.createEntityManager();
         try {

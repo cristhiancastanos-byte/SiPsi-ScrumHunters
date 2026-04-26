@@ -10,17 +10,13 @@ public interface IPacientePersistenciaIntegration {
 
     boolean existePaciente(String correo);
 
-    boolean existePaciente(PacienteEntity paciente);
-
-    boolean checkDuplicate(String nombre, Date fechaNac, String telefono);
-
     List<PacienteEntity> buscarTodosActivos();
 
     List<PacienteEntity> buscarPorNombreActivos(String nombre);
 
     PacienteEntity consultarPorId(int id);
 
-    PacienteEntity buscarDuplicado(String nombre, Date fechaNac, String telefono, int idActual);
+    PacienteEntity buscarDuplicado(String nombre, Date fechaNac, int idActual);
 
     void actualizar(PacienteEntity paciente);
 

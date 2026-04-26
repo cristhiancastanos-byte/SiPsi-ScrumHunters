@@ -33,9 +33,6 @@ public class PacienteEntity implements Serializable {
     @Column(name = "genero", nullable = false, length = 20)
     private String genero;
 
-    @Column(name = "telefono", nullable = false)
-    private String telefono;
-
     @Column(name = "correo", unique = true, length = 100)
     private String correo;
 
@@ -45,6 +42,7 @@ public class PacienteEntity implements Serializable {
     public PacienteEntity() {
         this.activo = true;
     }
+
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -57,10 +55,6 @@ public class PacienteEntity implements Serializable {
 
     public String getGenero() { return genero; }
     public void setGenero(String genero) { this.genero = genero; }
-
-
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
 
     public String getCorreo() { return correo; }
     public void setCorreo(String correo) { this.correo = correo; }
