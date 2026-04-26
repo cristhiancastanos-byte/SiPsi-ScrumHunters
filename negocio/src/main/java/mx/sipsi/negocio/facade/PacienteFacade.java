@@ -9,19 +9,16 @@ public class PacienteFacade {
     private final PacienteDAO pacienteDAO = new PacienteDAO();
 
     public void procesarAlta(PacienteEntity paciente) {
-
         if (paciente == null
                 || paciente.getNombre() == null || paciente.getNombre().trim().isEmpty()
                 || paciente.getFechaNac() == null
-                || paciente.getGenero() == null || paciente.getGenero().trim().isEmpty()
-                || paciente.getTelefono() == null || paciente.getTelefono().trim().isEmpty()) {
+                || paciente.getGenero() == null || paciente.getGenero().trim().isEmpty()) {
             throw new IllegalArgumentException("Complete todos los campos obligatorios");
         }
 
-       PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
+        PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
                 paciente.getNombre(),
                 paciente.getFechaNac(),
-                paciente.getTelefono(),
                 0
         );
 
@@ -45,19 +42,16 @@ public class PacienteFacade {
     }
 
     public void procesarActualizacion(PacienteEntity paciente) {
-
         if (paciente == null
                 || paciente.getNombre() == null || paciente.getNombre().trim().isEmpty()
                 || paciente.getFechaNac() == null
-                || paciente.getGenero() == null || paciente.getGenero().trim().isEmpty()
-                || paciente.getTelefono() == null || paciente.getTelefono().trim().isEmpty()) {
+                || paciente.getGenero() == null || paciente.getGenero().trim().isEmpty()) {
             throw new IllegalArgumentException("Complete todos los campos obligatorios");
         }
 
         PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
                 paciente.getNombre(),
                 paciente.getFechaNac(),
-                paciente.getTelefono(),
                 paciente.getId()
         );
 
@@ -70,7 +64,7 @@ public class PacienteFacade {
 
     public void procesarBajaLogica(int idPaciente) {
         if (idPaciente <= 0) {
-            throw new IllegalArgumentException("Paciente invalido");
+            throw new IllegalArgumentException("Paciente inválido");
         }
 
         boolean eliminado = pacienteDAO.darDeBajaLogica(idPaciente);

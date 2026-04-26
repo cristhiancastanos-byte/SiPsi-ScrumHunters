@@ -10,10 +10,8 @@ public class PacienteHelper implements Serializable {
 
     public boolean validarDatos(PacienteEntity paciente) {
         if (paciente == null) return false;
-
         return (paciente.getNombre() != null && !paciente.getNombre().trim().isEmpty())
                 && (paciente.getFechaNac() != null)
-                && (paciente.getGenero() != null && !paciente.getGenero().trim().isEmpty())
-                && (paciente.getTelefono() != null && !paciente.getTelefono().trim().isEmpty());
+                && (paciente.getGenero() != null && !paciente.getGenero().trim().isEmpty());
     }
 }
