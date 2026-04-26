@@ -12,4 +12,8 @@ public interface ICitaPersistenciaIntegration {
     CitaEntity findByFechaHora(Date fecha, Time horaInicio);
 
     List<CitaEntity> obtenerCitasPorMes(int mes, int anio);
+
+    boolean tieneCitasPendientesPorPaciente(int idPaciente);
+
+    void eliminarCitasPendientesPorPaciente(int idPaciente);
 }
