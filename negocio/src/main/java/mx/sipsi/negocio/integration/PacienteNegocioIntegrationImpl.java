@@ -89,4 +89,9 @@ public class PacienteNegocioIntegrationImpl implements IPacienteNegocioIntegrati
     public List<PacienteEntity> listarPacientesArchivados() {
         return persistencia.listarPacientesArchivados();
     }
+
+    @Override
+    public PacienteEntity obtenerExpedienteCompleto(Long idPaciente) {
+        return persistencia.obtenerExpedienteCompleto(idPaciente);
+    }
 }
