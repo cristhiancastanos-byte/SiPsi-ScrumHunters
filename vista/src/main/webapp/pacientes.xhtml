@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
 
 <h:head>
     <title>Pacientes</title>
@@ -194,6 +195,105 @@
             margin-bottom: 15px;
             font-family: 'Archivo', Arial, sans-serif;
         }
+
+        .modal-expediente {
+            width: 760px !important;
+        }
+
+        .modal-expediente .ui-dialog-content {
+            padding: 20px 35px 35px 35px !important;
+        }
+
+        .expediente-info-card {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            padding: 20px 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            margin-top: 5px;
+            margin-bottom: 25px;
+            user-select: none;
+            cursor: default;
+        }
+
+        .expediente-subtitulo {
+            color: #833D3D;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 14px;
+            user-select: none;
+            cursor: default;
+        }
+
+        .expediente-dato {
+            font-size: 18px;
+            margin: 8px 0;
+            color: #000000;
+            user-select: none;
+            cursor: default;
+            text-decoration: none;
+        }
+
+        .expediente-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+
+        .expediente-section-card {
+            background-color: #FFFFFF;
+            border-radius: 8px;
+            min-height: 270px;
+            padding: 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            user-select: none;
+            cursor: default;
+        }
+
+        .expediente-section-title {
+            color: #833D3D;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 25px;
+            user-select: none;
+            cursor: default;
+            text-decoration: none;
+        }
+
+        .expediente-empty {
+            color: #808080;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 85px;
+            user-select: none;
+            cursor: default;
+        }
+
+        .expediente-item {
+            border: 1px solid #EAEAEA;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #FFFFFF;
+        }
+
+        .expediente-item-title {
+            color: #833D3D;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .expediente-item-text {
+            color: #333333;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .expediente-item-date {
+            color: #808080;
+            font-size: 12px;
+        }
     </style>
 </h:head>
 
@@ -247,7 +347,7 @@
                                      icon="pi pi-plus"
                                      styleClass="btn-add"
                                      actionListener="#{pacienteBean.limpiar}"
-                                     update="pnlMod"
+                                     update=":frmPrincipal:pnlMod"
                                      oncomplete="PF('dlgRegistro').show();"
                                      rendered="#{not pacienteBean.modoArchivados}" />
                 </div>
@@ -302,6 +402,10 @@
                     <p:commandButton icon="pi pi-folder-open"
                                      styleClass="btn-action"
                                      title="Expediente"
+                                     process="@this"
+                                     actionListener="#{pacienteBean.abrirExpediente(paciente.id)}"
+                                     update=":frmPrincipal:pnlExpediente"
+                                     oncomplete="PF('dlgExpediente').show();"
                                      rendered="#{not pacienteBean.modoArchivados}" />
 
                     <p:commandButton icon="pi pi-refresh"
@@ -324,6 +428,122 @@
                 </p:column>
             </p:dataTable>
         </div>
+
+        <p:dialog widgetVar="dlgExpediente"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Expediente"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  styleClass="modal-sipsi modal-expediente">
+
+            <p:outputPanel id="pnlExpediente">
+
+                <h:panelGroup rendered="#{not empty pacienteBean.pacienteExpediente}">
+
+                    <div class="expediente-info-card">
+                        <div class="expediente-subtitulo">Información del paciente:</div>
+
+                        <p class="expediente-dato">
+                            Nombre completo: #{pacienteBean.pacienteExpediente.nombre}
+                        </p>
+
+                        <p class="expediente-dato">
+                            Fecha de nacimiento:
+                            <h:outputText value="#{pacienteBean.pacienteExpediente.fechaNac}">
+                                <f:convertDateTime pattern="dd-MMM-yyyy" locale="es" />
+                            </h:outputText>
+                        </p>
+
+                        <p class="expediente-dato">
+                            Género: #{pacienteBean.pacienteExpediente.genero}
+                        </p>
+
+                        <p class="expediente-dato">
+                            Teléfono: #{pacienteBean.pacienteExpediente.telefono}
+                        </p>
+                    </div>
+
+                    <div class="expediente-grid">
+
+                        <div class="expediente-section-card">
+                            <div class="expediente-section-title">Notas clínicas</div>
+
+                            <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente.notas}">
+                                <div class="expediente-empty">
+                                    Aún no hay registros en esta sección
+                                </div>
+                            </h:panelGroup>
+
+                            <ui:repeat value="#{pacienteBean.pacienteExpediente.notas}" var="nota">
+                                <div class="expediente-item">
+                                    <div class="expediente-item-title">
+                                        #{empty nota.titulo ? 'Nota clínica' : nota.titulo}
+                                    </div>
+
+                                    <div class="expediente-item-text">
+                                        #{nota.contenido}
+                                    </div>
+
+                                    <div class="expediente-item-date">
+                                        <h:outputText value="#{nota.fechaCreacion}">
+                                            <f:convertDateTime pattern="dd-MMM-yyyy HH:mm" locale="es" />
+                                        </h:outputText>
+                                    </div>
+                                </div>
+                            </ui:repeat>
+                        </div>
+
+                        <div class="expediente-section-card">
+                            <div class="expediente-section-title">Archivos</div>
+
+                            <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente.archivos}">
+                                <div class="expediente-empty">
+                                    Aún no hay registros en esta sección
+                                </div>
+                            </h:panelGroup>
+
+                            <ui:repeat value="#{pacienteBean.pacienteExpediente.archivos}" var="archivo">
+                                <div class="expediente-item">
+                                    <div class="expediente-item-title">
+                                        #{archivo.nombreOriginal}
+                                    </div>
+
+                                    <div class="expediente-item-text">
+                                        #{archivo.rutaServidor}
+                                    </div>
+
+                                    <div class="expediente-item-date">
+                                        <h:outputText value="#{archivo.fechaSubida}">
+                                            <f:convertDateTime pattern="dd-MMM-yyyy HH:mm" locale="es" />
+                                        </h:outputText>
+                                    </div>
+                                </div>
+                            </ui:repeat>
+                        </div>
+
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; margin-top: 25px;">
+                        <p:commandButton value="Cerrar"
+                                         type="button"
+                                         onclick="PF('dlgExpediente').hide();"
+                                         styleClass="btn-cancelar" />
+                    </div>
+
+                </h:panelGroup>
+
+                <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente}">
+                    <div class="expediente-info-card">
+                        <div class="expediente-empty">
+                            No se encontró el expediente del paciente.
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+            </p:outputPanel>
+        </p:dialog>
 
         <p:dialog widgetVar="dlgRegistro"
                   modal="true"
@@ -426,12 +646,12 @@
                                      onclick="PF('dlgRegistro').hide();"
                                      process="@this"
                                      actionListener="#{pacienteBean.limpiar}"
-                                     update="pnlMod"
+                                     update=":frmPrincipal:pnlMod"
                                      styleClass="btn-cancelar" />
 
                     <p:commandButton value="Guardar"
                                      action="#{pacienteBean.guardar}"
-                                     update="pnlMod msgs tblPacientes"
+                                     update=":frmPrincipal:pnlMod :frmPrincipal:msgs :frmPrincipal:tblPacientes"
                                      oncomplete="if(!args.validationFailed) PF('dlgRegistro').hide();"
                                      styleClass="btn-guardar" />
                 </div>
@@ -539,12 +759,12 @@
                                      onclick="PF('dlgEditar').hide();"
                                      process="@this"
                                      actionListener="#{pacienteBean.cancelarEdicion}"
-                                     update="pnlEditar"
+                                     update=":frmPrincipal:pnlEditar"
                                      styleClass="btn-cancelar" />
 
                     <p:commandButton value="Guardar Cambios"
                                      actionListener="#{pacienteBean.actualizarPaciente}"
-                                     update="pnlEditar msgs tblPacientes"
+                                     update=":frmPrincipal:pnlEditar :frmPrincipal:msgs :frmPrincipal:tblPacientes"
                                      oncomplete="if(!args.validationFailed) PF('dlgEditar').hide();"
                                      styleClass="btn-guardar" />
                 </div>

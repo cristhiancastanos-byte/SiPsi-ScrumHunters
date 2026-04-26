@@ -2,12 +2,16 @@ package mx.sipsi.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -42,6 +46,12 @@ public class PacienteEntity implements Serializable {
     @Column(name = "activo", nullable = false)
     private boolean activo;
 
+    @OneToMany(mappedBy = "paciente", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<NotaEntity> notas;
+
+    @OneToMany(mappedBy = "paciente", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ArchivoEntity> archivos;
+
     public PacienteEntity() {
         this.activo = true;
     }
@@ -67,4 +77,10 @@ public class PacienteEntity implements Serializable {
 
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
+
+    public List<NotaEntity> getNotas() { return notas; }
+    public void setNotas(List<NotaEntity> notas) { this.notas = notas; }
+
+    public List<ArchivoEntity> getArchivos() { return archivos; }
+    public void setArchivos(List<ArchivoEntity> archivos) { this.archivos = archivos; }
 }

@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import mx.sipsi.entity.PacienteEntity;
 import mx.sipsi.negocio.delegate.CitaDelegate;
+import mx.sipsi.negocio.delegate.ExpedienteDelegate;
 import mx.sipsi.negocio.facade.PacienteFacade;
 
 @Named("pacienteBean")
@@ -23,6 +24,7 @@ public class PacienteBean implements Serializable {
 
     private final PacienteFacade facade = new PacienteFacade();
     private final CitaDelegate citaDelegate = new CitaDelegate();
+    private final ExpedienteDelegate expedienteDelegate = new ExpedienteDelegate();
 
     private PacienteEntity pacienteNuevo;
     private String dia = "";
@@ -42,6 +44,8 @@ public class PacienteBean implements Serializable {
     private PacienteEntity pacienteEliminar = new PacienteEntity();
     private PacienteEntity pacienteRecuperar = new PacienteEntity();
     private PacienteEntity pacienteEliminarDefinitivo = new PacienteEntity();
+
+    private PacienteEntity pacienteExpediente;
 
     private String diaEditar = "";
     private String mesEditar = "";
@@ -438,6 +442,15 @@ public class PacienteBean implements Serializable {
         eliminarDefinitivamente();
     }
 
+    public void abrirExpediente(int idPaciente) {
+        try {
+            pacienteExpediente = expedienteDelegate.obtenerExpedienteCompleto(Long.valueOf(idPaciente));
+        } catch (Exception e) {
+            e.printStackTrace();
+            pacienteExpediente = null;
+        }
+    }
+
     public void actualizarPaciente() {
         limpiarErroresEdicion();
         boolean hasErrors = false;
@@ -699,6 +712,14 @@ public class PacienteBean implements Serializable {
 
     public void setPacienteEliminarDefinitivo(PacienteEntity pacienteEliminarDefinitivo) {
         this.pacienteEliminarDefinitivo = pacienteEliminarDefinitivo;
+    }
+
+    public PacienteEntity getPacienteExpediente() {
+        return pacienteExpediente;
+    }
+
+    public void setPacienteExpediente(PacienteEntity pacienteExpediente) {
+        this.pacienteExpediente = pacienteExpediente;
     }
 
     public String getDiaEditar() {

@@ -10,7 +10,6 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
 
     private final PacientePersistence persistence = new PacientePersistence();
 
-
     private void validarFormatos(PacienteEntity paciente) {
         String regexTelefono = "^\\+?[0-9\\-\\s]{10,15}$";
         String regexCorreo = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -78,7 +77,6 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
         }
     }
 
-
     @Override
     public PacienteEntity buscarDuplicado(String nombre, Date fechaNac, String telefono, int idActual) {
         try {
@@ -140,6 +138,15 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
             return persistence.executeFindAllArchivados();
         } catch (Exception e) {
             throw new RuntimeException("Error al consultar pacientes archivados", e);
+        }
+    }
+
+    @Override
+    public PacienteEntity obtenerExpedienteCompleto(Long idPaciente) {
+        try {
+            return persistence.executeSelectExpediente(idPaciente);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar expediente completo del paciente", e);
         }
     }
 }

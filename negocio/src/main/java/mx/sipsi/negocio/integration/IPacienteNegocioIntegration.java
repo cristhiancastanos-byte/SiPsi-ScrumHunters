@@ -4,9 +4,11 @@ import mx.sipsi.entity.PacienteEntity;
 import java.util.List;
 
 public interface IPacienteNegocioIntegration {
+
     void llamarIntegracion(PacienteEntity paciente) throws Exception;
 
     List<PacienteEntity> buscarTodosActivos();
+
     List<PacienteEntity> buscarPorNombreActivos(String nombre);
 
     void archivarPaciente(int idPaciente);
@@ -16,4 +18,6 @@ public interface IPacienteNegocioIntegration {
     void eliminarDefinitivamente(int idPaciente);
 
     List<PacienteEntity> listarPacientesArchivados();
+
+    PacienteEntity obtenerExpedienteCompleto(Long idPaciente);
 }
