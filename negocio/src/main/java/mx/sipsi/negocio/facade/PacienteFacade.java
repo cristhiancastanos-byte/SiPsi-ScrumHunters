@@ -73,4 +73,62 @@ public class PacienteFacade {
             throw new IllegalArgumentException("No se encontró el paciente");
         }
     }
+
+    public void procesarArchivado(int idPaciente) {
+        if (idPaciente <= 0) {
+            throw new IllegalArgumentException("Paciente inválido");
+        }
+
+        PacienteEntity paciente = pacienteDAO.consultarPorId(idPaciente);
+
+        if (paciente == null) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+
+        if (!paciente.isActivo()) {
+            throw new IllegalArgumentException("El paciente ya se encuentra archivado");
+        }
+
+        pacienteDAO.archivarPaciente(idPaciente);
+    }
+
+    public void procesarRecuperacion(int idPaciente) {
+        if (idPaciente <= 0) {
+            throw new IllegalArgumentException("Paciente inválido");
+        }
+
+        PacienteEntity paciente = pacienteDAO.consultarPorId(idPaciente);
+
+        if (paciente == null) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+
+        if (paciente.isActivo()) {
+            throw new IllegalArgumentException("El paciente ya se encuentra activo");
+        }
+
+        pacienteDAO.recuperarPaciente(idPaciente);
+    }
+
+    public void procesarEliminacionDefinitiva(int idPaciente) {
+        if (idPaciente <= 0) {
+            throw new IllegalArgumentException("Paciente inválido");
+        }
+
+        PacienteEntity paciente = pacienteDAO.consultarPorId(idPaciente);
+
+        if (paciente == null) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+
+        if (paciente.isActivo()) {
+            throw new IllegalArgumentException("Solo se pueden eliminar definitivamente pacientes archivados");
+        }
+
+        pacienteDAO.eliminarDefinitivamente(idPaciente);
+    }
+
+    public List<PacienteEntity> buscarPacientesArchivados() {
+        return pacienteDAO.listarPacientesArchivados();
+    }
 }

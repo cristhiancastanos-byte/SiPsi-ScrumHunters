@@ -8,4 +8,12 @@ public interface IPacienteNegocioIntegration {
 
     List<PacienteEntity> buscarTodosActivos();
     List<PacienteEntity> buscarPorNombreActivos(String nombre);
+
+    void archivarPaciente(int idPaciente);
+
+    void recuperarPaciente(int idPaciente);
+
+    void eliminarDefinitivamente(int idPaciente);
+
+    List<PacienteEntity> listarPacientesArchivados();
 }

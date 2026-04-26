@@ -28,4 +28,54 @@ public class PacienteNegocioIntegrationImpl implements IPacienteNegocioIntegrati
     public List<PacienteEntity> buscarPorNombreActivos(String nombre) {
         return persistencia.buscarPorNombreActivos(nombre);
     }
+
+    @Override
+    public void archivarPaciente(int idPaciente) {
+        PacienteEntity paciente = persistencia.consultarPorId(idPaciente);
+
+        if (paciente == null) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+
+        if (!paciente.isActivo()) {
+            throw new IllegalArgumentException("El paciente ya se encuentra archivado");
+        }
+
+        persistencia.archivarPaciente(idPaciente);
+    }
+
+    @Override
+    public void recuperarPaciente(int idPaciente) {
+        PacienteEntity paciente = persistencia.consultarPorId(idPaciente);
+
+        if (paciente == null) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+
+        if (paciente.isActivo()) {
+            throw new IllegalArgumentException("El paciente ya se encuentra activo");
+        }
+
+        persistencia.recuperarPaciente(idPaciente);
+    }
+
+    @Override
+    public void eliminarDefinitivamente(int idPaciente) {
+        PacienteEntity paciente = persistencia.consultarPorId(idPaciente);
+
+        if (paciente == null) {
+            throw new IllegalArgumentException("No se encontró el paciente");
+        }
+
+        if (paciente.isActivo()) {
+            throw new IllegalArgumentException("Solo se pueden eliminar definitivamente pacientes archivados");
+        }
+
+        persistencia.eliminarDefinitivamente(idPaciente);
+    }
+
+    @Override
+    public List<PacienteEntity> listarPacientesArchivados() {
+        return persistencia.listarPacientesArchivados();
+    }
 }
