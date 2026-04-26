@@ -264,16 +264,27 @@ public class PacientePersistence {
 
     public PacienteEntity executeSelectExpediente(Long idPaciente) throws Exception {
         EntityManager em = emf.createEntityManager();
+
         try {
-            String hql = "SELECT DISTINCT p FROM PacienteEntity p "
+            String hqlPacienteConNotas = "SELECT DISTINCT p FROM PacienteEntity p "
                     + "LEFT JOIN FETCH p.notas "
+                    + "WHERE p.id = :idPaciente";
+
+            TypedQuery<PacienteEntity> queryNotas = em.createQuery(hqlPacienteConNotas, PacienteEntity.class);
+            queryNotas.setParameter("idPaciente", idPaciente.intValue());
+
+            PacienteEntity paciente = queryNotas.getSingleResult();
+
+            String hqlPacienteConArchivos = "SELECT DISTINCT p FROM PacienteEntity p "
                     + "LEFT JOIN FETCH p.archivos "
                     + "WHERE p.id = :idPaciente";
 
-            TypedQuery<PacienteEntity> query = em.createQuery(hql, PacienteEntity.class);
-            query.setParameter("idPaciente", idPaciente.intValue());
+            TypedQuery<PacienteEntity> queryArchivos = em.createQuery(hqlPacienteConArchivos, PacienteEntity.class);
+            queryArchivos.setParameter("idPaciente", idPaciente.intValue());
+            queryArchivos.getSingleResult();
 
-            return query.getSingleResult();
+            return paciente;
+
         } finally {
             em.close();
         }
