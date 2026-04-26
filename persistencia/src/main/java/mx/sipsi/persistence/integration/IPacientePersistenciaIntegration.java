@@ -21,4 +21,12 @@ public interface IPacientePersistenciaIntegration {
     void actualizar(PacienteEntity paciente);
 
     boolean darDeBajaLogica(int idPaciente);
+
+    void archivarPaciente(int idPaciente);
+
+    void recuperarPaciente(int idPaciente);
+
+    void eliminarDefinitivamente(int idPaciente);
+
+    List<PacienteEntity> listarPacientesArchivados();
 }
