@@ -9,6 +9,7 @@ public class PacienteDelegate {
     private PacienteFacade facade = new PacienteFacade();
 
     public void registrarPaciente(PacienteEntity paciente) throws Exception {
+
         facade.procesarAlta(paciente);
     }
 

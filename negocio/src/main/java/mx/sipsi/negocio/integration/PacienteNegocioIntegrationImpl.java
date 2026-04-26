@@ -12,8 +12,19 @@ public class PacienteNegocioIntegrationImpl implements IPacienteNegocioIntegrati
     @Override
     public void llamarIntegracion(PacienteEntity paciente) throws Exception {
 
+
+        if (paciente.getTelefono() == null || paciente.getTelefono().trim().isEmpty()) {
+            throw new Exception("El teléfono es obligatorio y no puede estar vacío.");
+        }
+
+
         if (persistencia.existePaciente(paciente.getCorreo())) {
-            throw new Exception("Validación de Negocio: El paciente con este correo ya está registrado.");
+            throw new Exception("El paciente con este correo ya está registrado.");
+        }
+
+
+        if (persistencia.existePaciente(paciente)) {
+            throw new Exception(": Ya existe un paciente registrado con el mismo nombre, fecha de nacimiento y teléfono.");
         }
 
         persistencia.insertar(paciente);

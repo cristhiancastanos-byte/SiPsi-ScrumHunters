@@ -10,18 +10,45 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
 
     private final PacientePersistence persistence = new PacientePersistence();
 
+
+    private void validarFormatos(PacienteEntity paciente) {
+        String regexTelefono = "^\\+?[0-9\\-\\s]{10,15}$";
+        String regexCorreo = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
+        if (paciente.getTelefono() == null || !paciente.getTelefono().matches(regexTelefono)) {
+            throw new IllegalArgumentException("El numero de telefono ingresado no tiene un formato valido.");
+        }
+
+        if (paciente.getCorreo() != null && !paciente.getCorreo().trim().isEmpty()) {
+            if (!paciente.getCorreo().matches(regexCorreo)) {
+                throw new IllegalArgumentException("El correo ingresado no tiene un formato valido.");
+            }
+        }
+    }
+
     @Override
     public void insertar(PacienteEntity paciente) {
         try {
+            validarFormatos(paciente);
             persistence.executeTransaction(paciente);
         } catch (Exception e) {
-            throw new RuntimeException("Error al insertar paciente", e);
+            throw new RuntimeException("Error al insertar paciente: " + e.getMessage(), e);
         }
     }
 
     @Override
     public boolean existePaciente(String correo) {
         return persistence.checkExists(correo);
+    }
+
+    @Override
+    public boolean existePaciente(PacienteEntity paciente) {
+        return checkDuplicate(paciente.getNombre(), paciente.getFechaNac(), paciente.getTelefono());
+    }
+
+    @Override
+    public boolean checkDuplicate(String nombre, Date fechaNac, String telefono) {
+        return persistence.checkDuplicate(nombre, fechaNac, telefono);
     }
 
     @Override
@@ -51,10 +78,11 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
         }
     }
 
+
     @Override
-    public PacienteEntity buscarDuplicado(String nombre, Date fechaNac, int idActual) {
+    public PacienteEntity buscarDuplicado(String nombre, Date fechaNac, String telefono, int idActual) {
         try {
-            return persistence.executeFindDuplicado(nombre, fechaNac, idActual);
+            return persistence.executeFindDuplicado(nombre, fechaNac, telefono, idActual);
         } catch (Exception e) {
             throw new RuntimeException("Error al buscar paciente duplicado", e);
         }
@@ -63,9 +91,10 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
     @Override
     public void actualizar(PacienteEntity paciente) {
         try {
+            validarFormatos(paciente);
             persistence.executeUpdate(paciente);
         } catch (Exception e) {
-            throw new RuntimeException("Error al actualizar paciente", e);
+            throw new RuntimeException("Error al actualizar paciente: " + e.getMessage(), e);
         }
     }
 
