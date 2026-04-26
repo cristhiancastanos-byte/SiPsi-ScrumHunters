@@ -35,4 +35,20 @@ public class CitaFacade {
 
         return persistencia.obtenerCitasPorMes(mes, anio);
     }
+
+    public boolean procesarValidacionCitasPendientes(int idPaciente) {
+        if (idPaciente <= 0) {
+            throw new IllegalArgumentException("Paciente inválido");
+        }
+
+        return persistencia.tieneCitasPendientesPorPaciente(idPaciente);
+    }
+
+    public void procesarEliminacionCitasPendientes(int idPaciente) {
+        if (idPaciente <= 0) {
+            throw new IllegalArgumentException("Paciente inválido");
+        }
+
+        persistencia.eliminarCitasPendientesPorPaciente(idPaciente);
+    }
 }

@@ -12,4 +12,8 @@ public interface ICitaNegocioIntegration {
     boolean enviarValidacionHorario(Date fecha, Time horaInicio);
 
     List<CitaEntity> consultarAgenda(int mes, int anio);
+
+    boolean tieneCitasPendientesPorPaciente(int idPaciente);
+
+    void eliminarCitasPendientesPorPaciente(int idPaciente);
 }

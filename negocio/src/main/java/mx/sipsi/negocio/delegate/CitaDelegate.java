@@ -26,4 +26,12 @@ public class CitaDelegate {
     public List<CitaEntity> consultarAgenda(int mes, int anio) {
         return integracion.consultarAgenda(mes, anio);
     }
+
+    public boolean tieneCitasPendientesPorPaciente(int idPaciente) {
+        return integracion.tieneCitasPendientesPorPaciente(idPaciente);
+    }
+
+    public void eliminarCitasPendientesPorPaciente(int idPaciente) {
+        integracion.eliminarCitasPendientesPorPaciente(idPaciente);
+    }
 }
