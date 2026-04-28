@@ -1,10 +1,12 @@
 package mx.sipsi.negocio.delegate;
 
+import mx.sipsi.entity.ArchivoEntity;
 import mx.sipsi.entity.PacienteEntity;
 import mx.sipsi.negocio.facade.ArchivoFacade;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class ArchivoDelegate {
 
@@ -14,7 +16,19 @@ public class ArchivoDelegate {
         this.archivoFacade = new ArchivoFacade();
     }
 
-    public void subirArchivo(InputStream inputStream, String nombreOriginal, PacienteEntity paciente) throws IOException {
-        archivoFacade.subirArchivo(inputStream, nombreOriginal, paciente);
+    public ArchivoEntity subirArchivo(InputStream inputStream, String nombreOriginal, PacienteEntity paciente) throws IOException {
+        return archivoFacade.subirArchivo(inputStream, nombreOriginal, paciente);
+    }
+
+    public ArchivoEntity buscarPorId(Long idArchivo) throws IOException {
+        return archivoFacade.buscarPorId(idArchivo);
+    }
+
+    public List<ArchivoEntity> listarPorPaciente(int idPaciente) throws IOException {
+        return archivoFacade.listarPorPaciente(idPaciente);
+    }
+
+    public void eliminarArchivo(Long idArchivo) throws IOException {
+        archivoFacade.eliminarArchivo(idArchivo);
     }
 }

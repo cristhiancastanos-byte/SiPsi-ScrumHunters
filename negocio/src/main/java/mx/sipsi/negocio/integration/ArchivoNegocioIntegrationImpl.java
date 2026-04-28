@@ -2,7 +2,6 @@ package mx.sipsi.negocio.integration;
 
 import mx.sipsi.entity.ArchivoEntity;
 import mx.sipsi.entity.PacienteEntity;
-import mx.sipsi.negocio.integration.IArchivoNegocioIntegration;
 import mx.sipsi.persistence.dao.ArchivoDAO;
 import mx.sipsi.persistence.integration.IArchivoPersistenceIntegration;
 
@@ -10,7 +9,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration {
@@ -25,7 +26,7 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
     }
 
     @Override
-    public void subirArchivo(InputStream inputStream, String nombreOriginal, PacienteEntity paciente) throws IOException {
+    public ArchivoEntity subirArchivo(InputStream inputStream, String nombreOriginal, PacienteEntity paciente) throws IOException {
 
         if (inputStream == null) {
             throw new IOException("No se recibió ningún archivo.");
@@ -39,6 +40,12 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
             throw new IOException("No se encontró el paciente asociado al archivo.");
         }
 
+        String nombreLower = nombreOriginal.toLowerCase();
+
+        if (!(nombreLower.endsWith(".jpg") || nombreLower.endsWith(".jpeg") || nombreLower.endsWith(".png"))) {
+            throw new IOException("Formato no válido. Solo se permiten imágenes JPG o PNG.");
+        }
+
         File carpetaDestino = new File(RUTA_BASE_ARCHIVOS);
 
         if (!carpetaDestino.exists()) {
@@ -49,7 +56,8 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
             }
         }
 
-        String nombreUnico = UUID.randomUUID().toString() + "_" + nombreOriginal;
+        String nombrePaciente = limpiarNombreArchivo(paciente.getNombre());
+        String nombreUnico = nombrePaciente + "_" + UUID.randomUUID().toString() + "_" + nombreOriginal;
         File archivoFisico = new File(carpetaDestino, nombreUnico);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(archivoFisico)) {
@@ -72,9 +80,61 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
         archivo.setPaciente(paciente);
 
         try {
-            archivoPersistenciaIntegration.guardarRutaArchivo(archivo);
+            return archivoPersistenciaIntegration.guardarRutaArchivo(archivo);
         } catch (Exception e) {
             throw new IOException("Error al registrar la ruta del archivo en la base de datos.", e);
         }
+    }
+
+    @Override
+    public ArchivoEntity buscarPorId(Long idArchivo) throws IOException {
+        try {
+            return archivoPersistenciaIntegration.buscarPorId(idArchivo);
+        } catch (Exception e) {
+            throw new IOException("Error al buscar el archivo.", e);
+        }
+    }
+
+    @Override
+    public List<ArchivoEntity> listarPorPaciente(int idPaciente) throws IOException {
+        try {
+            return archivoPersistenciaIntegration.listarPorPaciente(idPaciente);
+        } catch (Exception e) {
+            throw new IOException("Error al listar archivos del paciente.", e);
+        }
+    }
+
+    @Override
+    public void eliminarArchivo(Long idArchivo) throws IOException {
+        try {
+            ArchivoEntity archivo = archivoPersistenciaIntegration.buscarPorId(idArchivo);
+
+            if (archivo == null) {
+                throw new IOException("No se encontró el archivo.");
+            }
+
+            File archivoFisico = new File(archivo.getRutaServidor());
+
+            if (archivoFisico.exists()) {
+                archivoFisico.delete();
+            }
+
+            archivoPersistenciaIntegration.eliminarArchivo(idArchivo);
+
+        } catch (Exception e) {
+            throw new IOException("Error al eliminar el archivo.", e);
+        }
+    }
+
+    private String limpiarNombreArchivo(String texto) {
+        if (texto == null || texto.trim().isEmpty()) {
+            return "Paciente";
+        }
+
+        String limpio = Normalizer.normalize(texto, Normalizer.Form.NFD);
+        limpio = limpio.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        limpio = limpio.replaceAll("[^a-zA-Z0-9]", "_");
+
+        return limpio;
     }
 }
