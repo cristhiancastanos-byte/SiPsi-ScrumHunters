@@ -7,7 +7,9 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import mx.sipsi.entity.PacienteEntity;
+import mx.sipsi.entity.ArchivoEntity;
 import org.hibernate.Session;
 
 public class PacientePersistence {
@@ -275,13 +277,19 @@ public class PacientePersistence {
 
             PacienteEntity paciente = queryNotas.getSingleResult();
 
-            String hqlPacienteConArchivos = "SELECT DISTINCT p FROM PacienteEntity p "
-                    + "LEFT JOIN FETCH p.archivos "
-                    + "WHERE p.id = :idPaciente";
+            if (paciente.getNotas() != null) {
+                paciente.getNotas().size();
+            }
 
-            TypedQuery<PacienteEntity> queryArchivos = em.createQuery(hqlPacienteConArchivos, PacienteEntity.class);
+            String hqlArchivos = "FROM ArchivoEntity a "
+                    + "WHERE a.paciente.id = :idPaciente "
+                    + "ORDER BY a.fechaSubida DESC";
+
+            TypedQuery<ArchivoEntity> queryArchivos = em.createQuery(hqlArchivos, ArchivoEntity.class);
             queryArchivos.setParameter("idPaciente", idPaciente.intValue());
-            queryArchivos.getSingleResult();
+
+            List<ArchivoEntity> archivos = queryArchivos.getResultList();
+            paciente.setArchivos(new ArrayList<>(archivos));
 
             return paciente;
 
