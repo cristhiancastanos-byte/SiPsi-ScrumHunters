@@ -3,6 +3,8 @@ package mx.sipsi.entity;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Entity
 @Table(name = "archivo")
@@ -68,6 +70,15 @@ public class ArchivoEntity implements Serializable {
 
     public void setFechaSubida(LocalDateTime fechaSubida) {
         this.fechaSubida = fechaSubida;
+    }
+
+    public String getFechaSubidaFormateada() {
+        if (fechaSubida == null) {
+            return "";
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm", new Locale("es", "MX"));
+        return fechaSubida.format(formatter);
     }
 
     public PacienteEntity getPaciente() {
