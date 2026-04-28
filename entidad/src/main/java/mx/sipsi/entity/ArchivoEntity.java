@@ -1,37 +1,30 @@
 package mx.sipsi.entity;
 
+import jakarta.persistence.*;
 import java.io.Serializable;
-import java.sql.Timestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Entity
-@Table(name = "archivos")
+@Table(name = "archivo")
 public class ArchivoEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_archivo")
-    private int id;
+    @Column(name = "id")
+    private Long id;
 
-    @Column(name = "nombre_original", nullable = false, length = 150)
+    @Column(name = "nombre_original", nullable = false, length = 255)
     private String nombreOriginal;
 
     @Column(name = "ruta_servidor", nullable = false, length = 255)
     private String rutaServidor;
 
     @Column(name = "fecha_subida", nullable = false)
-    private Timestamp fechaSubida;
+    private LocalDateTime fechaSubida;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_paciente", nullable = false)
@@ -40,14 +33,20 @@ public class ArchivoEntity implements Serializable {
     public ArchivoEntity() {
     }
 
-    public int getId() {
+    public ArchivoEntity(String nombreOriginal, String rutaServidor, LocalDateTime fechaSubida, PacienteEntity paciente) {
+        this.nombreOriginal = nombreOriginal;
+        this.rutaServidor = rutaServidor;
+        this.fechaSubida = fechaSubida;
+        this.paciente = paciente;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
-
 
     public String getNombreOriginal() {
         return nombreOriginal;
@@ -65,12 +64,21 @@ public class ArchivoEntity implements Serializable {
         this.rutaServidor = rutaServidor;
     }
 
-    public Timestamp getFechaSubida() {
+    public LocalDateTime getFechaSubida() {
         return fechaSubida;
     }
 
-    public void setFechaSubida(Timestamp fechaSubida) {
+    public void setFechaSubida(LocalDateTime fechaSubida) {
         this.fechaSubida = fechaSubida;
+    }
+
+    public String getFechaSubidaFormateada() {
+        if (fechaSubida == null) {
+            return "";
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm", new Locale("es", "MX"));
+        return fechaSubida.format(formatter);
     }
 
     public PacienteEntity getPaciente() {

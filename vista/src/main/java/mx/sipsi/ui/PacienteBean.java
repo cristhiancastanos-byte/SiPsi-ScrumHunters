@@ -445,9 +445,32 @@ public class PacienteBean implements Serializable {
     public void abrirExpediente(int idPaciente) {
         try {
             pacienteExpediente = expedienteDelegate.obtenerExpedienteCompleto(Long.valueOf(idPaciente));
+
+            if (pacienteExpediente == null || pacienteExpediente.getId() <= 0) {
+                pacienteExpediente = facade.procesarConsultaPorId(idPaciente);
+            }
+
+            if (pacienteExpediente == null || pacienteExpediente.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró el expediente del paciente."));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
-            pacienteExpediente = null;
+
+            try {
+                pacienteExpediente = facade.procesarConsultaPorId(idPaciente);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                pacienteExpediente = null;
+
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró el expediente del paciente."));
+            }
         }
     }
 
