@@ -2,6 +2,7 @@ package mx.sipsi.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -47,40 +48,103 @@ public class PacienteEntity implements Serializable {
     private boolean activo;
 
     @OneToMany(mappedBy = "paciente", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<NotaEntity> notas;
+    private List<NotaEntity> notas = new ArrayList<>();
 
-    @OneToMany(mappedBy = "paciente", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<ArchivoEntity> archivos;
+    @OneToMany(mappedBy = "paciente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ArchivoEntity> archivos = new ArrayList<>();
 
     public PacienteEntity() {
         this.activo = true;
     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public Date getFechaNac() { return fechaNac; }
-    public void setFechaNac(Date fechaNac) { this.fechaNac = fechaNac; }
-
-    public String getGenero() { return genero; }
-    public void setGenero(String genero) { this.genero = genero; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
 
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
 
-    public List<NotaEntity> getNotas() { return notas; }
-    public void setNotas(List<NotaEntity> notas) { this.notas = notas; }
+    public Date getFechaNac() {
+        return fechaNac;
+    }
 
-    public List<ArchivoEntity> getArchivos() { return archivos; }
-    public void setArchivos(List<ArchivoEntity> archivos) { this.archivos = archivos; }
+    public void setFechaNac(Date fechaNac) {
+        this.fechaNac = fechaNac;
+    }
+
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+
+    public List<NotaEntity> getNotas() {
+        return notas;
+    }
+
+    public void setNotas(List<NotaEntity> notas) {
+        this.notas = notas;
+    }
+
+
+    public List<ArchivoEntity> getArchivos() {
+        return archivos;
+    }
+
+    public void setArchivos(List<ArchivoEntity> archivos) {
+        this.archivos = archivos;
+    }
+
+
+    public void agregarArchivo(ArchivoEntity archivo) {
+        this.archivos.add(archivo);
+        archivo.setPaciente(this);
+    }
+
+    public void eliminarArchivo(ArchivoEntity archivo) {
+        this.archivos.remove(archivo);
+        archivo.setPaciente(null);
+    }
 }
