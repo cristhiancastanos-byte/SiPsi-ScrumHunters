@@ -1,27 +1,18 @@
 package mx.sipsi.entity;
 
+import jakarta.persistence.*;
 import java.io.Serializable;
-import java.sql.Timestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.util.Date;
 
 @Entity
-@Table(name = "notas")
+@Table(name = "nota")
 public class NotaEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_nota")
+    @Column(name = "id")
     private int id;
 
     @Column(name = "titulo", length = 100)
@@ -30,14 +21,22 @@ public class NotaEntity implements Serializable {
     @Column(name = "contenido", nullable = false, columnDefinition = "TEXT")
     private String contenido;
 
-    @Column(name = "fecha_creacion", nullable = false)
-    private Timestamp fechaCreacion;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_creacion", insertable = false, updatable = false)
+    private Date fechaCreacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_paciente", nullable = false)
     private PacienteEntity paciente;
 
     public NotaEntity() {
+    }
+
+    public NotaEntity(String titulo, String contenido, Date fechaCreacion, PacienteEntity paciente) {
+        this.titulo = titulo;
+        this.contenido = contenido;
+        this.fechaCreacion = fechaCreacion;
+        this.paciente = paciente;
     }
 
     public int getId() {
@@ -65,11 +64,11 @@ public class NotaEntity implements Serializable {
         this.contenido = contenido;
     }
 
-    public Timestamp getFechaCreacion() {
+    public Date getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(Timestamp fechaCreacion) {
+    public void setFechaCreacion(Date fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
 
