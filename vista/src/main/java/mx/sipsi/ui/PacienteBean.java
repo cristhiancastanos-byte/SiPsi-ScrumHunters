@@ -15,6 +15,10 @@ import mx.sipsi.entity.PacienteEntity;
 import mx.sipsi.negocio.delegate.CitaDelegate;
 import mx.sipsi.negocio.delegate.ExpedienteDelegate;
 import mx.sipsi.negocio.facade.PacienteFacade;
+import mx.sipsi.entity.NotaEntity;
+import mx.sipsi.negocio.delegate.NotaDelegate;
+import org.primefaces.PrimeFaces;
+
 
 @Named("pacienteBean")
 @ViewScoped
@@ -44,6 +48,8 @@ public class PacienteBean implements Serializable {
     private PacienteEntity pacienteEliminar = new PacienteEntity();
     private PacienteEntity pacienteRecuperar = new PacienteEntity();
     private PacienteEntity pacienteEliminarDefinitivo = new PacienteEntity();
+    private NotaEntity nuevaNota = new NotaEntity();
+    private final NotaDelegate notaDelegate = new NotaDelegate();
 
     private PacienteEntity pacienteExpediente;
 
@@ -474,6 +480,73 @@ public class PacienteBean implements Serializable {
         }
     }
 
+    public void prepararNuevaNota() {
+        nuevaNota = new NotaEntity();
+    }
+
+    public void guardarNota() {
+        try {
+            if (pacienteExpediente == null || pacienteExpediente.getId() <= 0) {
+                FacesContext.getCurrentInstance().validationFailed();
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró el paciente asociado a la nota."));
+                return;
+            }
+
+            if (nuevaNota == null
+                    || nuevaNota.getContenido() == null
+                    || nuevaNota.getContenido().trim().isEmpty()) {
+
+                FacesContext.getCurrentInstance().validationFailed();
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Campo Obligatorio",
+                                "La nota clínica no puede estar vacía."));
+                return;
+            }
+
+            nuevaNota.setContenido(nuevaNota.getContenido().trim());
+
+            if (nuevaNota.getTitulo() != null) {
+                nuevaNota.setTitulo(nuevaNota.getTitulo().trim());
+            }
+
+            nuevaNota.setPaciente(pacienteExpediente);
+
+            notaDelegate.agregarNota(nuevaNota);
+
+            int idPaciente = pacienteExpediente.getId();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO,
+                            "Nota agregada correctamente",
+                            "La nota clínica se guardó correctamente."));
+
+            nuevaNota = new NotaEntity();
+
+            abrirExpediente(idPaciente);
+
+            PrimeFaces.current().ajax().update("frmExpediente:msgsExpediente");
+            PrimeFaces.current().ajax().update("frmExpediente:pnlExpediente");
+            PrimeFaces.current().executeScript(
+                    "var panel = document.getElementById('frmExpediente:formNuevaNota'); if(panel){panel.style.display='none';}"
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            FacesContext.getCurrentInstance().validationFailed();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error al guardar",
+                            "No se pudo guardar la nota clínica. Revisa la consola de Tomcat."));
+
+            PrimeFaces.current().ajax().update("frmExpediente:msgsExpediente");
+        }
+    }
+
     public void actualizarPaciente() {
         limpiarErroresEdicion();
         boolean hasErrors = false;
@@ -847,5 +920,12 @@ public class PacienteBean implements Serializable {
 
     public void setTelefonoDuplicadoEditar(boolean telefonoDuplicadoEditar) {
         this.telefonoDuplicadoEditar = telefonoDuplicadoEditar;
+    }
+    public NotaEntity getNuevaNota() {
+        return nuevaNota;
+    }
+
+    public void setNuevaNota(NotaEntity nuevaNota) {
+        this.nuevaNota = nuevaNota;
     }
 }
