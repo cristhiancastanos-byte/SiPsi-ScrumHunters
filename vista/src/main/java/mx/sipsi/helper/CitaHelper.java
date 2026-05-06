@@ -2,6 +2,7 @@ package mx.sipsi.helper;
 
 import mx.sipsi.entity.CitaEntity;
 import mx.sipsi.negocio.delegate.CitaDelegate;
+
 import java.sql.Time;
 import java.util.Date;
 
@@ -14,14 +15,19 @@ public class CitaHelper {
     }
 
     public boolean validarDatos(CitaEntity cita) {
-        if (cita == null) return false;
+        if (cita == null) {
+            return false;
+        }
+
         return cita.getIdPaciente() != null && cita.getIdPaciente() > 0
                 && cita.getFecha() != null
-                && cita.getHoraInicio() != null;
+                && cita.getHoraInicio() != null
+                && cita.getHoraFin() != null
+                && cita.getHoraInicio().before(cita.getHoraFin());
     }
 
-    public boolean validarEmpalmeHorario(Date fecha, Time horaInicio) {
-        return citaDelegate.validarDisponibilidad(fecha, horaInicio);
+    public boolean validarEmpalmeHorario(Date fecha, Time horaInicio, Time horaFin) {
+        return citaDelegate.validarDisponibilidad(fecha, horaInicio, horaFin);
     }
 
     public CitaDelegate getCitaDelegate() {

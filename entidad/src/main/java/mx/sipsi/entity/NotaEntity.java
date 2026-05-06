@@ -22,7 +22,7 @@ public class NotaEntity implements Serializable {
     private String contenido;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "fecha_creacion", insertable = false, updatable = false)
+    @Column(name = "fecha_creacion", nullable = false, columnDefinition = "TIMESTAMP")
     private Date fechaCreacion;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,6 +37,13 @@ public class NotaEntity implements Serializable {
         this.contenido = contenido;
         this.fechaCreacion = fechaCreacion;
         this.paciente = paciente;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (this.fechaCreacion == null) {
+            this.fechaCreacion = new Date();
+        }
     }
 
     public int getId() {

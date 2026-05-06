@@ -3,6 +3,7 @@ package mx.sipsi.negocio.delegate;
 import mx.sipsi.entity.CitaEntity;
 import mx.sipsi.negocio.integration.ICitaNegocioIntegration;
 import mx.sipsi.negocio.integration.CitaNegocioIntegrationImpl;
+
 import java.sql.Time;
 import java.util.Date;
 import java.util.List;
@@ -19,8 +20,8 @@ public class CitaDelegate {
         integracion.enviarAPersistenciaCita(cita);
     }
 
-    public boolean validarDisponibilidad(Date fecha, Time horaInicio) {
-        return integracion.enviarValidacionHorario(fecha, horaInicio);
+    public boolean validarDisponibilidad(Date fecha, Time horaInicio, Time horaFin) {
+        return integracion.enviarValidacionHorario(fecha, horaInicio, horaFin);
     }
 
     public List<CitaEntity> consultarAgenda(int mes, int anio) {
