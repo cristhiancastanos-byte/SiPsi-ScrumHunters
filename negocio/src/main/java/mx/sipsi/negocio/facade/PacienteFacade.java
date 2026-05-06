@@ -18,7 +18,7 @@ public class PacienteFacade {
             throw new IllegalArgumentException("Complete todos los campos obligatorios");
         }
 
-       PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
+        PacienteEntity duplicado = pacienteDAO.buscarDuplicado(
                 paciente.getNombre(),
                 paciente.getFechaNac(),
                 paciente.getTelefono(),

@@ -22,15 +22,19 @@ public class CitaPersistence {
 
     public void executeTransaction(CitaEntity cita) {
         EntityManager em = emf.createEntityManager();
+
         try {
             em.getTransaction().begin();
             em.persist(cita);
             em.getTransaction().commit();
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
+
             throw new RuntimeException("Error al registrar la cita en la base de datos: " + e.getMessage(), e);
+
         } finally {
             em.close();
         }
@@ -38,16 +42,47 @@ public class CitaPersistence {
 
     public CitaEntity executeFindEmpalme(Date fecha, Time horaInicio) {
         EntityManager em = emf.createEntityManager();
+
         try {
             return em.createQuery(
-                            "SELECT c FROM CitaEntity c WHERE c.fecha = :fecha AND c.horaInicio = :horaInicio",
+                            "SELECT c FROM CitaEntity c " +
+                                    "WHERE c.fecha = :fecha " +
+                                    "AND c.horaInicio = :horaInicio",
                             CitaEntity.class
                     )
                     .setParameter("fecha", fecha)
                     .setParameter("horaInicio", horaInicio)
                     .getSingleResult();
+
         } catch (NoResultException e) {
             return null;
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean executeExisteTraslape(Date fecha, Time horaInicio, Time horaFin) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(c) FROM CitaEntity c " +
+                            "WHERE c.fecha = :fecha " +
+                            "AND c.horaInicio < :horaFin " +
+                            "AND c.horaFin > :horaInicio",
+                    Long.class
+            );
+
+            query.setParameter("fecha", fecha);
+            query.setParameter("horaInicio", horaInicio);
+            query.setParameter("horaFin", horaFin);
+
+            return query.getSingleResult() > 0;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar traslape de horario: " + e.getMessage(), e);
+
         } finally {
             em.close();
         }
@@ -85,6 +120,7 @@ public class CitaPersistence {
 
         } catch (Exception e) {
             throw new RuntimeException("Error al consultar las citas por mes: " + e.getMessage(), e);
+
         } finally {
             em.close();
         }
@@ -110,6 +146,7 @@ public class CitaPersistence {
 
         } catch (Exception e) {
             throw new RuntimeException("Error al validar citas pendientes del paciente: " + e.getMessage(), e);
+
         } finally {
             em.close();
         }
@@ -138,7 +175,9 @@ public class CitaPersistence {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
+
             throw new RuntimeException("Error al eliminar citas pendientes del paciente: " + e.getMessage(), e);
+
         } finally {
             em.close();
         }

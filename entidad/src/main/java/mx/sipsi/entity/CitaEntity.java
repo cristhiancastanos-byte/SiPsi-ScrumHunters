@@ -16,7 +16,7 @@ public class CitaEntity implements Serializable {
     @Column(name = "id_cita")
     private Integer idCita;
 
-    @Column(name = "id_paciente", nullable = false)
+    @Column(name = "id_paciente", nullable = true)
     private Integer idPaciente;
 
     @Temporal(TemporalType.DATE)
@@ -26,7 +26,7 @@ public class CitaEntity implements Serializable {
     @Column(name = "hora_inicio", nullable = false)
     private Time horaInicio;
 
-    @Column(name = "hora_fin")
+    @Column(name = "hora_fin", nullable = false)
     private Time horaFin;
 
     @Column(name = "motivo", length = 255)
@@ -35,28 +35,81 @@ public class CitaEntity implements Serializable {
     @Column(name = "estado", length = 50)
     private String estado;
 
+    @Column(name = "nombre_paciente_historico", length = 255)
+    private String nombrePacienteHistorico;
+
     public CitaEntity() {
         this.estado = "Agendada";
     }
 
-    public Integer getIdCita() { return idCita; }
-    public void setIdCita(Integer idCita) { this.idCita = idCita; }
+    @PrePersist
+    public void prePersist() {
+        if (this.estado == null || this.estado.trim().isEmpty()) {
+            this.estado = "Agendada";
+        }
+    }
 
-    public Integer getIdPaciente() { return idPaciente; }
-    public void setIdPaciente(Integer idPaciente) { this.idPaciente = idPaciente; }
+    public Integer getIdCita() {
+        return idCita;
+    }
 
-    public Date getFecha() { return fecha; }
-    public void setFecha(Date fecha) { this.fecha = fecha; }
+    public void setIdCita(Integer idCita) {
+        this.idCita = idCita;
+    }
 
-    public Time getHoraInicio() { return horaInicio; }
-    public void setHoraInicio(Time horaInicio) { this.horaInicio = horaInicio; }
+    public Integer getIdPaciente() {
+        return idPaciente;
+    }
 
-    public Time getHoraFin() { return horaFin; }
-    public void setHoraFin(Time horaFin) { this.horaFin = horaFin; }
+    public void setIdPaciente(Integer idPaciente) {
+        this.idPaciente = idPaciente;
+    }
 
-    public String getMotivo() { return motivo; }
-    public void setMotivo(String motivo) { this.motivo = motivo; }
+    public Date getFecha() {
+        return fecha;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
+    }
+
+    public Time getHoraInicio() {
+        return horaInicio;
+    }
+
+    public void setHoraInicio(Time horaInicio) {
+        this.horaInicio = horaInicio;
+    }
+
+    public Time getHoraFin() {
+        return horaFin;
+    }
+
+    public void setHoraFin(Time horaFin) {
+        this.horaFin = horaFin;
+    }
+
+    public String getMotivo() {
+        return motivo;
+    }
+
+    public void setMotivo(String motivo) {
+        this.motivo = motivo;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getNombrePacienteHistorico() {
+        return nombrePacienteHistorico;
+    }
+
+    public void setNombrePacienteHistorico(String nombrePacienteHistorico) {
+        this.nombrePacienteHistorico = nombrePacienteHistorico;
+    }
 }

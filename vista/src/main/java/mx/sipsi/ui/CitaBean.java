@@ -81,7 +81,7 @@ public class CitaBean implements Serializable {
                         fechaFin = fechaInicio.plusHours(1);
                     }
 
-                    String nombrePaciente = obtenerNombrePaciente(cita.getIdPaciente(), nombresPacientes);
+                    String nombrePaciente = obtenerNombreParaAgenda(cita, nombresPacientes);
                     String titulo = construirTituloEvento(cita, nombrePaciente);
 
                     DefaultScheduleEvent<?> evento = DefaultScheduleEvent.builder()
@@ -125,23 +125,77 @@ public class CitaBean implements Serializable {
             return;
         }
 
-        boolean hayEmpalme = helper.validarEmpalmeHorario(citaNueva.getFecha(), citaNueva.getHoraInicio());
+        if (citaEsAntesDelMomentoActual(citaNueva)) {
+            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Fecha u horario inválido", "No se pueden agendar citas antes del día u horario actual.");
+            FacesContext.getCurrentInstance().validationFailed();
+            return;
+        }
+
+        boolean hayEmpalme = helper.validarEmpalmeHorario(
+                citaNueva.getFecha(),
+                citaNueva.getHoraInicio(),
+                citaNueva.getHoraFin()
+        );
 
         if (hayEmpalme) {
-            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Horario no disponible", "Ya existe una cita en esa fecha y hora.");
+            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Horario no disponible", "Ya existe una cita registrada dentro de ese horario.");
             FacesContext.getCurrentInstance().validationFailed();
             return;
         }
 
         try {
+            copiarNombrePacienteHistorico();
+
             helper.getCitaDelegate().registrarCita(citaNueva);
             mostrarMensaje(FacesMessage.SEVERITY_INFO, "Éxito", "La cita se ha registrado correctamente.");
             limpiarFormulario();
             cargarAgenda();
+
         } catch (Exception e) {
             mostrarMensaje(FacesMessage.SEVERITY_FATAL, "Error", "Problema al guardar: " + e.getMessage());
             FacesContext.getCurrentInstance().validationFailed();
         }
+    }
+
+    private boolean citaEsAntesDelMomentoActual(CitaEntity cita) {
+        LocalDateTime fechaHoraInicio = convertirALocalDateTime(cita.getFecha(), cita.getHoraInicio());
+
+        if (fechaHoraInicio == null) {
+            return true;
+        }
+
+        return fechaHoraInicio.isBefore(LocalDateTime.now());
+    }
+
+    private void copiarNombrePacienteHistorico() {
+        if (citaNueva == null || citaNueva.getIdPaciente() == null || citaNueva.getIdPaciente() <= 0) {
+            return;
+        }
+
+        try {
+            PacienteEntity paciente = pacienteDelegate.consultarPorId(citaNueva.getIdPaciente());
+
+            if (paciente != null && paciente.getNombre() != null && !paciente.getNombre().trim().isEmpty()) {
+                citaNueva.setNombrePacienteHistorico(paciente.getNombre());
+            }
+
+        } catch (Exception e) {
+            citaNueva.setNombrePacienteHistorico("Paciente no encontrado");
+        }
+    }
+
+    private String obtenerNombreParaAgenda(CitaEntity cita, Map<Integer, String> nombresPacientes) {
+        if (cita == null) {
+            return "Paciente eliminado";
+        }
+
+        String nombreHistorico = cita.getNombrePacienteHistorico();
+
+        if (nombreHistorico != null && !nombreHistorico.trim().isEmpty()) {
+            return nombreHistorico;
+        }
+
+        return obtenerNombrePaciente(cita.getIdPaciente(), nombresPacientes);
     }
 
     public void limpiarFormulario() {
@@ -176,7 +230,7 @@ public class CitaBean implements Serializable {
 
     private String obtenerNombrePaciente(Integer idPaciente, Map<Integer, String> nombresPacientes) {
         if (idPaciente == null || idPaciente <= 0) {
-            return "Paciente no asignado";
+            return "Paciente eliminado";
         }
 
         if (nombresPacientes.containsKey(idPaciente)) {
@@ -188,13 +242,14 @@ public class CitaBean implements Serializable {
 
             String nombre = paciente != null && paciente.getNombre() != null
                     ? paciente.getNombre()
-                    : "Paciente no encontrado";
+                    : "Paciente eliminado";
 
             nombresPacientes.put(idPaciente, nombre);
             return nombre;
+
         } catch (Exception e) {
-            nombresPacientes.put(idPaciente, "Paciente no encontrado");
-            return "Paciente no encontrado";
+            nombresPacientes.put(idPaciente, "Paciente eliminado");
+            return "Paciente eliminado";
         }
     }
 

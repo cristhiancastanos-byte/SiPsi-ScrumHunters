@@ -128,7 +128,7 @@ public class PacienteDAO implements IPacientePersistenciaIntegration {
         try {
             persistence.executeDeletePaciente(idPaciente);
         } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar definitivamente al paciente", e);
+            throw new RuntimeException("Error al eliminar definitivamente al paciente: " + e.getMessage(), e);
         }
     }
 

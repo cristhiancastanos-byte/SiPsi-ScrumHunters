@@ -24,6 +24,10 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
         return persistence.executeFindEmpalme(fecha, horaInicio);
     }
 
+    public boolean buscarTraslape(Date fecha, Time horaInicio, Time horaFin) {
+        return persistence.executeExisteTraslape(fecha, horaInicio, horaFin);
+    }
+
     @Override
     public void save(CitaEntity cita) {
         this.insertar(cita);
@@ -32,6 +36,11 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
     @Override
     public CitaEntity findByFechaHora(Date fecha, Time horaInicio) {
         return this.buscarPorFechaYHora(fecha, horaInicio);
+    }
+
+    @Override
+    public boolean existeTraslape(Date fecha, Time horaInicio, Time horaFin) {
+        return this.buscarTraslape(fecha, horaInicio, horaFin);
     }
 
     @Override

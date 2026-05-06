@@ -242,6 +242,7 @@ public class PacientePersistence {
 
     public void executeDeletePaciente(int idPaciente) throws Exception {
         EntityManager em = emf.createEntityManager();
+
         try {
             em.getTransaction().begin();
 
@@ -251,14 +252,33 @@ public class PacientePersistence {
                 throw new RuntimeException("No se encontró el paciente");
             }
 
-            em.remove(paciente);
+            em.createQuery("UPDATE CitaEntity c SET c.idPaciente = null WHERE c.idPaciente = :idPaciente")
+                    .setParameter("idPaciente", idPaciente)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM NotaEntity n WHERE n.paciente.id = :idPaciente")
+                    .setParameter("idPaciente", idPaciente)
+                    .executeUpdate();
+
+            em.createQuery("DELETE FROM ArchivoEntity a WHERE a.paciente.id = :idPaciente")
+                    .setParameter("idPaciente", idPaciente)
+                    .executeUpdate();
+
+            PacienteEntity pacienteEliminar = em.find(PacienteEntity.class, idPaciente);
+
+            if (pacienteEliminar != null) {
+                em.remove(pacienteEliminar);
+            }
 
             em.getTransaction().commit();
+
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
+
             throw e;
+
         } finally {
             em.close();
         }
