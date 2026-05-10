@@ -1559,7 +1559,8 @@
 
                                                     <div class="expediente-item-date">
                                                         <h:outputText value="#{nota.fechaCreacion}">
-                                                            <f:convertDateTime pattern="dd-MMM-yyyy HH:mm" locale="es" />
+                                                            <f:convertDateTime pattern="dd-MMM-yyyy HH:mm" locale="es" timeZone="America/Tijuana"
+                                                                               clientTimeZone="America/Tijuana"/>
                                                         </h:outputText>
                                                     </div>
                                                 </div>
