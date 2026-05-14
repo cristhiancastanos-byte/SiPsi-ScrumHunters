@@ -298,6 +298,14 @@
             color: #833D3D !important;
             padding: 1px 3px !important;
             margin-bottom: 2px !important;
+            position: relative !important;
+            cursor: default !important;
+        }
+
+        .fc-event.evento-realizada:hover,
+        .fc-h-event.evento-realizada:hover,
+        .fc-daygrid-dot-event.evento-realizada:hover {
+            background-color: #F8DDDC !important;
         }
 
         .fc-event.evento-cancelado,
@@ -351,6 +359,51 @@
             border-color: #EAEAEA !important;
         }
 
+        .btn-reporte-evento {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #FFFFFF;
+            color: #833D3D;
+            border: 1px solid #CF8080;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 15px;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .fc-event.evento-realizada:hover .btn-reporte-evento,
+        .fc-h-event.evento-realizada:hover .btn-reporte-evento,
+        .fc-daygrid-dot-event.evento-realizada:hover .btn-reporte-evento {
+            display: inline-block;
+        }
+
+        .btn-reporte-evento:hover {
+            background-color: #FFEDEC;
+            border-color: #833D3D;
+        }
+
+        .area-reporte {
+            width: 96% !important;
+            min-height: 280px !important;
+            padding: 10px !important;
+            border: 1px solid #EAEAEA !important;
+            border-radius: 4px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            font-size: 14px !important;
+        }
+
+        .texto-limite {
+            color: #808080;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
         @media (max-width: 768px) {
             .fc .fc-toolbar.fc-header-toolbar {
                 min-height: 60px !important;
@@ -400,6 +453,11 @@
 
             <div class="agenda-wrapper">
 
+                <p:remoteCommand name="prepararReporteDesdeAgenda"
+                                 actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
+                                 update="msgs pnlReporte"
+                                 oncomplete="if (args.abrirReporte) PF('modalReporte').show();" />
+
                 <p:schedule id="calendarioCitas"
                             widgetVar="calendarioCitasWidget"
                             value="#{citaBean.eventModel}"
@@ -409,18 +467,19 @@
                             locale="es"
                             leftHeaderTemplate="prev,next today"
                             centerHeaderTemplate="title"
-                            rightHeaderTemplate="" />
+                            rightHeaderTemplate=""
+                            extender="agendaReporteExtender" />
 
                 <div class="leyenda-agenda">
-                    <span>
-                        <span class="punto-leyenda punto-activa"></span>
-                        Cita activa
-                    </span>
+                <span>
+                    <span class="punto-leyenda punto-activa"></span>
+                    Cita activa
+                </span>
 
                     <span>
-                        <span class="punto-leyenda punto-cancelada"></span>
-                        Cita cancelada
-                    </span>
+                    <span class="punto-leyenda punto-cancelada"></span>
+                    Cita cancelada
+                </span>
                 </div>
 
             </div>
@@ -554,6 +613,57 @@
 
         </p:dialog>
 
+        <p:dialog widgetVar="modalReporte"
+                  modal="true"
+                  width="650"
+                  resizable="false"
+                  header="Agregar reporte"
+                  closable="false"
+                  styleClass="modal-sipsi">
+
+            <p:outputPanel id="pnlReporte">
+
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel for="contenidoReporte"
+                                   value="Nota de sesión:"
+                                   styleClass="lbl-tinto"
+                                   style="margin-top: 0; font-size: 18px;" />
+
+                    <p:inputTextarea id="contenidoReporte"
+                                     value="#{reporteBean.reporteNuevo.contenido}"
+                                     rows="12"
+                                     maxlength="2000"
+                                     autoResize="false"
+                                     styleClass="area-reporte"
+                                     placeholder="Escribir nota aquí..." />
+
+                    <h:outputText value="Máximo 2000 caracteres"
+                                  styleClass="texto-limite" />
+
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 25px; margin-top: 25px;">
+
+                    <p:commandButton value="Cancelar"
+                                     process="@this"
+                                     actionListener="#{reporteBean.limpiarReporte}"
+                                     update="pnlReporte"
+                                     onclick="PF('modalReporte').hide();"
+                                     styleClass="btn-cancelar" />
+
+                    <p:commandButton value="Guardar reporte"
+                                     action="#{reporteBean.guardarReporte}"
+                                     process="pnlReporte"
+                                     update="pnlReporte msgs"
+                                     styleClass="btn-guardar" />
+
+                </div>
+
+            </p:outputPanel>
+
+        </p:dialog>
+
     </h:form>
 
     <h:form id="formModalCerrarSesion">
@@ -585,6 +695,64 @@
         </p:dialog>
 
     </h:form>
+
+    <script>
+        function agendaReporteExtender() {
+            var cfg = this.cfg;
+
+            var originalEventDidMount = cfg.eventDidMount;
+
+            if (!originalEventDidMount &amp;&amp; cfg.options) {
+                originalEventDidMount = cfg.options.eventDidMount;
+            }
+
+            var nuevoEventDidMount = function(info) {
+                if (originalEventDidMount) {
+                    originalEventDidMount(info);
+                }
+
+                var evento = info.event;
+                var elemento = info.el;
+
+                if (!elemento.classList.contains('evento-realizada')) {
+                    return;
+                }
+
+                if (!evento.id) {
+                    return;
+                }
+
+                if (elemento.querySelector('.btn-reporte-evento')) {
+                    return;
+                }
+
+                var botonReporte = document.createElement('span');
+                botonReporte.className = 'btn-reporte-evento';
+                botonReporte.innerHTML = '📄';
+                botonReporte.title = 'Reporte';
+
+                botonReporte.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    prepararReporteDesdeAgenda([
+                        {
+                            name: 'idCita',
+                            value: evento.id
+                        }
+                    ]);
+                });
+
+                elemento.appendChild(botonReporte);
+            };
+
+            cfg.eventDidMount = nuevoEventDidMount;
+
+            if (cfg.options) {
+                cfg.options.eventDidMount = nuevoEventDidMount;
+            }
+        }
+    </script>
 
 </h:body>
 </html>
