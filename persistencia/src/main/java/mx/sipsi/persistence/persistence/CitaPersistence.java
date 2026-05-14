@@ -182,4 +182,78 @@ public class CitaPersistence {
             em.close();
         }
     }
+
+    public CitaEntity executeSelectCitaById(Integer idCita) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            return em.find(CitaEntity.class, idCita);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al consultar la cita seleccionada: " + e.getMessage(), e);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public void executeUpdateCita(CitaEntity cita) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            CitaEntity citaExistente = em.find(CitaEntity.class, cita.getIdCita());
+
+            if (citaExistente == null) {
+                throw new RuntimeException("No se encontró la cita que se desea actualizar.");
+            }
+
+            citaExistente.setFecha(cita.getFecha());
+            citaExistente.setHoraInicio(cita.getHoraInicio());
+            citaExistente.setHoraFin(cita.getHoraFin());
+
+            em.merge(citaExistente);
+
+            em.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            throw new RuntimeException("Error al actualizar la cita: " + e.getMessage(), e);
+
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean executeExisteTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            TypedQuery<Long> query = em.createQuery(
+                    "SELECT COUNT(c) FROM CitaEntity c " +
+                            "WHERE c.fecha = :fecha " +
+                            "AND c.idCita <> :idCita " +
+                            "AND c.horaInicio < :horaFin " +
+                            "AND c.horaFin > :horaInicio",
+                    Long.class
+            );
+
+            query.setParameter("fecha", fecha);
+            query.setParameter("idCita", idCita);
+            query.setParameter("horaInicio", horaInicio);
+            query.setParameter("horaFin", horaFin);
+
+            return query.getSingleResult() > 0;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al validar traslape para edición de cita: " + e.getMessage(), e);
+
+        } finally {
+            em.close();
+        }
+    }
 }
