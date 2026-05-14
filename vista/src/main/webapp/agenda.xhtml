@@ -130,11 +130,19 @@
             text-align: center;
             border: none !important;
             padding: 15px !important;
+            font-size: 26px !important;
+            font-weight: normal !important;
+        }
+
+        .modal-sipsi .ui-dialog-title {
+            width: 100% !important;
+            text-align: center !important;
+            margin: 0 !important;
         }
 
         .modal-sipsi .ui-dialog-content {
             background-color: #FFFFFF !important;
-            padding: 20px 30px !important;
+            padding: 22px 28px !important;
         }
 
         .modal-sipsi .ui-dialog-titlebar-close {
@@ -152,17 +160,31 @@
         .lbl-tinto {
             color: #833D3D;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 20px;
             display: block;
             margin-top: 15px;
         }
 
+        .lbl-tinto-small {
+            color: #833D3D;
+            font-weight: bold;
+            font-size: 18px;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .texto-original {
+            font-style: italic;
+            font-weight: normal;
+            color: #555555;
+            font-size: 15px;
+        }
+
         .msg-error-valid {
             color: #FF0707;
-            font-size: 12px;
+            font-size: 16px;
             display: block;
-            margin-top: 4px;
-            font-weight: bold;
+            margin-top: 5px;
         }
 
         .btn-cancelar {
@@ -171,7 +193,8 @@
             border: 1px solid #EAEAEA !important;
             border-radius: 4px;
             font-family: 'Archivo', Arial, sans-serif;
-            padding: 5px 15px !important;
+            padding: 5px 18px !important;
+            font-size: 16px !important;
         }
 
         .btn-cancelar:hover {
@@ -183,7 +206,8 @@
             background-color: #CF8080 !important;
             border: none !important;
             color: #FFFFFF !important;
-            padding: 5px 15px !important;
+            padding: 5px 18px !important;
+            font-size: 16px !important;
         }
 
         .btn-guardar:hover {
@@ -212,6 +236,48 @@
 
         .ui-selectonemenu {
             width: 100% !important;
+        }
+
+        .campo-bloqueado {
+            width: 95% !important;
+            padding: 8px !important;
+            background: #D9D9D9 !important;
+            color: #555555 !important;
+            border: 1px solid #CCCCCC !important;
+            border-radius: 4px !important;
+            font-size: 18px !important;
+        }
+
+        .campo-motivo-edicion {
+            width: 95% !important;
+            padding: 8px !important;
+            border: 1px solid #EAEAEA !important;
+            border-radius: 4px !important;
+            font-size: 18px !important;
+        }
+
+        .fila-fecha-edicion {
+            display: flex;
+            gap: 10px;
+            width: 190px;
+        }
+
+        .fila-hora-edicion {
+            display: flex;
+            gap: 15px;
+            width: 300px;
+        }
+
+        .fila-fecha-edicion .ui-datepicker,
+        .fila-hora-edicion .ui-datepicker {
+            width: 100% !important;
+        }
+
+        .fila-fecha-edicion .ui-inputfield,
+        .fila-hora-edicion .ui-inputfield {
+            font-size: 18px !important;
+            text-align: center;
+            padding: 8px !important;
         }
 
         .agenda-wrapper .fc {
@@ -298,6 +364,14 @@
             color: #833D3D !important;
             padding: 1px 3px !important;
             margin-bottom: 2px !important;
+            position: relative !important;
+            cursor: default !important;
+        }
+
+        .fc-event.evento-editable:hover,
+        .fc-h-event.evento-editable:hover,
+        .fc-daygrid-dot-event.evento-editable:hover {
+            background-color: #F8DDDC !important;
         }
 
         .fc-event.evento-cancelado,
@@ -351,6 +425,41 @@
             border-color: #EAEAEA !important;
         }
 
+        .acciones-evento {
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .fc-event.evento-editable:hover .acciones-evento,
+        .fc-h-event.evento-editable:hover .acciones-evento,
+        .fc-daygrid-dot-event.evento-editable:hover .acciones-evento {
+            display: flex;
+        }
+
+        .btn-accion-evento {
+            background-color: #FFFFFF;
+            color: #833D3D;
+            border: 1px solid #CF8080;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 15px;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+            cursor: pointer;
+        }
+
+        .btn-accion-evento:hover {
+            background-color: #FFEDEC;
+            border-color: #833D3D;
+        }
+
         @media (max-width: 768px) {
             .fc .fc-toolbar.fc-header-toolbar {
                 min-height: 60px !important;
@@ -400,6 +509,11 @@
 
             <div class="agenda-wrapper">
 
+                <p:remoteCommand name="prepararEdicionDesdeAgenda"
+                                 actionListener="#{citaBean.prepararEdicionDesdeAgenda}"
+                                 update="pnlEdicionCita msgs"
+                                 oncomplete="if (args.abrirEdicion) PF('dlgEditarCita').show();" />
+
                 <p:schedule id="calendarioCitas"
                             widgetVar="calendarioCitasWidget"
                             value="#{citaBean.eventModel}"
@@ -409,18 +523,19 @@
                             locale="es"
                             leftHeaderTemplate="prev,next today"
                             centerHeaderTemplate="title"
-                            rightHeaderTemplate="" />
+                            rightHeaderTemplate=""
+                            extender="agendaEditarExtender" />
 
                 <div class="leyenda-agenda">
-                    <span>
-                        <span class="punto-leyenda punto-activa"></span>
-                        Cita activa
-                    </span>
+                <span>
+                    <span class="punto-leyenda punto-activa"></span>
+                    Cita activa
+                </span>
 
                     <span>
-                        <span class="punto-leyenda punto-cancelada"></span>
-                        Cita cancelada
-                    </span>
+                    <span class="punto-leyenda punto-cancelada"></span>
+                    Cita cancelada
+                </span>
                 </div>
 
             </div>
@@ -554,6 +669,124 @@
 
         </p:dialog>
 
+        <p:dialog widgetVar="dlgEditarCita"
+                  modal="true"
+                  width="700"
+                  resizable="false"
+                  header="Reprogramar cita"
+                  closable="false"
+                  styleClass="modal-sipsi">
+
+            <p:outputPanel id="pnlEdicionCita">
+
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel value="Paciente:"
+                                   styleClass="lbl-tinto"
+                                   style="margin-top: 0;" />
+
+                    <p:inputText value="#{citaBean.nombrePacienteEditar}"
+                                 readonly="true"
+                                 styleClass="campo-bloqueado" />
+
+                    <h:panelGroup>
+                        <h:outputText value="Fecha: "
+                                      styleClass="lbl-tinto-small" />
+
+                        <h:outputText value="(Cita original: #{citaBean.citaOriginalTexto})"
+                                      styleClass="texto-original" />
+                    </h:panelGroup>
+
+                    <div class="fila-fecha-edicion">
+                        <p:datePicker id="fechaEditar"
+                                      value="#{citaBean.citaEditar.fecha}"
+                                      pattern="dd/MM/yyyy"
+                                      showIcon="false"
+                                      styleClass="custom-datepicker">
+                            <p:ajax event="dateSelect" update="msgFechaEditar" />
+                            <p:ajax event="change" update="msgFechaEditar" />
+                        </p:datePicker>
+                    </div>
+
+                    <h:panelGroup id="msgFechaEditar">
+                        <h:outputText value="Campo Obligatorio"
+                                      styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formEdicionIntentado and empty citaBean.citaEditar.fecha}" />
+                    </h:panelGroup>
+
+                    <h:outputLabel value="Hora:"
+                                   styleClass="lbl-tinto" />
+
+                    <div class="fila-hora-edicion">
+                        <p:datePicker id="horaInicioEditar"
+                                      value="#{citaBean.horaInicioEditarAux}"
+                                      timeOnly="true"
+                                      pattern="HH:mm"
+                                      placeholder="Inicio"
+                                      styleClass="custom-datepicker"
+                                      stepMinute="30">
+                            <p:ajax event="dateSelect" update="msgHoraEditar" />
+                            <p:ajax event="change" update="msgHoraEditar" />
+                        </p:datePicker>
+
+                        <p:datePicker id="horaFinEditar"
+                                      value="#{citaBean.horaFinEditarAux}"
+                                      timeOnly="true"
+                                      pattern="HH:mm"
+                                      placeholder="Fin"
+                                      styleClass="custom-datepicker"
+                                      stepMinute="30">
+                            <p:ajax event="dateSelect" update="msgHoraEditar" />
+                            <p:ajax event="change" update="msgHoraEditar" />
+                        </p:datePicker>
+                    </div>
+
+                    <h:panelGroup id="msgHoraEditar">
+                        <h:outputText value="Campo Obligatorio (Inicio)"
+                                      styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formEdicionIntentado and empty citaBean.horaInicioEditarAux}" />
+
+                        <h:outputText value="Campo Obligatorio (Fin)"
+                                      styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formEdicionIntentado and empty citaBean.horaFinEditarAux}" />
+
+                        <h:outputText value="Duración inválida (máx. 3 horas)"
+                                      styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formEdicionIntentado and citaBean.horaInicioEditarAux != null and citaBean.horaFinEditarAux != null and (citaBean.horaFinEditarAux.time - citaBean.horaInicioEditarAux.time gt 10800000 or citaBean.horaFinEditarAux.time - citaBean.horaInicioEditarAux.time le 0)}" />
+                    </h:panelGroup>
+
+                    <h:outputLabel value="Motivo:"
+                                   styleClass="lbl-tinto" />
+
+                    <p:inputTextarea value="#{citaBean.citaEditar.motivo}"
+                                     readonly="true"
+                                     rows="4"
+                                     styleClass="campo-motivo-edicion" />
+
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px;">
+
+                    <p:commandButton value="Cancelar"
+                                     onclick="PF('dlgEditarCita').hide();"
+                                     process="@this"
+                                     actionListener="#{citaBean.limpiarFormularioEdicion}"
+                                     update="pnlEdicionCita"
+                                     styleClass="btn-cancelar" />
+
+                    <p:commandButton value="Guardar cambios"
+                                     action="#{citaBean.actualizarCita}"
+                                     process="@form"
+                                     update="pnlEdicionCita msgs calendarioCitas"
+                                     oncomplete="if (!args.validationFailed) PF('dlgEditarCita').hide();"
+                                     styleClass="btn-guardar" />
+
+                </div>
+
+            </p:outputPanel>
+
+        </p:dialog>
+
     </h:form>
 
     <h:form id="formModalCerrarSesion">
@@ -585,6 +818,72 @@
         </p:dialog>
 
     </h:form>
+
+    <script>
+        function agendaEditarExtender() {
+            var cfg = this.cfg;
+
+            var originalEventDidMount = cfg.eventDidMount;
+
+            if (!originalEventDidMount &amp;&amp; cfg.options) {
+                originalEventDidMount = cfg.options.eventDidMount;
+            }
+
+            var nuevoEventDidMount = function(info) {
+                if (originalEventDidMount) {
+                    originalEventDidMount(info);
+                }
+
+                var evento = info.event;
+                var elemento = info.el;
+
+                if (!elemento.classList.contains('evento-editable')) {
+                    return;
+                }
+
+                if (!evento.id) {
+                    return;
+                }
+
+                var contenedorAcciones = elemento.querySelector('.acciones-evento');
+
+                if (!contenedorAcciones) {
+                    contenedorAcciones = document.createElement('span');
+                    contenedorAcciones.className = 'acciones-evento';
+                    elemento.appendChild(contenedorAcciones);
+                }
+
+                if (contenedorAcciones.querySelector('.btn-editar-evento')) {
+                    return;
+                }
+
+                var botonEditar = document.createElement('span');
+                botonEditar.className = 'btn-accion-evento btn-editar-evento';
+                botonEditar.innerHTML = '✏️';
+                botonEditar.title = 'Editar cita';
+
+                botonEditar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    prepararEdicionDesdeAgenda([
+                        {
+                            name: 'idCita',
+                            value: evento.id
+                        }
+                    ]);
+                });
+
+                contenedorAcciones.appendChild(botonEditar);
+            };
+
+            cfg.eventDidMount = nuevoEventDidMount;
+
+            if (cfg.options) {
+                cfg.options.eventDidMount = nuevoEventDidMount;
+            }
+        }
+    </script>
 
 </h:body>
 </html>
