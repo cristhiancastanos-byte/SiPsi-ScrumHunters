@@ -97,10 +97,17 @@ public class CitaBean implements Serializable {
 
                     String nombrePaciente = obtenerNombreParaAgenda(cita, nombresPacientes);
                     String titulo = construirTituloEvento(cita, nombrePaciente);
+                  
 
-                    String claseEvento = esCitaCancelada(cita)
-                            ? "evento-cancelado"
-                            : "evento-activo evento-editable";
+                    String claseEvento;
+
+                    if (esCitaCancelada(cita)) {
+                        claseEvento = "evento-cancelado";
+                    } else if (esCitaRealizada(cita)) {
+                        claseEvento = "evento-activo evento-editable evento-realizada";
+                    } else {
+                        claseEvento = "evento-activo evento-editable";
+                    }
 
                     DefaultScheduleEvent<?> evento = DefaultScheduleEvent.builder()
                             .id(String.valueOf(cita.getIdCita()))
@@ -470,6 +477,24 @@ public class CitaBean implements Serializable {
 
     private boolean esCitaCancelada(CitaEntity cita) {
         return cita.getEstado() != null && cita.getEstado().equalsIgnoreCase("CANCELADA");
+    }
+
+    private boolean esCitaRealizada(CitaEntity cita) {
+        if (cita == null || cita.getFecha() == null || cita.getHoraFin() == null) {
+            return false;
+        }
+
+        if (esCitaCancelada(cita)) {
+            return false;
+        }
+
+        LocalDateTime fechaHoraFin = convertirALocalDateTime(cita.getFecha(), cita.getHoraFin());
+
+        if (fechaHoraFin == null) {
+            return false;
+        }
+
+        return fechaHoraFin.isBefore(LocalDateTime.now());
     }
 
     private void mostrarMensaje(FacesMessage.Severity severity, String summary, String detail) {

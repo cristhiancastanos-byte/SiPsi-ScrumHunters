@@ -16,4 +16,14 @@ public class NotaDAO implements INotaPersistenciaIntegration {
     public void guardarNota(NotaEntity nota) throws Exception {
         notaPersistence.executePersistNota(nota);
     }
+
+    @Override
+    public NotaEntity consultarNotaPorId(int idNota) throws Exception {
+        return notaPersistence.executeSelectNotaById(idNota);
+    }
+
+    @Override
+    public void actualizarNota(NotaEntity nota) throws Exception {
+        notaPersistence.executeUpdateNota(nota);
+    }
 }

@@ -370,7 +370,10 @@
 
         .fc-event.evento-editable:hover,
         .fc-h-event.evento-editable:hover,
-        .fc-daygrid-dot-event.evento-editable:hover {
+        .fc-daygrid-dot-event.evento-editable:hover,
+        .fc-event.evento-realizada:hover,
+        .fc-h-event.evento-realizada:hover,
+        .fc-daygrid-dot-event.evento-realizada:hover {
             background-color: #F8DDDC !important;
         }
 
@@ -439,7 +442,10 @@
 
         .fc-event.evento-editable:hover .acciones-evento,
         .fc-h-event.evento-editable:hover .acciones-evento,
-        .fc-daygrid-dot-event.evento-editable:hover .acciones-evento {
+        .fc-daygrid-dot-event.evento-editable:hover .acciones-evento,
+        .fc-event.evento-realizada:hover .acciones-evento,
+        .fc-h-event.evento-realizada:hover .acciones-evento,
+        .fc-daygrid-dot-event.evento-realizada:hover .acciones-evento {
             display: flex;
         }
 
@@ -458,6 +464,22 @@
         .btn-accion-evento:hover {
             background-color: #FFEDEC;
             border-color: #833D3D;
+        }
+
+        .area-reporte {
+            width: 96% !important;
+            min-height: 280px !important;
+            padding: 10px !important;
+            border: 1px solid #EAEAEA !important;
+            border-radius: 4px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            font-size: 14px !important;
+        }
+
+        .texto-limite {
+            color: #808080;
+            font-size: 12px;
+            margin-top: 5px;
         }
 
         @media (max-width: 768px) {
@@ -514,6 +536,11 @@
                                  update="pnlEdicionCita msgs"
                                  oncomplete="if (args.abrirEdicion) PF('dlgEditarCita').show();" />
 
+                <p:remoteCommand name="prepararReporteDesdeAgenda"
+                                 actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
+                                 update="msgs pnlReporte"
+                                 oncomplete="if (args.abrirReporte) PF('modalReporte').show();" />
+
                 <p:schedule id="calendarioCitas"
                             widgetVar="calendarioCitasWidget"
                             value="#{citaBean.eventModel}"
@@ -524,18 +551,18 @@
                             leftHeaderTemplate="prev,next today"
                             centerHeaderTemplate="title"
                             rightHeaderTemplate=""
-                            extender="agendaEditarExtender" />
+                            extender="agendaAccionesExtender" />
 
                 <div class="leyenda-agenda">
-                <span>
-                    <span class="punto-leyenda punto-activa"></span>
-                    Cita activa
-                </span>
+                    <span>
+                        <span class="punto-leyenda punto-activa"></span>
+                        Cita activa
+                    </span>
 
                     <span>
-                    <span class="punto-leyenda punto-cancelada"></span>
-                    Cita cancelada
-                </span>
+                        <span class="punto-leyenda punto-cancelada"></span>
+                        Cita cancelada
+                    </span>
                 </div>
 
             </div>
@@ -787,6 +814,57 @@
 
         </p:dialog>
 
+        <p:dialog widgetVar="modalReporte"
+                  modal="true"
+                  width="650"
+                  resizable="false"
+                  header="Agregar reporte"
+                  closable="false"
+                  styleClass="modal-sipsi">
+
+            <p:outputPanel id="pnlReporte">
+
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel for="contenidoReporte"
+                                   value="Nota de sesión:"
+                                   styleClass="lbl-tinto"
+                                   style="margin-top: 0; font-size: 18px;" />
+
+                    <p:inputTextarea id="contenidoReporte"
+                                     value="#{reporteBean.reporteNuevo.contenido}"
+                                     rows="12"
+                                     maxlength="2000"
+                                     autoResize="false"
+                                     styleClass="area-reporte"
+                                     placeholder="Escribir nota aquí..." />
+
+                    <h:outputText value="Máximo 2000 caracteres"
+                                  styleClass="texto-limite" />
+
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 25px; margin-top: 25px;">
+
+                    <p:commandButton value="Cancelar"
+                                     process="@this"
+                                     actionListener="#{reporteBean.limpiarReporte}"
+                                     update="pnlReporte"
+                                     onclick="PF('modalReporte').hide();"
+                                     styleClass="btn-cancelar" />
+
+                    <p:commandButton value="Guardar reporte"
+                                     action="#{reporteBean.guardarReporte}"
+                                     process="pnlReporte"
+                                     update="pnlReporte msgs"
+                                     styleClass="btn-guardar" />
+
+                </div>
+
+            </p:outputPanel>
+
+        </p:dialog>
+
     </h:form>
 
     <h:form id="formModalCerrarSesion">
@@ -820,7 +898,7 @@
     </h:form>
 
     <script>
-        function agendaEditarExtender() {
+        function agendaAccionesExtender() {
             var cfg = this.cfg;
 
             var originalEventDidMount = cfg.eventDidMount;
@@ -837,11 +915,14 @@
                 var evento = info.event;
                 var elemento = info.el;
 
-                if (!elemento.classList.contains('evento-editable')) {
+                if (!evento.id) {
                     return;
                 }
 
-                if (!evento.id) {
+                var esEditable = elemento.classList.contains('evento-editable');
+                var esRealizada = elemento.classList.contains('evento-realizada');
+
+                if (!esEditable &amp;&amp; !esRealizada) {
                     return;
                 }
 
@@ -853,28 +934,47 @@
                     elemento.appendChild(contenedorAcciones);
                 }
 
-                if (contenedorAcciones.querySelector('.btn-editar-evento')) {
-                    return;
+                if (esEditable &amp;&amp; !contenedorAcciones.querySelector('.btn-editar-evento')) {
+                    var botonEditar = document.createElement('span');
+                    botonEditar.className = 'btn-accion-evento btn-editar-evento';
+                    botonEditar.innerHTML = '✏️';
+                    botonEditar.title = 'Editar cita';
+
+                    botonEditar.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        prepararEdicionDesdeAgenda([
+                            {
+                                name: 'idCita',
+                                value: evento.id
+                            }
+                        ]);
+                    });
+
+                    contenedorAcciones.appendChild(botonEditar);
                 }
 
-                var botonEditar = document.createElement('span');
-                botonEditar.className = 'btn-accion-evento btn-editar-evento';
-                botonEditar.innerHTML = '✏️';
-                botonEditar.title = 'Editar cita';
+                if (esRealizada &amp;&amp; !contenedorAcciones.querySelector('.btn-reporte-evento')) {
+                    var botonReporte = document.createElement('span');
+                    botonReporte.className = 'btn-accion-evento btn-reporte-evento';
+                    botonReporte.innerHTML = '📄';
+                    botonReporte.title = 'Reporte';
 
-                botonEditar.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    botonReporte.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
 
-                    prepararEdicionDesdeAgenda([
-                        {
-                            name: 'idCita',
-                            value: evento.id
-                        }
-                    ]);
-                });
+                        prepararReporteDesdeAgenda([
+                            {
+                                name: 'idCita',
+                                value: evento.id
+                            }
+                        ]);
+                    });
 
-                contenedorAcciones.appendChild(botonEditar);
+                    contenedorAcciones.appendChild(botonReporte);
+                }
             };
 
             cfg.eventDidMount = nuevoEventDidMount;
