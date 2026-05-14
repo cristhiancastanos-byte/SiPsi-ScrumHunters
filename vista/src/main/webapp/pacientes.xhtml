@@ -735,6 +735,15 @@
             max-width: 92vw !important;
         }
 
+        .modal-eliminar-archivo.ui-dialog {
+            z-index: 12000 !important;
+        }
+
+        .modal-eliminar-archivo .ui-dialog-content {
+            background-color: #FFFFFF !important;
+            padding: 20px 30px !important;
+        }
+
         .eliminar-archivo-box {
             padding: 8px 4px;
             text-align: center;
@@ -894,11 +903,17 @@
             display: block !important;
         }
         .nota-section-card {
-            align-items: center;
+            align-items: stretch;
         }
 
         .nota-panel {
             width: 100%;
+            display: block;
+        }
+
+        .nota-form-box {
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .nota-header {
@@ -1098,7 +1113,7 @@
                                      title="Expediente"
                                      process="@this"
                                      actionListener="#{pacienteBean.abrirExpediente(paciente.id)}"
-                                     update=":frmExpediente:pnlExpediente"
+                                     update=":pnlExpediente"
                                      oncomplete="PF('dlgExpediente').show();"
                                      rendered="#{not pacienteBean.modoArchivados}" />
 
@@ -1440,138 +1455,199 @@
     </h:form>
 
 
-    <h:form id="frmExpediente" enctype="multipart/form-data">
-        <p:growl id="msgsExpediente" showDetail="true" life="4500" />
+    <p:dialog widgetVar="dlgExpediente"
+              modal="true"
+              closable="false"
+              resizable="false"
+              header="Expediente"
+              showEffect="fade"
+              hideEffect="fade"
+              styleClass="modal-sipsi modal-expediente">
 
-        <p:dialog widgetVar="dlgExpediente"
-                  modal="true"
-                  closable="false"
-                  resizable="false"
-                  header="Expediente"
-                  showEffect="fade"
-                  hideEffect="fade"
-                  styleClass="modal-sipsi modal-expediente">
+        <p:outputPanel id="pnlExpediente">
 
-            <p:outputPanel id="pnlExpediente">
+            <h:panelGroup rendered="#{not empty pacienteBean.pacienteExpediente}">
+                <div class="expediente-shell">
 
-                <h:panelGroup rendered="#{not empty pacienteBean.pacienteExpediente}">
-                    <div class="expediente-shell">
+                    <div class="expediente-body">
+                        <div class="expediente-info-card">
+                            <div class="expediente-subtitulo">Información del paciente</div>
 
-                        <div class="expediente-body">
-                            <div class="expediente-info-card">
-                                <div class="expediente-subtitulo">Información del paciente</div>
+                            <p class="expediente-dato">
+                                <strong>Nombre completo:</strong> #{pacienteBean.pacienteExpediente.nombre}
+                            </p>
 
-                                <p class="expediente-dato">
-                                    <strong>Nombre completo:</strong> #{pacienteBean.pacienteExpediente.nombre}
-                                </p>
+                            <p class="expediente-dato">
+                                <strong>Fecha de nacimiento:</strong>
+                                <h:outputText value="#{pacienteBean.pacienteExpediente.fechaNac}">
+                                    <f:convertDateTime pattern="dd-MMM-yyyy" locale="es" />
+                                </h:outputText>
+                            </p>
 
-                                <p class="expediente-dato">
-                                    <strong>Fecha de nacimiento:</strong>
-                                    <h:outputText value="#{pacienteBean.pacienteExpediente.fechaNac}">
-                                        <f:convertDateTime pattern="dd-MMM-yyyy" locale="es" />
-                                    </h:outputText>
-                                </p>
+                            <p class="expediente-dato">
+                                <strong>Género:</strong> #{pacienteBean.pacienteExpediente.genero}
+                            </p>
 
-                                <p class="expediente-dato">
-                                    <strong>Género:</strong> #{pacienteBean.pacienteExpediente.genero}
-                                </p>
+                            <p class="expediente-dato">
+                                <strong>Teléfono:</strong> #{pacienteBean.pacienteExpediente.telefono}
+                            </p>
+                        </div>
 
-                                <p class="expediente-dato">
-                                    <strong>Teléfono:</strong> #{pacienteBean.pacienteExpediente.telefono}
-                                </p>
-                            </div>
+                        <div class="expediente-grid">
 
-                            <div class="expediente-grid">
+                            <div class="expediente-section-card nota-section-card">
 
-                                <div class="expediente-section-card nota-section-card">
+                                <h:form id="frmNotas">
+                                    <p:growl id="msgsExpediente" showDetail="true" life="4500" />
 
                                     <p:outputPanel id="panelNotas" styleClass="nota-panel">
 
-                                        <div class="nota-header">
-                                            <div class="nota-title">Notas clínicas</div>
-                                            <p:commandButton value="Agregar nota"
-                                                             icon="pi pi-plus"
-                                                             styleClass="btn-nota-agregar"
-                                                             process="@this"
-                                                             actionListener="#{pacienteBean.prepararNuevaNota}"
-                                                             update=":frmExpediente:formNuevaNota"
-                                                             oncomplete="document.getElementById('frmExpediente:formNuevaNota').style.display='block';" />
-                                        </div>
-
-                                        <p:outputPanel id="formNuevaNota"
-                                                       layout="block"
-                                                       styleClass="nota-form-box"
-                                                       style="display:none;">
-
-                                            <div class="nota-form-title">Agregar nota</div>
-
-                                            <h:outputLabel value="Título (opcional)" styleClass="nota-label" />
-                                            <p:inputText value="#{pacienteBean.nuevaNota.titulo}"
-                                                         styleClass="nota-input"
-                                                         placeholder="Sesión inicial" />
-
-                                            <h:outputLabel value="Contenido de la nota" styleClass="nota-label" />
-                                            <p:inputTextarea value="#{pacienteBean.nuevaNota.contenido}"
-                                                             rows="6"
-                                                             maxlength="1000"
-                                                             autoResize="false"
-                                                             styleClass="nota-textarea"
-                                                             placeholder="Escribe aquí la nota clínica del paciente..." />
-
-                                            <div class="nota-counter">Máximo 1000 caracteres</div>
-
-                                            <div class="nota-actions">
-                                                <p:commandButton value="Cancelar"
-                                                                 type="button"
-                                                                 styleClass="btn-cancelar"
-                                                                 onclick="document.getElementById('frmExpediente:formNuevaNota').style.display='none';" />
-
-                                                <p:commandButton value="Guardar nota"
-                                                                 actionListener="#{pacienteBean.guardarNota}"
-                                                                 process="@this formNuevaNota"
-                                                                 update=":frmExpediente:msgsExpediente"
-                                                                 onerror="alert('Error al guardar la nota. Revisa la consola de Tomcat.');"
-                                                                 styleClass="btn-guardar" />
+                                        <h:panelGroup rendered="#{not pacienteBean.editandoNota}">
+                                            <div class="nota-header">
+                                                <div class="nota-title">Notas clínicas</div>
+                                                <p:commandButton value="Agregar nota"
+                                                                 icon="pi pi-plus"
+                                                                 styleClass="btn-nota-agregar"
+                                                                 process="@this"
+                                                                 actionListener="#{pacienteBean.prepararNuevaNota}"
+                                                                 update=":frmNotas:formNuevaNota"
+                                                                 oncomplete="document.getElementById('frmNotas:formNuevaNota').style.display='block';" />
                                             </div>
 
-                                        </p:outputPanel>
+                                            <p:outputPanel id="formNuevaNota"
+                                                           layout="block"
+                                                           styleClass="nota-form-box"
+                                                           style="display:none;">
 
-                                        <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente.notas}">
-                                            <div class="expediente-empty-box">
-                                                <i class="pi pi-file-edit"></i>
-                                                <div class="expediente-empty-title">Sin notas clínicas</div>
-                                                <div class="expediente-empty">
-                                                    Aquí aparecerán las notas registradas para este paciente.
+                                                <div class="nota-form-title">Agregar nota</div>
+
+                                                <h:outputLabel value="Título (opcional)" styleClass="nota-label" />
+                                                <p:inputText value="#{pacienteBean.nuevaNota.titulo}"
+                                                             styleClass="nota-input"
+                                                             placeholder="Sesión inicial" />
+
+                                                <h:outputLabel value="Contenido de la nota" styleClass="nota-label" />
+                                                <p:inputTextarea value="#{pacienteBean.nuevaNota.contenido}"
+                                                                 rows="6"
+                                                                 maxlength="1000"
+                                                                 autoResize="false"
+                                                                 styleClass="nota-textarea"
+                                                                 placeholder="Escribe aquí la nota clínica del paciente..." />
+
+                                                <h:outputText value="Campo Obligatorio"
+                                                              styleClass="msg-error-valid"
+                                                              rendered="#{facesContext.validationFailed and empty pacienteBean.nuevaNota.contenido}" />
+
+                                                <div class="nota-counter">Máximo 1000 caracteres</div>
+
+                                                <div class="nota-actions">
+                                                    <p:commandButton value="Cancelar"
+                                                                     type="button"
+                                                                     styleClass="btn-cancelar"
+                                                                     onclick="document.getElementById('frmNotas:formNuevaNota').style.display='none';" />
+
+                                                    <p:commandButton value="Guardar nota"
+                                                                     actionListener="#{pacienteBean.guardarNota}"
+                                                                     process="@this formNuevaNota"
+                                                                     update=":frmNotas:msgsExpediente :pnlExpediente"
+                                                                     oncomplete="if(!args.validationFailed){var panel=document.getElementById('frmNotas:formNuevaNota'); if(panel){panel.style.display='none';}}"
+                                                                     onerror="alert('Error al guardar la nota. Revisa la consola de Tomcat.');"
+                                                                     styleClass="btn-guardar" />
                                                 </div>
-                                            </div>
+
+                                            </p:outputPanel>
+
+                                            <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente.notas}">
+                                                <div class="expediente-empty-box">
+                                                    <i class="pi pi-file-edit"></i>
+                                                    <div class="expediente-empty-title">Sin notas clínicas</div>
+                                                    <div class="expediente-empty">
+                                                        Aquí aparecerán las notas registradas para este paciente.
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+
+                                            <h:panelGroup rendered="#{not empty pacienteBean.pacienteExpediente.notas}">
+                                                <ui:repeat value="#{pacienteBean.pacienteExpediente.notas}" var="nota">
+                                                    <div class="expediente-item">
+                                                        <div class="expediente-item-title">
+                                                            #{empty nota.titulo ? 'Nota clínica' : nota.titulo}
+                                                        </div>
+
+                                                        <div class="expediente-item-text">
+                                                            #{nota.contenido}
+                                                        </div>
+
+                                                        <div class="expediente-item-date">
+                                                            <h:outputText value="#{nota.fechaCreacion}">
+                                                                <f:convertDateTime pattern="dd-MMM-yyyy HH:mm" locale="es" timeZone="America/Tijuana"
+                                                                                   clientTimeZone="America/Tijuana"/>
+                                                            </h:outputText>
+                                                        </div>
+
+                                                        <div class="nota-actions">
+                                                            <p:commandButton value="Editar"
+                                                                             icon="pi pi-pencil"
+                                                                             actionListener="#{pacienteBean.prepararEdicionNota(nota)}"
+                                                                             process="@this"
+                                                                             update=":frmNotas:msgsExpediente :frmNotas:panelNotas"
+                                                                             styleClass="btn-guardar" />
+                                                        </div>
+                                                    </div>
+                                                </ui:repeat>
+                                            </h:panelGroup>
                                         </h:panelGroup>
 
-                                        <h:panelGroup rendered="#{not empty pacienteBean.pacienteExpediente.notas}">
-                                            <ui:repeat value="#{pacienteBean.pacienteExpediente.notas}" var="nota">
-                                                <div class="expediente-item">
-                                                    <div class="expediente-item-title">
-                                                        #{empty nota.titulo ? 'Nota clínica' : nota.titulo}
-                                                    </div>
+                                        <h:panelGroup rendered="#{pacienteBean.editandoNota}">
+                                            <p:outputPanel id="formEditarNota" layout="block" styleClass="nota-form-box">
+                                                <div class="nota-form-title">Editar nota</div>
 
-                                                    <div class="expediente-item-text">
-                                                        #{nota.contenido}
-                                                    </div>
+                                                <h:outputLabel value="Título (opcional)" styleClass="nota-label" />
+                                                <p:inputText id="tituloEditarNota"
+                                                             value="#{pacienteBean.notaEditar.titulo}"
+                                                             styleClass="nota-input"
+                                                             placeholder="Sesión inicial" />
 
-                                                    <div class="expediente-item-date">
-                                                        <h:outputText value="#{nota.fechaCreacion}">
-                                                            <f:convertDateTime pattern="dd-MMM-yyyy HH:mm" locale="es" timeZone="America/Tijuana"
-                                                                               clientTimeZone="America/Tijuana"/>
-                                                        </h:outputText>
-                                                    </div>
+                                                <h:outputLabel value="Contenido de la nota" styleClass="nota-label" />
+                                                <p:inputTextarea id="contenidoEditarNota"
+                                                                 value="#{pacienteBean.notaEditar.contenido}"
+                                                                 rows="6"
+                                                                 maxlength="1000"
+                                                                 autoResize="false"
+                                                                 styleClass="nota-textarea"
+                                                                 placeholder="Escribe aquí la nota clínica del paciente..." />
+
+                                                <h:outputText value="Campo Obligatorio"
+                                                              styleClass="msg-error-valid"
+                                                              rendered="#{facesContext.validationFailed and empty pacienteBean.notaEditar.contenido}" />
+
+                                                <div class="nota-counter">Máximo 1000 caracteres</div>
+
+                                                <div class="nota-actions">
+                                                    <p:commandButton value="Cancelar"
+                                                                     actionListener="#{pacienteBean.cancelarEdicionNota}"
+                                                                     process="@this"
+                                                                     update=":frmNotas:panelNotas"
+                                                                     styleClass="btn-cancelar" />
+
+                                                    <p:commandButton value="Guardar cambios"
+                                                                     actionListener="#{pacienteBean.actualizarNota}"
+                                                                     process="@this formEditarNota"
+                                                                     update=":frmNotas:msgsExpediente :pnlExpediente"
+                                                                     styleClass="btn-guardar" />
                                                 </div>
-                                            </ui:repeat>
+                                            </p:outputPanel>
                                         </h:panelGroup>
 
                                     </p:outputPanel>
+                                </h:form>
 
-                                </div>
+                            </div>
 
-                                <div class="expediente-section-card">
+                            <div class="expediente-section-card">
+                                <h:form id="frmArchivos" enctype="multipart/form-data">
+                                    <p:growl id="msgsArchivos" showDetail="true" life="4500" />
+
                                     <p:outputPanel id="panelArchivos">
 
                                         <div class="expediente-section-title">Archivos</div>
@@ -1590,7 +1666,7 @@
                                             <p:fileUpload listener="#{archivoBean.handleFileUpload}"
                                                           mode="advanced"
                                                           dragDropSupport="false"
-                                                          update=":frmPrincipal:msgs :frmExpediente:msgsExpediente :frmExpediente:panelArchivos"
+                                                          update=":frmPrincipal:msgs :frmArchivos:msgsArchivos :frmArchivos:panelArchivos"
                                                           allowTypes="/(\.|\/)(jpe?g|png)$/"
                                                           sizeLimit="5242880"
                                                           fileLimit="1"
@@ -1656,7 +1732,7 @@
                                                                              styleClass="btn-archivo-eliminar"
                                                                              process="@this"
                                                                              actionListener="#{archivoBean.prepararEliminarArchivo(archivo.id)}"
-                                                                             update=":frmExpediente:pnlConfirmarEliminarArchivo :frmExpediente:msgsExpediente"
+                                                                             update=":frmEliminarArchivo:pnlConfirmarEliminarArchivo :frmArchivos:msgsArchivos"
                                                                              oncomplete="PF('dlgEliminarArchivo').show();" />
                                                         </div>
                                                     </div>
@@ -1665,79 +1741,83 @@
                                         </h:panelGroup>
 
                                     </p:outputPanel>
-                                </div>
 
+                                    <p:dialog widgetVar="dlgVistaArchivo"
+                                              modal="true"
+                                              closable="true"
+                                              resizable="false"
+                                              header="Vista previa"
+                                              showEffect="fade"
+                                              hideEffect="fade"
+                                              styleClass="modal-sipsi modal-vista-archivo">
+
+                                        <p:outputPanel id="pnlVistaArchivo">
+                                            <h:panelGroup rendered="#{not empty archivoBean.archivoVista}">
+                                                <div class="vista-archivo-nombre">
+                                                    #{archivoBean.archivoVista.nombreOriginal}
+                                                </div>
+
+                                                <h:graphicImage value="#{request.contextPath}/archivo?id=#{archivoBean.archivoVista.id}"
+                                                                styleClass="vista-archivo-img" />
+
+                                                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                                                    <h:outputLink value="#{request.contextPath}/archivo?id=#{archivoBean.archivoVista.id}"
+                                                                  target="_blank"
+                                                                  styleClass="archivo-btn-ver">
+                                                        Abrir en pestaña
+                                                    </h:outputLink>
+
+                                                    <p:commandButton value="Cerrar"
+                                                                     type="button"
+                                                                     onclick="PF('dlgVistaArchivo').hide();"
+                                                                     styleClass="btn-cancelar" />
+                                                </div>
+                                            </h:panelGroup>
+                                        </p:outputPanel>
+                                    </p:dialog>
+
+
+                                </h:form>
                             </div>
-                        </div>
 
-                        <div class="expediente-footer">
-                            <p:commandButton value="Cerrar"
-                                             type="button"
-                                             onclick="PF('dlgExpediente').hide();"
-                                             styleClass="btn-cancelar" />
                         </div>
                     </div>
-                </h:panelGroup>
 
-                <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente}">
-                    <div class="expediente-shell">
-                        <div class="expediente-body">
-                            <div class="expediente-empty-box" style="min-height: 280px;">
-                                <i class="pi pi-exclamation-circle"></i>
-                                <div class="expediente-empty-title">No se encontró el expediente</div>
-                                <div class="expediente-empty">
-                                    No fue posible cargar la información del paciente.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="expediente-footer">
-                            <p:commandButton value="Cerrar"
-                                             type="button"
-                                             onclick="PF('dlgExpediente').hide();"
-                                             styleClass="btn-cancelar" />
-                        </div>
-                    </div>
-                </h:panelGroup>
-
-            </p:outputPanel>
-        </p:dialog>
-
-        <p:dialog widgetVar="dlgVistaArchivo"
-                  modal="true"
-                  closable="true"
-                  resizable="false"
-                  header="Vista previa"
-                  showEffect="fade"
-                  hideEffect="fade"
-                  styleClass="modal-sipsi modal-vista-archivo">
-
-            <p:outputPanel id="pnlVistaArchivo">
-                <h:panelGroup rendered="#{not empty archivoBean.archivoVista}">
-                    <div class="vista-archivo-nombre">
-                        #{archivoBean.archivoVista.nombreOriginal}
-                    </div>
-
-                    <h:graphicImage value="#{request.contextPath}/archivo?id=#{archivoBean.archivoVista.id}"
-                                    styleClass="vista-archivo-img" />
-
-                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
-                        <h:outputLink value="#{request.contextPath}/archivo?id=#{archivoBean.archivoVista.id}"
-                                      target="_blank"
-                                      styleClass="archivo-btn-ver">
-                            Abrir en pestaña
-                        </h:outputLink>
-
+                    <div class="expediente-footer">
                         <p:commandButton value="Cerrar"
                                          type="button"
-                                         onclick="PF('dlgVistaArchivo').hide();"
+                                         onclick="PF('dlgExpediente').hide();"
                                          styleClass="btn-cancelar" />
                     </div>
-                </h:panelGroup>
-            </p:outputPanel>
-        </p:dialog>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{empty pacienteBean.pacienteExpediente}">
+                <div class="expediente-shell">
+                    <div class="expediente-body">
+                        <div class="expediente-empty-box" style="min-height: 280px;">
+                            <i class="pi pi-exclamation-circle"></i>
+                            <div class="expediente-empty-title">No se encontró el expediente</div>
+                            <div class="expediente-empty">
+                                No fue posible cargar la información del paciente.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expediente-footer">
+                        <p:commandButton value="Cerrar"
+                                         type="button"
+                                         onclick="PF('dlgExpediente').hide();"
+                                         styleClass="btn-cancelar" />
+                    </div>
+                </div>
+            </h:panelGroup>
+
+        </p:outputPanel>
+    </p:dialog>
 
 
+    <h:form id="frmEliminarArchivo">
         <p:dialog widgetVar="dlgEliminarArchivo"
                   modal="true"
                   closable="false"
@@ -1776,14 +1856,15 @@
                     <p:commandButton value="Sí, eliminar"
                                      icon="pi pi-trash"
                                      actionListener="#{archivoBean.confirmarEliminarArchivo}"
-                                     update=":frmPrincipal:msgs :frmExpediente:msgsExpediente :frmExpediente:panelArchivos :frmExpediente:pnlConfirmarEliminarArchivo"
+                                     process="@this"
+                                     update=":frmPrincipal:msgs :frmArchivos:msgsArchivos :frmArchivos:panelArchivos :frmEliminarArchivo:pnlConfirmarEliminarArchivo"
                                      oncomplete="PF('dlgEliminarArchivo').hide();"
                                      styleClass="btn-peligro" />
                 </div>
             </p:outputPanel>
         </p:dialog>
-
     </h:form>
+
 
     <h:form id="formModalCerrarSesion">
         <p:dialog widgetVar="dlgCerrarSesion"
