@@ -5,6 +5,7 @@ import mx.sipsi.persistence.dao.CitaDAO;
 import mx.sipsi.persistence.integration.ICitaPersistenciaIntegration;
 
 import java.sql.Time;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -84,5 +85,98 @@ public class CitaFacade {
         }
 
         persistencia.eliminarCitasPendientesPorPaciente(idPaciente);
+    }
+
+    public CitaEntity consultarCitaPorId(Integer idCita) {
+        if (idCita == null || idCita <= 0) {
+            throw new IllegalArgumentException("La cita seleccionada no es válida");
+        }
+
+        CitaEntity cita = persistencia.consultarCitaPorId(idCita);
+
+        if (cita == null) {
+            throw new IllegalArgumentException("No se encontró la cita seleccionada");
+        }
+
+        return cita;
+    }
+
+    public void actualizarCita(CitaEntity cita) {
+        if (cita == null) {
+            throw new IllegalArgumentException("La cita no puede estar vacía");
+        }
+
+        if (cita.getIdCita() == null || cita.getIdCita() <= 0) {
+            throw new IllegalArgumentException("La cita seleccionada no es válida");
+        }
+
+        if (cita.getFecha() == null) {
+            throw new IllegalArgumentException("La fecha de la cita es obligatoria");
+        }
+
+        if (cita.getHoraInicio() == null || cita.getHoraFin() == null) {
+            throw new IllegalArgumentException("La hora de inicio y fin son obligatorias");
+        }
+
+        if (!cita.getHoraInicio().before(cita.getHoraFin())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser menor que la hora de fin");
+        }
+
+        CitaEntity citaOriginal = consultarCitaPorId(cita.getIdCita());
+
+        if (!validarAnticipacionMinima12Horas(citaOriginal)) {
+            throw new IllegalArgumentException("No se puede reprogramar una cita con menos de 12 horas de anticipación");
+        }
+
+        boolean existeTraslape = existeTraslapeParaEdicion(
+                cita.getFecha(),
+                cita.getHoraInicio(),
+                cita.getHoraFin(),
+                cita.getIdCita()
+        );
+
+        if (existeTraslape) {
+            throw new IllegalArgumentException("El horario seleccionado se traslapa con otra cita");
+        }
+
+        persistencia.actualizarCita(cita);
+    }
+
+    public boolean existeTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita) {
+        if (idCita == null || idCita <= 0) {
+            throw new IllegalArgumentException("La cita seleccionada no es válida");
+        }
+
+        if (fecha == null || horaInicio == null || horaFin == null) {
+            throw new IllegalArgumentException("Fecha, hora de inicio y hora de fin son obligatorias");
+        }
+
+        if (!horaInicio.before(horaFin)) {
+            throw new IllegalArgumentException("La hora de inicio debe ser menor que la hora de fin");
+        }
+
+        return persistencia.existeTraslapeParaEdicion(fecha, horaInicio, horaFin, idCita);
+    }
+
+    private boolean validarAnticipacionMinima12Horas(CitaEntity citaOriginal) {
+        if (citaOriginal == null || citaOriginal.getFecha() == null || citaOriginal.getHoraInicio() == null) {
+            return false;
+        }
+
+        Calendar fechaHoraCitaOriginal = Calendar.getInstance();
+        fechaHoraCitaOriginal.setTime(citaOriginal.getFecha());
+
+        Calendar horaOriginal = Calendar.getInstance();
+        horaOriginal.setTime(citaOriginal.getHoraInicio());
+
+        fechaHoraCitaOriginal.set(Calendar.HOUR_OF_DAY, horaOriginal.get(Calendar.HOUR_OF_DAY));
+        fechaHoraCitaOriginal.set(Calendar.MINUTE, horaOriginal.get(Calendar.MINUTE));
+        fechaHoraCitaOriginal.set(Calendar.SECOND, 0);
+        fechaHoraCitaOriginal.set(Calendar.MILLISECOND, 0);
+
+        long diferenciaMilisegundos = fechaHoraCitaOriginal.getTimeInMillis() - System.currentTimeMillis();
+        long doceHorasMilisegundos = 12L * 60L * 60L * 1000L;
+
+        return diferenciaMilisegundos > doceHorasMilisegundos;
     }
 }

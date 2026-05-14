@@ -35,4 +35,12 @@ public class CitaDelegate {
     public void eliminarCitasPendientesPorPaciente(int idPaciente) {
         integracion.eliminarCitasPendientesPorPaciente(idPaciente);
     }
+
+    public CitaEntity consultarCitaPorId(Integer idCita) {
+        return integracion.consultarCitaPorId(idCita);
+    }
+
+    public void actualizarCita(CitaEntity cita) {
+        integracion.actualizarCita(cita);
+    }
 }
