@@ -39,4 +39,19 @@ public class CitaNegocioIntegrationImpl implements ICitaNegocioIntegration {
     public void eliminarCitasPendientesPorPaciente(int idPaciente) {
         facade.procesarEliminacionCitasPendientes(idPaciente);
     }
+
+    @Override
+    public CitaEntity consultarCitaPorId(Integer idCita) {
+        return facade.consultarCitaPorId(idCita);
+    }
+
+    @Override
+    public void actualizarCita(CitaEntity cita) {
+        facade.actualizarCita(cita);
+    }
+
+    @Override
+    public boolean existeTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita) {
+        return facade.existeTraslapeParaEdicion(fecha, horaInicio, horaFin, idCita);
+    }
 }

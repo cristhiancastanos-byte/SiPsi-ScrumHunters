@@ -28,6 +28,18 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
         return persistence.executeExisteTraslape(fecha, horaInicio, horaFin);
     }
 
+    public CitaEntity buscarCitaPorId(Integer idCita) {
+        return persistence.executeSelectCitaById(idCita);
+    }
+
+    public void modificarCita(CitaEntity cita) {
+        persistence.executeUpdateCita(cita);
+    }
+
+    public boolean buscarTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita) {
+        return persistence.executeExisteTraslapeParaEdicion(fecha, horaInicio, horaFin, idCita);
+    }
+
     @Override
     public void save(CitaEntity cita) {
         this.insertar(cita);
@@ -56,5 +68,20 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
     @Override
     public void eliminarCitasPendientesPorPaciente(int idPaciente) {
         persistence.executeDeleteCitasPendientesPorPaciente(idPaciente);
+    }
+
+    @Override
+    public CitaEntity consultarCitaPorId(Integer idCita) {
+        return this.buscarCitaPorId(idCita);
+    }
+
+    @Override
+    public void actualizarCita(CitaEntity cita) {
+        this.modificarCita(cita);
+    }
+
+    @Override
+    public boolean existeTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita) {
+        return this.buscarTraslapeParaEdicion(fecha, horaInicio, horaFin, idCita);
     }
 }

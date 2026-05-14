@@ -19,4 +19,10 @@ public interface ICitaPersistenciaIntegration {
     boolean tieneCitasPendientesPorPaciente(int idPaciente);
 
     void eliminarCitasPendientesPorPaciente(int idPaciente);
+
+    CitaEntity consultarCitaPorId(Integer idCita);
+
+    void actualizarCita(CitaEntity cita);
+
+    boolean existeTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita);
 }
