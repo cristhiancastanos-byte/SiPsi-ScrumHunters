@@ -14,4 +14,12 @@ public class NotaDelegate {
     public void agregarNota(NotaEntity nota) throws Exception {
         notaFacade.agregarNota(nota);
     }
+
+    public NotaEntity consultarNotaPorId(int idNota) throws Exception {
+        return notaFacade.consultarNotaPorId(idNota);
+    }
+
+    public void actualizarNota(NotaEntity nota) throws Exception {
+        notaFacade.actualizarNota(nota);
+    }
 }
