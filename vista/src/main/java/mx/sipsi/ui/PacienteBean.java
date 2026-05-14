@@ -49,6 +49,8 @@ public class PacienteBean implements Serializable {
     private PacienteEntity pacienteRecuperar = new PacienteEntity();
     private PacienteEntity pacienteEliminarDefinitivo = new PacienteEntity();
     private NotaEntity nuevaNota = new NotaEntity();
+    private NotaEntity notaEditar = new NotaEntity();
+    private boolean editandoNota = false;
     private final NotaDelegate notaDelegate = new NotaDelegate();
 
     private PacienteEntity pacienteExpediente;
@@ -450,6 +452,9 @@ public class PacienteBean implements Serializable {
 
     public void abrirExpediente(int idPaciente) {
         try {
+            notaEditar = new NotaEntity();
+            editandoNota = false;
+
             pacienteExpediente = expedienteDelegate.obtenerExpedienteCompleto(Long.valueOf(idPaciente));
 
             if (pacienteExpediente == null || pacienteExpediente.getId() <= 0) {
@@ -528,10 +533,10 @@ public class PacienteBean implements Serializable {
 
             abrirExpediente(idPaciente);
 
-            PrimeFaces.current().ajax().update("frmExpediente:msgsExpediente");
-            PrimeFaces.current().ajax().update("frmExpediente:pnlExpediente");
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+            PrimeFaces.current().ajax().update("pnlExpediente");
             PrimeFaces.current().executeScript(
-                    "var panel = document.getElementById('frmExpediente:formNuevaNota'); if(panel){panel.style.display='none';}"
+                    "var panel = document.getElementById('frmNotas:formNuevaNota'); if(panel){panel.style.display='none';}"
             );
 
         } catch (Exception e) {
@@ -543,8 +548,101 @@ public class PacienteBean implements Serializable {
                             "Error al guardar",
                             "No se pudo guardar la nota clínica. Revisa la consola de Tomcat."));
 
-            PrimeFaces.current().ajax().update("frmExpediente:msgsExpediente");
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
         }
+    }
+
+
+    public void prepararEdicionNota(NotaEntity nota) {
+        try {
+            if (nota == null || nota.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró la nota clínica seleccionada."));
+                return;
+            }
+
+            notaEditar = notaDelegate.consultarNotaPorId(nota.getId());
+            editandoNota = true;
+
+            PrimeFaces.current().ajax().update("frmNotas:panelNotas");
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error",
+                            "No se pudo cargar la nota clínica para editar."));
+
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+        }
+    }
+
+    public void actualizarNota() {
+        try {
+            if (notaEditar == null || notaEditar.getId() <= 0) {
+                FacesContext.getCurrentInstance().validationFailed();
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró la nota clínica seleccionada."));
+                return;
+            }
+
+            if (notaEditar.getContenido() == null || notaEditar.getContenido().trim().isEmpty()) {
+                FacesContext.getCurrentInstance().validationFailed();
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Campo Obligatorio",
+                                "La nota clínica no puede estar vacía."));
+                return;
+            }
+
+            notaEditar.setContenido(notaEditar.getContenido().trim());
+
+            if (notaEditar.getTitulo() != null) {
+                notaEditar.setTitulo(notaEditar.getTitulo().trim());
+            }
+
+            int idPaciente = pacienteExpediente.getId();
+
+            notaDelegate.actualizarNota(notaEditar);
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO,
+                            "Nota actualizada correctamente",
+                            "La nota clínica se actualizó correctamente."));
+
+            notaEditar = new NotaEntity();
+            editandoNota = false;
+
+            abrirExpediente(idPaciente);
+
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+            PrimeFaces.current().ajax().update("pnlExpediente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            FacesContext.getCurrentInstance().validationFailed();
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error al actualizar",
+                            "No se pudo actualizar la nota clínica."));
+
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+            PrimeFaces.current().ajax().update("frmNotas:panelNotas");
+        }
+    }
+
+    public void cancelarEdicionNota() {
+        notaEditar = new NotaEntity();
+        editandoNota = false;
+
+        PrimeFaces.current().ajax().update("frmNotas:panelNotas");
     }
 
     public void actualizarPaciente() {
@@ -928,4 +1026,21 @@ public class PacienteBean implements Serializable {
     public void setNuevaNota(NotaEntity nuevaNota) {
         this.nuevaNota = nuevaNota;
     }
+
+    public NotaEntity getNotaEditar() {
+        return notaEditar;
+    }
+
+    public void setNotaEditar(NotaEntity notaEditar) {
+        this.notaEditar = notaEditar;
+    }
+
+    public boolean isEditandoNota() {
+        return editandoNota;
+    }
+
+    public void setEditandoNota(boolean editandoNota) {
+        this.editandoNota = editandoNota;
+    }
+
 }
