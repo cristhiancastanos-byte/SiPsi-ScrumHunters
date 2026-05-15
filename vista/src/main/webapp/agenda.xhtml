@@ -652,7 +652,7 @@
 
                 <p:remoteCommand name="prepararReporteDesdeAgenda"
                                  actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
-                                 update="msgs :frmReporte:pnlReporte"
+                                 update="msgs :frmReporte:pnlReporte :frmReporte:msgsReporte"
                                  oncomplete="if (args.abrirReporte) PF('modalReporte').show();" />
 
                 <p:schedule id="calendarioCitas"
@@ -933,6 +933,11 @@
 
     <h:form id="frmReporte" enctype="multipart/form-data">
 
+        <p:growl id="msgsReporte"
+                 showDetail="true"
+                 globalOnly="false"
+                 life="4500" />
+
         <p:dialog widgetVar="modalReporte"
                   modal="true"
                   width="650"
@@ -984,7 +989,7 @@
                             <p:fileUpload listener="#{imagenReporteBean.handleImagenUpload}"
                                           mode="advanced"
                                           dragDropSupport="false"
-                                          update=":frmAgenda:msgs :frmReporte:pnlImagenesReporte"
+                                          update=":frmReporte:msgsReporte :frmReporte:pnlImagenesReporte"
                                           allowTypes="/(\.|\/)(jpe?g|png)$/"
                                           sizeLimit="5242880"
                                           fileLimit="1"
@@ -999,6 +1004,7 @@
                                 <div class="imagen-reporte-lista">
                                     <ui:repeat value="#{imagenReporteBean.imagenesPendientes}" var="imagen">
                                         <div class="imagen-reporte-card">
+
                                             <div class="imagen-reporte-thumb">
                                                 <img src="#{imagen.vistaPreviaBase64}"
                                                      alt="#{imagen.nombreOriginal}" />
@@ -1013,6 +1019,7 @@
                                                     #{imagen.tamanoTexto} · PNG/JPG
                                                 </div>
                                             </div>
+
                                         </div>
                                     </ui:repeat>
                                 </div>
@@ -1029,14 +1036,14 @@
                     <p:commandButton value="Cancelar"
                                      process="@this"
                                      actionListener="#{reporteBean.limpiarReporte}"
-                                     update="pnlReporte"
+                                     update=":frmReporte:pnlReporte :frmReporte:msgsReporte"
                                      onclick="PF('modalReporte').hide();"
                                      styleClass="btn-cancelar" />
 
                     <p:commandButton value="Guardar reporte"
                                      action="#{reporteBean.guardarReporte}"
                                      process="@form"
-                                     update=":frmAgenda:msgs :frmAgenda:calendarioCitas :frmReporte:pnlReporte"
+                                     update=":frmReporte:msgsReporte :frmReporte:pnlReporte :frmAgenda:msgs :frmAgenda:calendarioCitas"
                                      oncomplete="if (!args.validationFailed) PF('modalReporte').hide();"
                                      styleClass="btn-guardar" />
 
