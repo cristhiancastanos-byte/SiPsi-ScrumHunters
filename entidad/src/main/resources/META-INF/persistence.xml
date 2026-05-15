@@ -9,6 +9,11 @@
 
         <class>mx.sipsi.entity.UsuarioEntity</class>
         <class>mx.sipsi.entity.PacienteEntity</class>
+        <class>mx.sipsi.entity.CitaEntity</class>
+        <class>mx.sipsi.entity.NotaEntity</class>
+        <class>mx.sipsi.entity.ArchivoEntity</class>
+        <class>mx.sipsi.entity.ReporteEntity</class>
+        <class>mx.sipsi.entity.ImagenReporteEntity</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

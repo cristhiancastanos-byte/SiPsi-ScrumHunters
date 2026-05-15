@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="jakarta.faces.facelets">
 
 <h:head>
     <title>SiPsi - Mis Citas</title>
@@ -482,6 +483,119 @@
             margin-top: 5px;
         }
 
+        .imagen-reporte-upload-box {
+            border: 1px solid #EAEAEA;
+            border-radius: 4px;
+            padding: 14px;
+            text-align: center;
+            background-color: #FFFFFF;
+            margin-top: 8px;
+            min-height: 95px;
+        }
+
+        .imagen-reporte-upload-box:hover {
+            border-color: #CF8080;
+            background-color: #FFF9F9;
+        }
+
+        .imagen-reporte-upload-title {
+            color: #000000;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+
+        .imagen-reporte-upload-text {
+            color: #808080;
+            font-size: 12px;
+            margin: 3px 0;
+        }
+
+        .imagen-reporte-upload-box .ui-fileupload {
+            border: none !important;
+            background: transparent !important;
+            margin-top: 8px;
+        }
+
+        .imagen-reporte-upload-box .ui-fileupload-buttonbar {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            gap: 8px !important;
+        }
+
+        .imagen-reporte-upload-box .ui-fileupload-content {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin-top: 8px !important;
+        }
+
+        .imagen-reporte-upload-box .ui-button {
+            background-color: #CF8080 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            border-radius: 4px !important;
+            font-family: 'Archivo', Arial, sans-serif;
+            font-size: 12px !important;
+        }
+
+        .imagen-reporte-lista {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .imagen-reporte-card {
+            display: grid;
+            grid-template-columns: 54px 1fr;
+            gap: 9px;
+            align-items: center;
+            width: 185px;
+            border: 1px solid #EAEAEA;
+            border-radius: 6px;
+            padding: 7px;
+            background-color: #FFFFFF;
+            text-align: left;
+        }
+
+        .imagen-reporte-thumb {
+            width: 45px;
+            height: 45px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #F8F1F1;
+            border: 1px solid #EADADA;
+        }
+
+        .imagen-reporte-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .imagen-reporte-info {
+            min-width: 0;
+        }
+
+        .imagen-reporte-nombre {
+            color: #333333;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .imagen-reporte-meta {
+            color: #808080;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
         @media (max-width: 768px) {
             .fc .fc-toolbar.fc-header-toolbar {
                 min-height: 60px !important;
@@ -513,7 +627,7 @@
         </h:form>
     </div>
 
-    <h:form id="frmAgenda">
+    <h:form id="frmAgenda" >
 
         <p:growl id="msgs" showDetail="true" globalOnly="true" />
 
@@ -538,7 +652,7 @@
 
                 <p:remoteCommand name="prepararReporteDesdeAgenda"
                                  actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
-                                 update="msgs pnlReporte"
+                                 update="msgs :frmReporte:pnlReporte"
                                  oncomplete="if (args.abrirReporte) PF('modalReporte').show();" />
 
                 <p:schedule id="calendarioCitas"
@@ -814,6 +928,11 @@
 
         </p:dialog>
 
+    </h:form>
+
+
+    <h:form id="frmReporte" enctype="multipart/form-data">
+
         <p:dialog widgetVar="modalReporte"
                   modal="true"
                   width="650"
@@ -842,6 +961,67 @@
                     <h:outputText value="Máximo 2000 caracteres"
                                   styleClass="texto-limite" />
 
+                    <h:outputLabel value="Archivos:"
+                                   styleClass="lbl-tinto"
+                                   style="font-size: 18px; margin-top: 8px;" />
+
+                    <p:outputPanel id="pnlImagenesReporte">
+
+                        <div class="imagen-reporte-upload-box">
+
+                            <h:panelGroup rendered="#{empty imagenReporteBean.imagenesPendientes}">
+                                <p class="imagen-reporte-upload-title">Selecciona un archivo</p>
+
+                                <p class="imagen-reporte-upload-text">
+                                    Formatos permitidos: JPG, JPEG, PNG
+                                </p>
+
+                                <p class="imagen-reporte-upload-text">
+                                    Tamaño permitido: 5MB
+                                </p>
+                            </h:panelGroup>
+
+                            <p:fileUpload listener="#{imagenReporteBean.handleImagenUpload}"
+                                          mode="advanced"
+                                          dragDropSupport="false"
+                                          update=":frmAgenda:msgs :frmReporte:pnlImagenesReporte"
+                                          allowTypes="/(\.|\/)(jpe?g|png)$/"
+                                          sizeLimit="5242880"
+                                          fileLimit="1"
+                                          label="Seleccionar archivo"
+                                          uploadLabel="Agregar"
+                                          cancelLabel="Cancelar"
+                                          invalidFileMessage="Formato no válido. Solo se permiten imágenes JPG, JPEG o PNG."
+                                          invalidSizeMessage="Archivo demasiado pesado. El archivo no debe superar 5MB."
+                                          fileLimitMessage="Solo se puede subir un archivo a la vez." />
+
+                            <h:panelGroup rendered="#{not empty imagenReporteBean.imagenesPendientes}">
+                                <div class="imagen-reporte-lista">
+                                    <ui:repeat value="#{imagenReporteBean.imagenesPendientes}" var="imagen">
+                                        <div class="imagen-reporte-card">
+                                            <div class="imagen-reporte-thumb">
+                                                <img src="#{imagen.vistaPreviaBase64}"
+                                                     alt="#{imagen.nombreOriginal}" />
+                                            </div>
+
+                                            <div class="imagen-reporte-info">
+                                                <div class="imagen-reporte-nombre">
+                                                    #{imagen.nombreOriginal}
+                                                </div>
+
+                                                <div class="imagen-reporte-meta">
+                                                    #{imagen.tamanoTexto} · PNG/JPG
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ui:repeat>
+                                </div>
+                            </h:panelGroup>
+
+                        </div>
+
+                    </p:outputPanel>
+
                 </h:panelGrid>
 
                 <div style="display: flex; justify-content: flex-end; gap: 25px; margin-top: 25px;">
@@ -855,8 +1035,9 @@
 
                     <p:commandButton value="Guardar reporte"
                                      action="#{reporteBean.guardarReporte}"
-                                     process="pnlReporte"
-                                     update="pnlReporte msgs"
+                                     process="@form"
+                                     update=":frmAgenda:msgs :frmAgenda:calendarioCitas :frmReporte:pnlReporte"
+                                     oncomplete="if (!args.validationFailed) PF('modalReporte').hide();"
                                      styleClass="btn-guardar" />
 
                 </div>
