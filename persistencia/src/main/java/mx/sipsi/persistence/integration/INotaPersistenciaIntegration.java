@@ -9,4 +9,6 @@ public interface INotaPersistenciaIntegration {
     NotaEntity consultarNotaPorId(int idNota) throws Exception;
 
     void actualizarNota(NotaEntity nota) throws Exception;
+
+    void eliminarNota(int idNota) throws Exception;
 }

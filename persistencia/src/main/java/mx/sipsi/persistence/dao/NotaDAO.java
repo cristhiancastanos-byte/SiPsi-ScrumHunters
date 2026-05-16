@@ -26,4 +26,9 @@ public class NotaDAO implements INotaPersistenciaIntegration {
     public void actualizarNota(NotaEntity nota) throws Exception {
         notaPersistence.executeUpdateNota(nota);
     }
+
+    @Override
+    public void eliminarNota(int idNota) throws Exception {
+        notaPersistence.executeDeleteNota(idNota);
+    }
 }
