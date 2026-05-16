@@ -47,7 +47,8 @@ public class CitaPersistence {
             return em.createQuery(
                             "SELECT c FROM CitaEntity c " +
                                     "WHERE c.fecha = :fecha " +
-                                    "AND c.horaInicio = :horaInicio",
+                                    "AND c.horaInicio = :horaInicio " +
+                                    "AND (c.estado IS NULL OR c.estado <> 'Cancelada')",
                             CitaEntity.class
                     )
                     .setParameter("fecha", fecha)
@@ -70,7 +71,8 @@ public class CitaPersistence {
                     "SELECT COUNT(c) FROM CitaEntity c " +
                             "WHERE c.fecha = :fecha " +
                             "AND c.horaInicio < :horaFin " +
-                            "AND c.horaFin > :horaInicio",
+                            "AND c.horaFin > :horaInicio " +
+                            "AND (c.estado IS NULL OR c.estado <> 'Cancelada')",
                     Long.class
             );
 
@@ -135,7 +137,8 @@ public class CitaPersistence {
             TypedQuery<Long> query = em.createQuery(
                     "SELECT COUNT(c) FROM CitaEntity c " +
                             "WHERE c.idPaciente = :idPaciente " +
-                            "AND c.fecha >= :fechaActual",
+                            "AND c.fecha >= :fechaActual " +
+                            "AND (c.estado IS NULL OR c.estado <> 'Cancelada')",
                     Long.class
             );
 
@@ -163,7 +166,8 @@ public class CitaPersistence {
             em.createQuery(
                             "DELETE FROM CitaEntity c " +
                                     "WHERE c.idPaciente = :idPaciente " +
-                                    "AND c.fecha >= :fechaActual"
+                                    "AND c.fecha >= :fechaActual " +
+                                    "AND (c.estado IS NULL OR c.estado <> 'Cancelada')"
                     )
                     .setParameter("idPaciente", idPaciente)
                     .setParameter("fechaActual", fechaActual)
@@ -197,6 +201,37 @@ public class CitaPersistence {
         }
     }
 
+    public void executeCancelarCita(Integer idCita, String motivo) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            CitaEntity citaExistente = em.find(CitaEntity.class, idCita);
+
+            if (citaExistente == null) {
+                throw new RuntimeException("No se encontró la cita que se desea cancelar.");
+            }
+
+            citaExistente.setEstado("Cancelada");
+            citaExistente.setMotivo(motivo);
+
+            em.merge(citaExistente);
+
+            em.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            throw new RuntimeException("Error al cancelar la cita: " + e.getMessage(), e);
+
+        } finally {
+            em.close();
+        }
+    }
+
     public void executeUpdateCita(CitaEntity cita) {
         EntityManager em = emf.createEntityManager();
 
@@ -212,6 +247,8 @@ public class CitaPersistence {
             citaExistente.setFecha(cita.getFecha());
             citaExistente.setHoraInicio(cita.getHoraInicio());
             citaExistente.setHoraFin(cita.getHoraFin());
+            citaExistente.setMotivo(cita.getMotivo());
+            citaExistente.setEstado(cita.getEstado());
 
             em.merge(citaExistente);
 
@@ -238,7 +275,8 @@ public class CitaPersistence {
                             "WHERE c.fecha = :fecha " +
                             "AND c.idCita <> :idCita " +
                             "AND c.horaInicio < :horaFin " +
-                            "AND c.horaFin > :horaInicio",
+                            "AND c.horaFin > :horaInicio " +
+                            "AND (c.estado IS NULL OR c.estado <> 'Cancelada')",
                     Long.class
             );
 
