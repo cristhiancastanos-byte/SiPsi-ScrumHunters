@@ -22,6 +22,8 @@ public interface ICitaPersistenciaIntegration {
 
     CitaEntity consultarCitaPorId(Integer idCita);
 
+    void cancelarCita(Integer idCita, String motivo);
+
     void actualizarCita(CitaEntity cita);
 
     boolean existeTraslapeParaEdicion(Date fecha, Time horaInicio, Time horaFin, Integer idCita);

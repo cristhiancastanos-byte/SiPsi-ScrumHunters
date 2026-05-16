@@ -46,6 +46,11 @@ public class CitaNegocioIntegrationImpl implements ICitaNegocioIntegration {
     }
 
     @Override
+    public void cancelarCita(Integer idCita, String motivo) {
+        facade.cancelarCita(idCita, motivo);
+    }
+
+    @Override
     public void actualizarCita(CitaEntity cita) {
         facade.actualizarCita(cita);
     }

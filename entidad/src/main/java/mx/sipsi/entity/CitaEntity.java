@@ -32,7 +32,7 @@ public class CitaEntity implements Serializable {
     @Column(name = "motivo", length = 255)
     private String motivo;
 
-    @Column(name = "estado", length = 50)
+    @Column(name = "estado", nullable = false, length = 50)
     private String estado;
 
     @Column(name = "nombre_paciente_historico", length = 255)
@@ -44,6 +44,13 @@ public class CitaEntity implements Serializable {
 
     @PrePersist
     public void prePersist() {
+        if (this.estado == null || this.estado.trim().isEmpty()) {
+            this.estado = "Agendada";
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
         if (this.estado == null || this.estado.trim().isEmpty()) {
             this.estado = "Agendada";
         }

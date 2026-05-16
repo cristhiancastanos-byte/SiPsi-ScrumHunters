@@ -32,6 +32,10 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
         return persistence.executeSelectCitaById(idCita);
     }
 
+    public void cancelar(Integer idCita, String motivo) {
+        persistence.executeCancelarCita(idCita, motivo);
+    }
+
     public void modificarCita(CitaEntity cita) {
         persistence.executeUpdateCita(cita);
     }
@@ -73,6 +77,11 @@ public class CitaDAO implements ICitaPersistenciaIntegration {
     @Override
     public CitaEntity consultarCitaPorId(Integer idCita) {
         return this.buscarCitaPorId(idCita);
+    }
+
+    @Override
+    public void cancelarCita(Integer idCita, String motivo) {
+        this.cancelar(idCita, motivo);
     }
 
     @Override

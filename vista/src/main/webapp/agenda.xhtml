@@ -650,6 +650,11 @@
                                  update="pnlEdicionCita msgs"
                                  oncomplete="if (args.abrirEdicion) PF('dlgEditarCita').show();" />
 
+                <p:remoteCommand name="prepararCancelacionDesdeAgenda"
+                                 actionListener="#{citaBean.prepararCancelacionDesdeAgenda}"
+                                 update="pnlCancelarCita msgs"
+                                 oncomplete="if (args.abrirCancelacion) PF('dlgCancelarCita').show();" />
+
                 <p:remoteCommand name="prepararReporteDesdeAgenda"
                                  actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
                                  update="msgs :frmReporte:pnlReporte :frmReporte:msgsReporte"
@@ -928,6 +933,76 @@
 
         </p:dialog>
 
+        <p:dialog widgetVar="dlgCancelarCita"
+                  modal="true"
+                  width="700"
+                  resizable="false"
+                  header="Cancelar cita"
+                  closable="false"
+                  styleClass="modal-sipsi">
+
+            <p:outputPanel id="pnlCancelarCita">
+
+                <h:panelGrid columns="1" style="width: 100%;">
+
+                    <h:outputLabel value="Paciente:"
+                                   styleClass="lbl-tinto"
+                                   style="margin-top: 0;" />
+
+                    <p:inputText value="#{citaBean.nombrePacienteCancelar}"
+                                 readonly="true"
+                                 styleClass="campo-bloqueado" />
+
+                    <h:outputLabel value="Fecha y Hora:"
+                                   styleClass="lbl-tinto" />
+
+                    <p:inputText value="#{citaBean.citaCancelarTexto}"
+                                 readonly="true"
+                                 styleClass="campo-bloqueado" />
+
+                    <h:outputLabel for="motivoCancelacion"
+                                   value="Motivo de cancelación:"
+                                   styleClass="lbl-tinto" />
+
+                    <p:inputTextarea id="motivoCancelacion"
+                                     value="#{citaBean.motivoCancelacion}"
+                                     rows="6"
+                                     autoResize="false"
+                                     style="width: 95%; padding: 8px; border: 1px solid #{citaBean.formCancelacionIntentado and empty citaBean.motivoCancelacion ? '#FF0707' : '#EAEAEA'}; border-radius: 4px; font-size: 18px;"
+                                     placeholder="Escribe el motivo de cancelación...">
+                        <p:ajax event="keyup" update="msgMotivoCancelacion" />
+                    </p:inputTextarea>
+
+                    <h:panelGroup id="msgMotivoCancelacion">
+                        <h:outputText value="Por favor, escriba un motivo antes de continuar"
+                                      styleClass="msg-error-valid"
+                                      rendered="#{citaBean.formCancelacionIntentado and empty citaBean.motivoCancelacion}" />
+                    </h:panelGroup>
+
+                </h:panelGrid>
+
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px;">
+
+                    <p:commandButton value="Cancelar"
+                                     onclick="PF('dlgCancelarCita').hide();"
+                                     process="@this"
+                                     actionListener="#{citaBean.limpiarCancelacionCita}"
+                                     update="pnlCancelarCita"
+                                     styleClass="btn-cancelar" />
+
+                    <p:commandButton value="Confirmar cancelación"
+                                     action="#{citaBean.cancelarCita}"
+                                     process="pnlCancelarCita"
+                                     update="pnlCancelarCita msgs calendarioCitas"
+                                     oncomplete="if (!args.validationFailed) PF('dlgCancelarCita').hide();"
+                                     styleClass="btn-guardar" />
+
+                </div>
+
+            </p:outputPanel>
+
+        </p:dialog>
+
     </h:form>
 
 
@@ -1141,6 +1216,27 @@
                     });
 
                     contenedorAcciones.appendChild(botonEditar);
+                }
+
+                if (esEditable &amp;&amp; !contenedorAcciones.querySelector('.btn-cancelar-evento')) {
+                    var botonCancelar = document.createElement('span');
+                    botonCancelar.className = 'btn-accion-evento btn-cancelar-evento';
+                    botonCancelar.innerHTML = '🗑️';
+                    botonCancelar.title = 'Cancelar cita';
+
+                    botonCancelar.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        prepararCancelacionDesdeAgenda([
+                            {
+                                name: 'idCita',
+                                value: evento.id
+                            }
+                        ]);
+                    });
+
+                    contenedorAcciones.appendChild(botonCancelar);
                 }
 
                 if (esRealizada &amp;&amp; !contenedorAcciones.querySelector('.btn-reporte-evento')) {

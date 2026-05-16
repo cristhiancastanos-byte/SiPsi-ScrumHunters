@@ -40,6 +40,10 @@ public class CitaDelegate {
         return integracion.consultarCitaPorId(idCita);
     }
 
+    public void cancelarCita(Integer idCita, String motivo) {
+        integracion.cancelarCita(idCita, motivo);
+    }
+
     public void actualizarCita(CitaEntity cita) {
         integracion.actualizarCita(cita);
     }
