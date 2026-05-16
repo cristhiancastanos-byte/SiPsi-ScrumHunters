@@ -40,4 +40,19 @@ public class NotaNegocioIntegrationImpl implements INotaNegocioIntegration {
 
         notaPersistenciaIntegration.actualizarNota(nota);
     }
+
+    @Override
+    public void eliminarNota(int idNota) throws Exception {
+        if (idNota <= 0) {
+            throw new Exception("No se encontró la nota clínica seleccionada.");
+        }
+
+        NotaEntity notaEncontrada = notaPersistenciaIntegration.consultarNotaPorId(idNota);
+
+        if (notaEncontrada == null) {
+            throw new Exception("La nota clínica seleccionada no existe.");
+        }
+
+        notaPersistenciaIntegration.eliminarNota(idNota);
+    }
 }
