@@ -1002,6 +1002,117 @@
             margin-top: 8px;
         }
 
+        .expediente-item .nota-actions .btn-nota-accion,
+        .expediente-item .nota-actions .btn-nota-accion.ui-button,
+        .expediente-item .nota-actions .btn-nota-accion.ui-widget,
+        .expediente-item .nota-actions .btn-nota-accion.ui-state-default {
+            background: #CF8080 !important;
+            background-color: #CF8080 !important;
+            background-image: none !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            width: 120px !important;
+            height: 42px !important;
+            min-width: 120px !important;
+            max-width: 120px !important;
+            padding: 0 !important;
+            border-radius: 7px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            font-size: 15px !important;
+            font-weight: normal !important;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.25) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .expediente-item .nota-actions .btn-nota-accion:hover,
+        .expediente-item .nota-actions .btn-nota-accion.ui-state-hover {
+            background: #833D3D !important;
+            background-color: #833D3D !important;
+            background-image: none !important;
+            border: none !important;
+            color: #FFFFFF !important;
+        }
+
+        .expediente-item .nota-actions .btn-nota-accion .ui-button-icon-left,
+        .expediente-item .nota-actions .btn-nota-accion .p-button-icon-left,
+        .expediente-item .nota-actions .btn-nota-accion .p-button-icon,
+        .expediente-item .nota-actions .btn-nota-accion .pi {
+            position: absolute !important;
+            left: 18px !important;
+            top: 50% !important;
+            margin: 0 !important;
+            transform: translateY(-50%) !important;
+            font-size: 18px !important;
+            line-height: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            color: #FFFFFF !important;
+        }
+
+        .expediente-item .nota-actions .btn-nota-accion .ui-button-text,
+        .expediente-item .nota-actions .btn-nota-accion .p-button-label {
+            display: block !important;
+            padding: 0 10px 0 44px !important;
+            margin: 0 !important;
+            width: 100% !important;
+            height: 42px !important;
+            line-height: 42px !important;
+            text-align: left !important;
+            box-sizing: border-box !important;
+            color: #FFFFFF !important;
+        }
+
+        .modal-eliminar-nota {
+            width: 520px !important;
+            max-width: 92vw !important;
+        }
+
+        .modal-eliminar-nota.ui-dialog {
+            z-index: 12000 !important;
+        }
+
+        .modal-eliminar-nota .ui-dialog-content {
+            background-color: #FFFFFF !important;
+            padding: 30px 36px !important;
+        }
+
+        .eliminar-nota-box {
+            padding: 10px 4px;
+            text-align: center;
+            color: #833D3D;
+            font-family: 'Archivo', Arial, sans-serif;
+        }
+
+        .eliminar-nota-title {
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1.35;
+            margin-bottom: 8px;
+            color: #833D3D;
+        }
+
+        .eliminar-nota-text {
+            font-size: 15px;
+            color: #555555;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .btn-modal-eliminar-nota {
+            background-color: #e63323 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            border-radius: 4px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            padding: 8px 26px !important;
+            min-width: 135px !important;
+        }
+
+        .btn-modal-eliminar-nota:hover {
+            background-color: #c9281b !important;
+        }
+
     </style>
 </h:head>
 
@@ -1586,12 +1697,22 @@
                                                         </div>
 
                                                         <div class="nota-actions">
+                                                            <p:commandButton value="Eliminar"
+                                                                             icon="pi pi-trash"
+                                                                             iconPos="left"
+                                                                             actionListener="#{pacienteBean.prepararEliminarNota(nota)}"
+                                                                             process="@this"
+                                                                             update=":frmEliminarNota:pnlConfirmarEliminarNota :frmNotas:msgsExpediente"
+                                                                             oncomplete="PF('dlgEliminarNota').show();"
+                                                                             styleClass="btn-nota-accion" />
+
                                                             <p:commandButton value="Editar"
                                                                              icon="pi pi-pencil"
+                                                                             iconPos="left"
                                                                              actionListener="#{pacienteBean.prepararEdicionNota(nota)}"
                                                                              process="@this"
                                                                              update=":frmNotas:msgsExpediente :frmNotas:panelNotas"
-                                                                             styleClass="btn-guardar" />
+                                                                             styleClass="btn-nota-accion" />
                                                         </div>
                                                     </div>
                                                 </ui:repeat>
@@ -1650,7 +1771,7 @@
 
                                     <p:outputPanel id="panelArchivos">
 
-                                        <div class="expediente-section-title">Archivos</div>
+                                        <div class="nota-title">Archivos</div>
 
                                         <div class="archivo-upload-box">
                                             <div class="archivo-upload-icon">
@@ -1865,6 +1986,56 @@
         </p:dialog>
     </h:form>
 
+
+
+
+    <h:form id="frmEliminarNota">
+        <p:dialog widgetVar="dlgEliminarNota"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Confirmación"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  appendTo="@(body)"
+                  styleClass="modal-sipsi modal-eliminar-nota">
+
+            <p:outputPanel id="pnlConfirmarEliminarNota">
+                <div class="eliminar-nota-box">
+                    <div class="eliminar-nota-title">
+                        ¿Estás segura de que deseas eliminar esta nota?
+                    </div>
+
+                    <div class="eliminar-nota-text">
+                        <h:panelGroup rendered="#{not empty pacienteBean.notaEliminar}">
+                            Esta acción eliminará definitivamente la nota clínica seleccionada.
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{empty pacienteBean.notaEliminar}">
+                            No se encontró la nota clínica seleccionada.
+                        </h:panelGroup>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                    <p:commandButton value="Cancelar"
+                                     actionListener="#{pacienteBean.cancelarEliminarNota}"
+                                     process="@this"
+                                     update=":frmEliminarNota:pnlConfirmarEliminarNota"
+                                     oncomplete="PF('dlgEliminarNota').hide();"
+                                     styleClass="btn-cancelar" />
+
+                    <p:commandButton value="Eliminar"
+                                     icon="pi pi-trash"
+                                     actionListener="#{pacienteBean.eliminarNota}"
+                                     process="@this"
+                                     update=":frmNotas:msgsExpediente :frmNotas:panelNotas :pnlExpediente :frmEliminarNota:pnlConfirmarEliminarNota"
+                                     oncomplete="if(!args.validationFailed){PF('dlgEliminarNota').hide();}"
+                                     styleClass="btn-modal-eliminar-nota" />
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+    </h:form>
 
     <h:form id="formModalCerrarSesion">
         <p:dialog widgetVar="dlgCerrarSesion"

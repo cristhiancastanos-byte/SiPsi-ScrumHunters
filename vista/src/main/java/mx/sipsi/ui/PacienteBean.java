@@ -50,6 +50,7 @@ public class PacienteBean implements Serializable {
     private PacienteEntity pacienteEliminarDefinitivo = new PacienteEntity();
     private NotaEntity nuevaNota = new NotaEntity();
     private NotaEntity notaEditar = new NotaEntity();
+    private NotaEntity notaEliminar = new NotaEntity();
     private boolean editandoNota = false;
     private final NotaDelegate notaDelegate = new NotaDelegate();
 
@@ -453,6 +454,7 @@ public class PacienteBean implements Serializable {
     public void abrirExpediente(int idPaciente) {
         try {
             notaEditar = new NotaEntity();
+            notaEliminar = new NotaEntity();
             editandoNota = false;
 
             pacienteExpediente = expedienteDelegate.obtenerExpedienteCompleto(Long.valueOf(idPaciente));
@@ -643,6 +645,92 @@ public class PacienteBean implements Serializable {
         editandoNota = false;
 
         PrimeFaces.current().ajax().update("frmNotas:panelNotas");
+    }
+
+
+
+    public void prepararEliminarNota(NotaEntity nota) {
+        try {
+            if (nota == null || nota.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró la nota clínica seleccionada."));
+                return;
+            }
+
+            notaEliminar = notaDelegate.consultarNotaPorId(nota.getId());
+
+            PrimeFaces.current().ajax().update("frmEliminarNota:pnlConfirmarEliminarNota");
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            notaEliminar = new NotaEntity();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error",
+                            "No se pudo cargar la nota clínica para eliminar."));
+
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+        }
+    }
+
+    public void eliminarNota() {
+        try {
+            if (notaEliminar == null || notaEliminar.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró la nota clínica seleccionada."));
+                return;
+            }
+
+            if (pacienteExpediente == null || pacienteExpediente.getId() <= 0) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                                "Error",
+                                "No se encontró el paciente asociado al expediente."));
+                return;
+            }
+
+            int idPaciente = pacienteExpediente.getId();
+
+            notaDelegate.eliminarNota(notaEliminar.getId());
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_INFO,
+                            "Nota eliminada correctamente",
+                            "La nota clínica se eliminó correctamente."));
+
+            notaEliminar = new NotaEntity();
+            notaEditar = new NotaEntity();
+            editandoNota = false;
+
+            abrirExpediente(idPaciente);
+
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+            PrimeFaces.current().ajax().update("pnlExpediente");
+            PrimeFaces.current().ajax().update("frmEliminarNota:pnlConfirmarEliminarNota");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Error al eliminar",
+                            "No se pudo eliminar la nota clínica."));
+
+            PrimeFaces.current().ajax().update("frmNotas:msgsExpediente");
+            PrimeFaces.current().ajax().update("frmEliminarNota:pnlConfirmarEliminarNota");
+        }
+    }
+
+    public void cancelarEliminarNota() {
+        notaEliminar = new NotaEntity();
+        PrimeFaces.current().ajax().update("frmEliminarNota:pnlConfirmarEliminarNota");
     }
 
     public void actualizarPaciente() {
@@ -1041,6 +1129,15 @@ public class PacienteBean implements Serializable {
 
     public void setEditandoNota(boolean editandoNota) {
         this.editandoNota = editandoNota;
+    }
+
+
+    public NotaEntity getNotaEliminar() {
+        return notaEliminar;
+    }
+
+    public void setNotaEliminar(NotaEntity notaEliminar) {
+        this.notaEliminar = notaEliminar;
     }
 
 }
