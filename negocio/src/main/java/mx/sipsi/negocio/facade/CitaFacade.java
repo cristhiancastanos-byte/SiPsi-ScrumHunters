@@ -101,6 +101,28 @@ public class CitaFacade {
         return cita;
     }
 
+    public void cancelarCita(Integer idCita, String motivo) {
+        if (idCita == null || idCita <= 0) {
+            throw new IllegalArgumentException("La cita seleccionada no es válida");
+        }
+
+        if (motivo == null || motivo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Campo obligatorio");
+        }
+
+        CitaEntity cita = consultarCitaPorId(idCita);
+
+        if (cita == null) {
+            throw new IllegalArgumentException("No se encontró la cita seleccionada");
+        }
+
+        if ("Cancelada".equalsIgnoreCase(cita.getEstado())) {
+            throw new IllegalArgumentException("La cita ya se encuentra cancelada");
+        }
+
+        persistencia.cancelarCita(idCita, motivo.trim());
+    }
+
     public void actualizarCita(CitaEntity cita) {
         if (cita == null) {
             throw new IllegalArgumentException("La cita no puede estar vacía");
