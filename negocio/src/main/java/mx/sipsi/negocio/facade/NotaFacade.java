@@ -63,4 +63,12 @@ public class NotaFacade {
 
         notaNegocioIntegration.actualizarNota(nota);
     }
+
+    public void eliminarNota(int idNota) throws Exception {
+        if (idNota <= 0) {
+            throw new Exception("No se encontró la nota clínica seleccionada.");
+        }
+
+        notaNegocioIntegration.eliminarNota(idNota);
+    }
 }

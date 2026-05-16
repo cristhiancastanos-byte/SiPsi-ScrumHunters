@@ -112,4 +112,37 @@ public class NotaPersistence {
             }
         }
     }
+
+    public void executeDeleteNota(int idNota) throws Exception {
+        EntityManager entityManager = null;
+
+        try {
+            entityManager = entityManagerFactory.createEntityManager();
+            entityManager.getTransaction().begin();
+
+            NotaEntity notaManaged = entityManager.find(NotaEntity.class, idNota);
+
+            if (notaManaged == null) {
+                throw new Exception("No se encontró la nota clínica que se desea eliminar.");
+            }
+
+            entityManager.remove(notaManaged);
+            entityManager.flush();
+
+            entityManager.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (entityManager != null && entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+
+            e.printStackTrace();
+            throw new Exception("Error al eliminar la nota clínica: " + e.getMessage(), e);
+
+        } finally {
+            if (entityManager != null && entityManager.isOpen()) {
+                entityManager.close();
+            }
+        }
+    }
 }

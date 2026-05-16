@@ -22,4 +22,8 @@ public class NotaDelegate {
     public void actualizarNota(NotaEntity nota) throws Exception {
         notaFacade.actualizarNota(nota);
     }
+
+    public void eliminarNota(int idNota) throws Exception {
+        notaFacade.eliminarNota(idNota);
+    }
 }
