@@ -387,6 +387,8 @@
             font-weight: bold;
             padding: 1px 3px !important;
             margin-bottom: 2px !important;
+            position: relative !important;
+            cursor: default !important;
         }
 
         .evento-activo .fc-daygrid-event-dot,
@@ -465,6 +467,34 @@
         .btn-accion-evento:hover {
             background-color: #FFEDEC;
             border-color: #833D3D;
+        }
+
+        .motivo-hover-cita {
+            display: none;
+            position: absolute;
+            left: 50%;
+            bottom: calc(100% + 6px);
+            transform: translateX(-50%);
+            background-color: #FFFFFF;
+            color: #833D3D;
+            border: 1px solid #CF8080;
+            border-radius: 6px;
+            padding: 6px 9px;
+            font-size: 12px;
+            line-height: 1.25;
+            font-weight: normal;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.18);
+            z-index: 30;
+            width: max-content;
+            max-width: 230px;
+            white-space: normal;
+            pointer-events: none;
+        }
+
+        .fc-event.evento-con-motivo:hover .motivo-hover-cita,
+        .fc-h-event.evento-con-motivo:hover .motivo-hover-cita,
+        .fc-daygrid-dot-event.evento-con-motivo:hover .motivo-hover-cita {
+            display: block;
         }
 
         .area-reporte {
@@ -1184,6 +1214,26 @@
 
                 var esEditable = elemento.classList.contains('evento-editable');
                 var esRealizada = elemento.classList.contains('evento-realizada');
+                var motivoHover = '';
+
+                if (evento.extendedProps) {
+                    motivoHover = evento.extendedProps.motivoHover || evento.extendedProps.description || '';
+                }
+
+                if (!motivoHover &amp;&amp; evento.description) {
+                    motivoHover = evento.description;
+                }
+
+                elemento.removeAttribute('title');
+
+                if (motivoHover) {
+                    if (!elemento.querySelector('.motivo-hover-cita')) {
+                        var tooltipMotivo = document.createElement('span');
+                        tooltipMotivo.className = 'motivo-hover-cita';
+                        tooltipMotivo.textContent = motivoHover;
+                        elemento.appendChild(tooltipMotivo);
+                    }
+                }
 
                 if (!esEditable &amp;&amp; !esRealizada) {
                     return;

@@ -105,14 +105,19 @@ public class CitaBean implements Serializable {
                     String nombrePaciente = obtenerNombreParaAgenda(cita, nombresPacientes);
                     String titulo = construirTituloEvento(cita, nombrePaciente);
 
+                    String descripcionHover = construirDescripcionHover(cita);
+                    String claseMotivo = descripcionHover != null && !descripcionHover.trim().isEmpty()
+                            ? " evento-con-motivo"
+                            : "";
+
                     String claseEvento;
 
                     if (esCitaCancelada(cita)) {
-                        claseEvento = "evento-cancelado";
+                        claseEvento = "evento-cancelado" + claseMotivo;
                     } else if (esCitaRealizada(cita)) {
-                        claseEvento = "evento-activo evento-editable evento-realizada";
+                        claseEvento = "evento-activo evento-realizada" + claseMotivo;
                     } else {
-                        claseEvento = "evento-activo evento-editable";
+                        claseEvento = "evento-activo evento-editable" + claseMotivo;
                     }
 
                     DefaultScheduleEvent<?> evento = DefaultScheduleEvent.builder()
@@ -122,6 +127,8 @@ public class CitaBean implements Serializable {
                             .endDate(fechaFin)
                             .data(cita)
                             .styleClass(claseEvento)
+                            .description(descripcionHover)
+                            .dynamicProperty("motivoHover", descripcionHover)
                             .build();
 
                     addEvent(evento);
@@ -195,7 +202,7 @@ public class CitaBean implements Serializable {
         if (evento != null && evento.getData() instanceof CitaEntity) {
             CitaEntity citaSeleccionada = (CitaEntity) evento.getData();
 
-            if (!esCitaCancelada(citaSeleccionada)) {
+            if (!esCitaCancelada(citaSeleccionada) && !esCitaRealizada(citaSeleccionada)) {
                 prepararEdicionCita(citaSeleccionada);
                 PrimeFaces.current().executeScript("PF('dlgEditarCita').show();");
             }
@@ -249,6 +256,12 @@ public class CitaBean implements Serializable {
 
             if (esCitaCancelada(this.citaEditar)) {
                 mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Cita cancelada", "No se puede editar una cita cancelada.");
+                FacesContext.getCurrentInstance().validationFailed();
+                return;
+            }
+
+            if (esCitaRealizada(this.citaEditar)) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Cita finalizada", "No se puede editar una cita que ya pasó.");
                 FacesContext.getCurrentInstance().validationFailed();
                 return;
             }
@@ -323,6 +336,12 @@ public class CitaBean implements Serializable {
                 return;
             }
 
+            if (esCitaRealizada(this.citaCancelar)) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Cita finalizada", "No se puede cancelar una cita que ya pasó.");
+                FacesContext.getCurrentInstance().validationFailed();
+                return;
+            }
+
             this.nombrePacienteCancelar = obtenerNombreParaAgenda(this.citaCancelar, new HashMap<>());
             this.citaCancelarTexto = construirTextoCitaCancelacion(this.citaCancelar);
 
@@ -348,6 +367,20 @@ public class CitaBean implements Serializable {
         }
 
         try {
+            this.citaCancelar = helper.getCitaDelegate().consultarCitaPorId(citaCancelar.getIdCita());
+
+            if (esCitaRealizada(this.citaCancelar)) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Cita finalizada", "No se puede cancelar una cita que ya pasó.");
+                FacesContext.getCurrentInstance().validationFailed();
+                return;
+            }
+
+            if (esCitaCancelada(this.citaCancelar)) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Cita cancelada", "La cita ya se encuentra cancelada.");
+                FacesContext.getCurrentInstance().validationFailed();
+                return;
+            }
+
             helper.getCitaDelegate().cancelarCita(citaCancelar.getIdCita(), motivoCancelacion.trim());
 
             mostrarMensaje(FacesMessage.SEVERITY_INFO, "Éxito", "La cita se ha cancelado correctamente.");
@@ -610,8 +643,20 @@ public class CitaBean implements Serializable {
         return nombrePaciente + "\n" + horaInicio + " - " + horaFin;
     }
 
+    private String construirDescripcionHover(CitaEntity cita) {
+        if (cita == null || cita.getMotivo() == null || cita.getMotivo().trim().isEmpty()) {
+            return "";
+        }
+
+        if (esCitaCancelada(cita)) {
+            return "Motivo de cancelación: " + cita.getMotivo().trim();
+        }
+
+        return "Motivo: " + cita.getMotivo().trim();
+    }
+
     private boolean esCitaCancelada(CitaEntity cita) {
-        return cita.getEstado() != null && cita.getEstado().equalsIgnoreCase("Cancelada");
+        return cita != null && cita.getEstado() != null && cita.getEstado().equalsIgnoreCase("Cancelada");
     }
 
     private boolean esCitaRealizada(CitaEntity cita) {
