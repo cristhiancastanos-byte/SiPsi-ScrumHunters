@@ -27,8 +27,4 @@ public class ArchivoDelegate {
     public List<ArchivoEntity> listarPorPaciente(int idPaciente) throws IOException {
         return archivoFacade.listarPorPaciente(idPaciente);
     }
-
-    public void eliminarArchivo(Long idArchivo) throws IOException {
-        archivoFacade.eliminarArchivo(idArchivo);
-    }
 }

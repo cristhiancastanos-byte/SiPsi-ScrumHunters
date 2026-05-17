@@ -14,6 +14,4 @@ public interface IArchivoNegocioIntegration {
     ArchivoEntity buscarPorId(Long idArchivo) throws IOException;
 
     List<ArchivoEntity> listarPorPaciente(int idPaciente) throws IOException;
-
-    void eliminarArchivo(Long idArchivo) throws IOException;
 }

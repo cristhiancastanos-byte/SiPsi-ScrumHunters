@@ -28,8 +28,4 @@ public class ArchivoFacade {
     public List<ArchivoEntity> listarPorPaciente(int idPaciente) throws IOException {
         return archivoNegocioIntegration.listarPorPaciente(idPaciente);
     }
-
-    public void eliminarArchivo(Long idArchivo) throws IOException {
-        archivoNegocioIntegration.eliminarArchivo(idArchivo);
-    }
 }

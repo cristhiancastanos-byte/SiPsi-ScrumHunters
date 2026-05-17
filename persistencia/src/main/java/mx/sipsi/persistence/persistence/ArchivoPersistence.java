@@ -82,34 +82,4 @@ public class ArchivoPersistence {
         }
     }
 
-    public void eliminarArchivo(Long idArchivo) throws Exception {
-        EntityManager entityManager = null;
-
-        try {
-            entityManager = emf.createEntityManager();
-            entityManager.getTransaction().begin();
-
-            ArchivoEntity archivo = entityManager.find(ArchivoEntity.class, idArchivo);
-
-            if (archivo == null) {
-                throw new Exception("No se encontró el archivo.");
-            }
-
-            entityManager.remove(archivo);
-
-            entityManager.getTransaction().commit();
-
-        } catch (Exception e) {
-            if (entityManager != null && entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-
-            throw new Exception("Error al eliminar el archivo de la base de datos.", e);
-
-        } finally {
-            if (entityManager != null && entityManager.isOpen()) {
-                entityManager.close();
-            }
-        }
-    }
 }

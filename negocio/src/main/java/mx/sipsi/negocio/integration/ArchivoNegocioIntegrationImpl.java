@@ -104,28 +104,6 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
         }
     }
 
-    @Override
-    public void eliminarArchivo(Long idArchivo) throws IOException {
-        try {
-            ArchivoEntity archivo = archivoPersistenciaIntegration.buscarPorId(idArchivo);
-
-            if (archivo == null) {
-                throw new IOException("No se encontró el archivo.");
-            }
-
-            File archivoFisico = new File(archivo.getRutaServidor());
-
-            if (archivoFisico.exists()) {
-                archivoFisico.delete();
-            }
-
-            archivoPersistenciaIntegration.eliminarArchivo(idArchivo);
-
-        } catch (Exception e) {
-            throw new IOException("Error al eliminar el archivo.", e);
-        }
-    }
-
     private String limpiarNombreArchivo(String texto) {
         if (texto == null || texto.trim().isEmpty()) {
             return "Paciente";

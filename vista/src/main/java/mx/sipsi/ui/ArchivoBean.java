@@ -22,9 +22,6 @@ public class ArchivoBean implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private ArchivoDelegate archivoDelegate;
-    private ArchivoEntity archivoVista;
-    private ArchivoEntity archivoEliminar;
-    private Long idArchivoEliminar;
 
     @Inject
     private PacienteBean pacienteBean;
@@ -112,94 +109,6 @@ public class ArchivoBean implements Serializable {
         return null;
     }
 
-    public void prepararVista(Long idArchivo) {
-        try {
-            if (idArchivo == null) {
-                agregarError("Error", "No se encontró el archivo seleccionado.");
-                return;
-            }
-
-            archivoVista = archivoDelegate.buscarPorId(idArchivo);
-
-            if (archivoVista == null) {
-                agregarError("Error", "No se encontró el archivo seleccionado.");
-            }
-
-        } catch (IOException e) {
-            agregarError("No se pudo abrir el archivo", e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            agregarError("Error", "Ocurrió un problema al abrir el archivo.");
-        }
-    }
-
-    public void prepararEliminarArchivo(Long idArchivo) {
-        try {
-            this.idArchivoEliminar = idArchivo;
-            this.archivoEliminar = null;
-
-            if (idArchivo == null) {
-                agregarError("Error", "No se encontró el archivo seleccionado.");
-                return;
-            }
-
-            this.archivoEliminar = archivoDelegate.buscarPorId(idArchivo);
-
-            if (this.archivoEliminar == null) {
-                agregarError("Error", "No se encontró el archivo seleccionado.");
-            }
-
-        } catch (IOException e) {
-            agregarError("No se pudo preparar la eliminación", e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            agregarError("Error", "Ocurrió un problema al preparar la eliminación.");
-        }
-    }
-
-    public void confirmarEliminarArchivo() {
-        eliminarArchivo(idArchivoEliminar);
-        limpiarEliminacion();
-    }
-
-    public void eliminarArchivo(Long idArchivo) {
-        try {
-            if (idArchivo == null) {
-                agregarError("Error", "No se encontró el archivo seleccionado.");
-                return;
-            }
-
-            archivoDelegate.eliminarArchivo(idArchivo);
-
-            PacienteEntity pacienteActual = null;
-
-            if (pacienteBean != null) {
-                pacienteActual = pacienteBean.getPacienteExpediente();
-            }
-
-            if (pacienteActual != null && pacienteActual.getArchivos() != null) {
-                pacienteActual.getArchivos().removeIf(archivo -> archivo.getId() != null && archivo.getId().equals(idArchivo));
-            }
-
-            if (archivoVista != null && archivoVista.getId() != null && archivoVista.getId().equals(idArchivo)) {
-                archivoVista = null;
-            }
-
-            agregarInfo("Archivo eliminado correctamente", "El archivo fue eliminado del expediente.");
-
-        } catch (IOException e) {
-            agregarError("No se pudo eliminar el archivo", e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            agregarError("Error", "Ocurrió un problema al eliminar el archivo.");
-        }
-    }
-
-    private void limpiarEliminacion() {
-        this.idArchivoEliminar = null;
-        this.archivoEliminar = null;
-    }
-
     private void agregarInfo(String resumen, String detalle) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, resumen, detalle));
@@ -208,29 +117,5 @@ public class ArchivoBean implements Serializable {
     private void agregarError(String resumen, String detalle) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, resumen, detalle));
-    }
-
-    public ArchivoEntity getArchivoVista() {
-        return archivoVista;
-    }
-
-    public void setArchivoVista(ArchivoEntity archivoVista) {
-        this.archivoVista = archivoVista;
-    }
-
-    public ArchivoEntity getArchivoEliminar() {
-        return archivoEliminar;
-    }
-
-    public void setArchivoEliminar(ArchivoEntity archivoEliminar) {
-        this.archivoEliminar = archivoEliminar;
-    }
-
-    public Long getIdArchivoEliminar() {
-        return idArchivoEliminar;
-    }
-
-    public void setIdArchivoEliminar(Long idArchivoEliminar) {
-        this.idArchivoEliminar = idArchivoEliminar;
     }
 }

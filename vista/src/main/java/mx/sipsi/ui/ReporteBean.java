@@ -77,7 +77,7 @@ public class ReporteBean implements Serializable {
             Integer idCita = Integer.parseInt(idCitaParam);
 
             if (motivoCitaParam != null && !motivoCitaParam.trim().isEmpty()) {
-                this.motivoReporteSeleccionado = motivoCitaParam.trim();
+                this.motivoReporteSeleccionado = limpiarTextoMotivo(motivoCitaParam);
             } else {
                 this.motivoReporteSeleccionado = "Sin motivo registrado";
             }
@@ -125,7 +125,7 @@ public class ReporteBean implements Serializable {
             }
 
             if (cita.getMotivo() != null && !cita.getMotivo().trim().isEmpty()) {
-                this.motivoReporteSeleccionado = cita.getMotivo().trim();
+                this.motivoReporteSeleccionado = limpiarTextoMotivo(cita.getMotivo());
             } else {
                 this.motivoReporteSeleccionado = "Sin motivo registrado";
             }
@@ -221,6 +221,21 @@ public class ReporteBean implements Serializable {
         if (imagenReporteBean != null) {
             imagenReporteBean.limpiarImagenesPendientes();
         }
+    }
+
+
+    private String limpiarTextoMotivo(String motivo) {
+        if (motivo == null || motivo.trim().isEmpty()) {
+            return "Sin motivo registrado";
+        }
+
+        String motivoLimpio = motivo.trim();
+
+        if (motivoLimpio.startsWith("Motivo:")) {
+            motivoLimpio = motivoLimpio.substring("Motivo:".length()).trim();
+        }
+
+        return motivoLimpio.isEmpty() ? "Sin motivo registrado" : motivoLimpio;
     }
 
     private void mostrarMensaje(FacesMessage.Severity severity, String summary, String detail) {

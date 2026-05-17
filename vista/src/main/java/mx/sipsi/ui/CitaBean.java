@@ -652,7 +652,7 @@ public class CitaBean implements Serializable {
             return "Motivo de cancelación: " + cita.getMotivo().trim();
         }
 
-        return "Motivo: " + cita.getMotivo().trim();
+        return cita.getMotivo().trim();
     }
 
     private boolean esCitaCancelada(CitaEntity cita) {
