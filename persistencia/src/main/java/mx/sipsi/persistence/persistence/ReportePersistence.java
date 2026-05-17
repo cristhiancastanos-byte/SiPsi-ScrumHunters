@@ -85,4 +85,28 @@ public class ReportePersistence {
             }
         }
     }
+
+    public ReporteEntity executeSelectReporteById(Integer idReporte) throws Exception {
+        EntityManager em = null;
+
+        try {
+            em = emf.createEntityManager();
+
+            TypedQuery<ReporteEntity> query = em.createQuery(
+                    "SELECT r FROM ReporteEntity r WHERE r.idReporte = :idReporte",
+                    ReporteEntity.class
+            );
+
+            query.setParameter("idReporte", idReporte);
+            query.setMaxResults(1);
+
+            return query.getResultStream().findFirst().orElse(null);
+        } catch (Exception e) {
+            throw new Exception("Error al consultar el reporte clínico seleccionado.", e);
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
 }

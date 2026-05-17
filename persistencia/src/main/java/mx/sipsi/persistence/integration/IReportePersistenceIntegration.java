@@ -9,4 +9,6 @@ public interface IReportePersistenceIntegration {
     boolean existeReportePorCita(Integer idCita) throws Exception;
 
     ReporteEntity consultarReportePorCita(Integer idCita) throws Exception;
+
+    ReporteEntity consultarReportePorId(Integer idReporte) throws Exception;
 }
