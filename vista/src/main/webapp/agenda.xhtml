@@ -626,6 +626,260 @@
             margin-top: 2px;
         }
 
+        .reporte-ver-contenedor {
+            position: relative;
+            min-height: 285px;
+        }
+
+        .reporte-ver-top {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 5px;
+        }
+
+        .btn-detalles-reporte {
+            background-color: #CF8080 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            padding: 6px 18px !important;
+            font-size: 12px !important;
+            border-radius: 3px !important;
+            font-family: 'Archivo', Arial, sans-serif;
+        }
+
+        .btn-detalles-reporte:hover {
+            background-color: #833D3D !important;
+        }
+
+        .reporte-campo-titulo {
+            color: #833D3D;
+            font-weight: bold;
+            font-size: 16px;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .reporte-campo-texto {
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.25;
+            margin: 5px 0 14px 0;
+            white-space: pre-line;
+        }
+
+        .reporte-campo-oculto {
+            color: #333333;
+            font-size: 16px;
+            margin: 5px 0 14px 0;
+        }
+
+        .reporte-archivos-lista {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .reporte-archivo-card {
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            gap: 7px;
+            align-items: center;
+            width: 155px;
+            border: 1px solid #EAEAEA;
+            border-radius: 4px;
+            padding: 6px;
+            background-color: #FFFFFF;
+        }
+
+        .reporte-archivo-card-click {
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .reporte-archivo-card-click:hover {
+            background-color: #FFF4F4;
+            border-color: #CF8080;
+        }
+
+        .reporte-archivo-icono {
+            width: 34px;
+            height: 34px;
+            border-radius: 3px;
+            background-color: #F8F1F1;
+            border: 1px solid #EADADA;
+            color: #833D3D;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .reporte-archivo-nombre {
+            color: #333333;
+            font-size: 9px;
+            font-weight: bold;
+            line-height: 1.1;
+            word-break: break-word;
+        }
+
+        .reporte-archivo-meta {
+            color: #808080;
+            font-size: 9px;
+            margin-top: 2px;
+        }
+
+        .reporte-botones-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .area-impresion-reporte {
+            display: none;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+
+            .area-impresion-reporte,
+            .area-impresion-reporte * {
+                visibility: visible !important;
+            }
+
+            .area-impresion-reporte {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: #FFFFFF !important;
+                color: #333333 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-family: 'Archivo', Arial, sans-serif !important;
+            }
+
+            .no-print {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            .print-hoja {
+                width: 90%;
+                margin: 0 auto;
+                padding: 30px 20px;
+            }
+
+            .print-logo {
+                color: #A4616A;
+                text-align: center;
+                font-size: 34px;
+                font-weight: bold;
+                margin-bottom: 2px;
+                letter-spacing: 1px;
+            }
+
+            .print-subtitulo {
+                text-align: center;
+                font-size: 12px;
+                margin-bottom: 18px;
+            }
+
+            .print-titulo {
+                color: #A4616A;
+                text-align: center;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .print-linea {
+                width: 230px;
+                border-top: 1px solid #DDAEAC;
+                margin: 0 auto 20px auto;
+                position: relative;
+            }
+
+            .print-linea::after {
+                content: "";
+                width: 6px;
+                height: 6px;
+                background: #A4616A;
+                border-radius: 50%;
+                position: absolute;
+                left: 50%;
+                top: -4px;
+                transform: translateX(-50%);
+            }
+
+            .print-info {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                border: 1px solid #E8CACA;
+                border-radius: 4px;
+                margin-bottom: 24px;
+            }
+
+            .print-info-col {
+                padding: 12px 10px;
+                text-align: center;
+                border-right: 1px solid #E8CACA;
+            }
+
+            .print-info-col:last-child {
+                border-right: none;
+            }
+
+            .print-label {
+                color: #A4616A;
+                font-weight: bold;
+                font-size: 12px;
+                margin-bottom: 7px;
+            }
+
+            .print-texto {
+                font-size: 12px;
+                color: #333333;
+            }
+
+            .print-bloque {
+                border: 1px solid #E8CACA;
+                border-radius: 4px;
+                margin-bottom: 22px;
+                overflow: hidden;
+            }
+
+            .print-bloque-titulo {
+                background-color: #FFF4F4;
+                color: #A4616A;
+                font-weight: bold;
+                font-size: 13px;
+                padding: 8px 12px;
+                border-bottom: 1px solid #E8CACA;
+            }
+
+            .print-bloque-contenido {
+                padding: 14px 12px;
+                font-size: 13px;
+                line-height: 1.45;
+                white-space: pre-line;
+            }
+
+            .print-firma {
+                width: 210px;
+                border-top: 1px solid #333333;
+                margin: 45px auto 0 auto;
+                padding-top: 8px;
+                text-align: center;
+                color: #A4616A;
+                font-size: 12px;
+            }
+        }
+
         @media (max-width: 768px) {
             .fc .fc-toolbar.fc-header-toolbar {
                 min-height: 60px !important;
@@ -644,7 +898,7 @@
 
 <h:body>
 
-    <div class="header-top">
+    <div class="header-top no-print">
         <div class="nav-links">
             <span class="nav-item-active">Mis Citas</span>
             <h:outputLink value="pacientes.xhtml" styleClass="nav-item-inactive">Pacientes</h:outputLink>
@@ -657,7 +911,7 @@
         </h:form>
     </div>
 
-    <h:form id="frmAgenda" >
+    <h:form id="frmAgenda" styleClass="no-print">
 
         <p:growl id="msgs" showDetail="true" globalOnly="true" />
 
@@ -687,8 +941,8 @@
 
                 <p:remoteCommand name="prepararReporteDesdeAgenda"
                                  actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
-                                 update="msgs :frmReporte:pnlReporte :frmReporte:msgsReporte"
-                                 oncomplete="if (args.abrirReporte) PF('modalReporte').show();" />
+                                 update="msgs :frmReporte:pnlReporte :frmReporte:msgsReporte :frmVerReporte:contenidoVerReporte :frmVerReporte:areaPrintReporte"
+                                 oncomplete="if (args.abrirCrearReporte) PF('modalReporte').show(); if (args.abrirVerReporte) PF('modalVerReporte').show();" />
 
                 <p:schedule id="calendarioCitas"
                             widgetVar="calendarioCitasWidget"
@@ -1035,7 +1289,6 @@
 
     </h:form>
 
-
     <h:form id="frmReporte" enctype="multipart/form-data">
 
         <p:growl id="msgsReporte"
@@ -1157,6 +1410,209 @@
             </p:outputPanel>
 
         </p:dialog>
+
+    </h:form>
+
+    <h:form id="frmVerReporte">
+
+        <p:dialog widgetVar="modalVerReporte"
+                  modal="true"
+                  width="650"
+                  resizable="false"
+                  header="Reporte de sesión"
+                  closable="false"
+                  styleClass="modal-sipsi">
+
+            <p:outputPanel id="contenidoVerReporte">
+
+                <div class="reporte-ver-contenedor no-print">
+
+                    <div class="reporte-ver-top">
+                        <p:commandButton value="#{reporteBean.textoBotonDetalles}"
+                                         actionListener="#{reporteBean.verDetalles}"
+                                         process="@this"
+                                         update="contenidoVerReporte areaPrintReporte"
+                                         oncomplete="PF('modalVerReporte').show();"
+                                         styleClass="btn-detalles-reporte" />
+                    </div>
+
+                    <h:outputText value="Motivo de la cita:"
+                                  styleClass="reporte-campo-titulo" />
+
+                    <div class="reporte-campo-texto">
+                        <h:outputText value="#{reporteBean.motivoReporteSeleccionado}" />
+                    </div>
+
+                    <h:outputText value="Nota de sesión:"
+                                  styleClass="reporte-campo-titulo" />
+
+                    <h:panelGroup rendered="#{not reporteBean.mostrarDetalles}">
+                        <div class="reporte-campo-oculto">
+                            Contenido oculto.
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{reporteBean.mostrarDetalles}">
+                        <div class="reporte-campo-texto">
+                            <h:outputText value="#{reporteBean.reporteSeleccionado.contenido}" />
+                        </div>
+                    </h:panelGroup>
+
+                    <h:outputText value="Archivos:"
+                                  styleClass="reporte-campo-titulo" />
+
+                    <h:panelGroup rendered="#{not reporteBean.mostrarDetalles}">
+                        <div class="reporte-campo-oculto">
+                            Contenido oculto.
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{reporteBean.mostrarDetalles}">
+
+                        <h:panelGroup rendered="#{empty reporteBean.imagenesReporteSeleccionado}">
+                            <div class="reporte-campo-oculto">
+                                Sin archivos agregados.
+                            </div>
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{not empty reporteBean.imagenesReporteSeleccionado}">
+                            <div class="reporte-archivos-lista">
+
+                                <ui:repeat value="#{reporteBean.imagenesReporteSeleccionado}" var="imagen">
+
+                                    <div class="reporte-archivo-card reporte-archivo-card-click"
+                                         onclick="abrirImagenReporteNuevaPestana('#{request.contextPath}/imagenReporte?id=#{imagen.idImagenReporte}')">
+
+                                        <div class="reporte-archivo-icono">
+                                            🖼️
+                                        </div>
+
+                                        <div>
+                                            <div class="reporte-archivo-nombre">
+                                                #{imagen.nombreOriginal}
+                                            </div>
+
+                                            <div class="reporte-archivo-meta">
+                                                Abrir imagen
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </ui:repeat>
+
+                            </div>
+                        </h:panelGroup>
+
+                    </h:panelGroup>
+
+                    <div class="reporte-botones-footer no-print">
+
+                        <p:commandButton value="Imprimir"
+                                         type="button"
+                                         onclick="imprimirReporteClinico();"
+                                         styleClass="btn-guardar" />
+
+                        <p:commandButton value="Cerrar"
+                                         process="@this"
+                                         actionListener="#{reporteBean.limpiarReporte}"
+                                         update="contenidoVerReporte areaPrintReporte"
+                                         onclick="PF('modalVerReporte').hide();"
+                                         styleClass="btn-cancelar" />
+
+                    </div>
+
+                </div>
+
+            </p:outputPanel>
+
+        </p:dialog>
+
+        <p:outputPanel id="areaPrintReporte">
+
+            <div class="area-impresion-reporte">
+
+                <div class="print-hoja">
+
+                    <div class="print-logo">
+                        SiPsi
+                    </div>
+
+                    <div class="print-subtitulo">
+                        Sistema de la Psicóloga
+                    </div>
+
+                    <div class="print-titulo">
+                        Reporte de sesión
+                    </div>
+
+                    <div class="print-linea"></div>
+
+                    <div class="print-info">
+
+                        <div class="print-info-col">
+                            <div class="print-label">
+                                Paciente
+                            </div>
+
+                            <div class="print-texto">
+                                <h:outputText value="#{reporteBean.nombrePacienteReporte}" />
+                            </div>
+                        </div>
+
+                        <div class="print-info-col">
+                            <div class="print-label">
+                                Fecha de sesión
+                            </div>
+
+                            <div class="print-texto">
+                                <h:outputText value="#{reporteBean.reporteSeleccionado.fechaCreacion}">
+                                    <f:convertDateTime pattern="dd/MM/yyyy" />
+                                </h:outputText>
+                            </div>
+                        </div>
+
+                        <div class="print-info-col">
+                            <div class="print-label">
+                                Psicóloga
+                            </div>
+
+                            <div class="print-texto">
+                                Psicóloga
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="print-bloque">
+                        <div class="print-bloque-titulo">
+                            Motivo de la cita
+                        </div>
+
+                        <div class="print-bloque-contenido">
+                            <h:outputText value="#{reporteBean.motivoReporteSeleccionado}" />
+                        </div>
+                    </div>
+
+                    <div class="print-bloque">
+                        <div class="print-bloque-titulo">
+                            Nota de sesión
+                        </div>
+
+                        <div class="print-bloque-contenido">
+                            <h:outputText value="#{reporteBean.reporteSeleccionado.contenido}" />
+                        </div>
+                    </div>
+
+                    <div class="print-firma">
+                        Firma de la psicóloga
+                    </div>
+
+                </div>
+
+            </div>
+
+        </p:outputPanel>
 
     </h:form>
 
@@ -1303,6 +1759,14 @@
                             {
                                 name: 'idCita',
                                 value: evento.id
+                            },
+                            {
+                                name: 'motivoCita',
+                                value: motivoHover
+                            },
+                            {
+                                name: 'nombrePaciente',
+                                value: evento.title
                             }
                         ]);
                     });
@@ -1316,6 +1780,13 @@
             if (cfg.options) {
                 cfg.options.eventDidMount = nuevoEventDidMount;
             }
+        }
+
+        function imprimirReporteClinico() {
+            window.print();
+        }
+        function abrirImagenReporteNuevaPestana(urlImagen) {
+            window.open(urlImagen, '_blank');
         }
     </script>
 

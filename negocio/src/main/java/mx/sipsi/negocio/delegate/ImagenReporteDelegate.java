@@ -20,4 +20,8 @@ public class ImagenReporteDelegate {
     public List<ImagenReporteEntity> listarImagenesPorReporte(Integer idReporte) throws Exception {
         return imagenReporteFacade.consultarImagenesPorReporte(idReporte);
     }
+
+    public ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception {
+        return imagenReporteFacade.procesarConsultaImagenPorId(idImagen);
+    }
 }

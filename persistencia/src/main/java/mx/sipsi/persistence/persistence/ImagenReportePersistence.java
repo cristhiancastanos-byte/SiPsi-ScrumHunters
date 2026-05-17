@@ -61,4 +61,22 @@ public class ImagenReportePersistence {
             }
         }
     }
+
+    public ImagenReporteEntity executeSelectImagenById(Integer idImagen) throws Exception {
+        EntityManager em = null;
+
+        try {
+            em = emf.createEntityManager();
+
+            return em.find(ImagenReporteEntity.class, idImagen);
+
+        } catch (Exception e) {
+            throw new Exception("Error al consultar la imagen del reporte clínico.", e);
+
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
 }

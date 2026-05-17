@@ -7,11 +7,15 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import mx.sipsi.entity.CitaEntity;
+import mx.sipsi.entity.ImagenReporteEntity;
 import mx.sipsi.entity.ReporteEntity;
+import mx.sipsi.negocio.delegate.ImagenReporteDelegate;
 import mx.sipsi.negocio.delegate.ReporteDelegate;
 import org.primefaces.PrimeFaces;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Named("reporteBean")
 @ViewScoped
@@ -20,8 +24,16 @@ public class ReporteBean implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private ReporteEntity reporteNuevo;
+    private ReporteEntity reporteSeleccionado;
     private CitaEntity citaSeleccionada;
+
     private ReporteDelegate reporteDelegate;
+    private ImagenReporteDelegate imagenReporteDelegate;
+
+    private boolean mostrarDetalles;
+    private String motivoReporteSeleccionado;
+    private String nombrePacienteReporte;
+    private List<ImagenReporteEntity> imagenesReporteSeleccionado;
 
     @Inject
     private ImagenReporteBean imagenReporteBean;
@@ -29,7 +41,13 @@ public class ReporteBean implements Serializable {
     @PostConstruct
     public void init() {
         reporteNuevo = new ReporteEntity();
+        reporteSeleccionado = null;
         reporteDelegate = new ReporteDelegate();
+        imagenReporteDelegate = new ImagenReporteDelegate();
+        mostrarDetalles = false;
+        motivoReporteSeleccionado = "";
+        nombrePacienteReporte = "Paciente";
+        imagenesReporteSeleccionado = new ArrayList<>();
     }
 
     public void prepararReporteDesdeAgenda() {
@@ -39,21 +57,47 @@ public class ReporteBean implements Serializable {
                     .getRequestParameterMap()
                     .get("idCita");
 
+            String motivoCitaParam = FacesContext.getCurrentInstance()
+                    .getExternalContext()
+                    .getRequestParameterMap()
+                    .get("motivoCita");
+
+            String nombrePacienteParam = FacesContext.getCurrentInstance()
+                    .getExternalContext()
+                    .getRequestParameterMap()
+                    .get("nombrePaciente");
+
+            PrimeFaces.current().ajax().addCallbackParam("abrirCrearReporte", false);
+            PrimeFaces.current().ajax().addCallbackParam("abrirVerReporte", false);
+
             if (idCitaParam == null || idCitaParam.trim().isEmpty()) {
-                PrimeFaces.current().ajax().addCallbackParam("abrirReporte", false);
                 return;
             }
 
             Integer idCita = Integer.parseInt(idCitaParam);
 
+            if (motivoCitaParam != null && !motivoCitaParam.trim().isEmpty()) {
+                this.motivoReporteSeleccionado = motivoCitaParam.trim();
+            } else {
+                this.motivoReporteSeleccionado = "Sin motivo registrado";
+            }
+
+            if (nombrePacienteParam != null && !nombrePacienteParam.trim().isEmpty()) {
+                this.nombrePacienteReporte = nombrePacienteParam.trim();
+            } else {
+                this.nombrePacienteReporte = "Paciente";
+            }
+
             if (reporteDelegate.existeReportePorCita(idCita)) {
-                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "Ya existe un reporte para esta cita.");
-                PrimeFaces.current().ajax().addCallbackParam("abrirReporte", false);
+                ReporteEntity reporteExistente = reporteDelegate.consultarReportePorCita(idCita);
+                abrirReporte(reporteExistente.getIdReporte());
+                PrimeFaces.current().ajax().addCallbackParam("abrirVerReporte", true);
                 return;
             }
 
             this.citaSeleccionada = new CitaEntity();
             this.citaSeleccionada.setIdCita(idCita);
+            this.citaSeleccionada.setMotivo(this.motivoReporteSeleccionado);
 
             this.reporteNuevo = new ReporteEntity();
             this.reporteNuevo.setIdCita(idCita);
@@ -62,24 +106,34 @@ public class ReporteBean implements Serializable {
                 imagenReporteBean.prepararCargaImagen(this.reporteNuevo);
             }
 
-            PrimeFaces.current().ajax().addCallbackParam("abrirReporte", true);
+            PrimeFaces.current().ajax().addCallbackParam("abrirCrearReporte", true);
 
         } catch (Exception e) {
             mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo preparar el reporte.");
-            PrimeFaces.current().ajax().addCallbackParam("abrirReporte", false);
+            PrimeFaces.current().ajax().addCallbackParam("abrirCrearReporte", false);
+            PrimeFaces.current().ajax().addCallbackParam("abrirVerReporte", false);
         }
     }
 
     public void prepararReporte(CitaEntity cita) {
         try {
+            PrimeFaces.current().ajax().addCallbackParam("abrirCrearReporte", false);
+            PrimeFaces.current().ajax().addCallbackParam("abrirVerReporte", false);
+
             if (cita == null || cita.getIdCita() == null) {
-                PrimeFaces.current().ajax().addCallbackParam("abrirReporte", false);
                 return;
             }
 
+            if (cita.getMotivo() != null && !cita.getMotivo().trim().isEmpty()) {
+                this.motivoReporteSeleccionado = cita.getMotivo().trim();
+            } else {
+                this.motivoReporteSeleccionado = "Sin motivo registrado";
+            }
+
             if (reporteDelegate.existeReportePorCita(cita.getIdCita())) {
-                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "Ya existe un reporte para esta cita.");
-                PrimeFaces.current().ajax().addCallbackParam("abrirReporte", false);
+                ReporteEntity reporteExistente = reporteDelegate.consultarReportePorCita(cita.getIdCita());
+                abrirReporte(reporteExistente.getIdReporte());
+                PrimeFaces.current().ajax().addCallbackParam("abrirVerReporte", true);
                 return;
             }
 
@@ -91,12 +145,38 @@ public class ReporteBean implements Serializable {
                 imagenReporteBean.prepararCargaImagen(this.reporteNuevo);
             }
 
-            PrimeFaces.current().ajax().addCallbackParam("abrirReporte", true);
+            PrimeFaces.current().ajax().addCallbackParam("abrirCrearReporte", true);
 
         } catch (Exception e) {
             mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo preparar el reporte.");
-            PrimeFaces.current().ajax().addCallbackParam("abrirReporte", false);
+            PrimeFaces.current().ajax().addCallbackParam("abrirCrearReporte", false);
+            PrimeFaces.current().ajax().addCallbackParam("abrirVerReporte", false);
         }
+    }
+
+    public void abrirReporte(Integer idReporte) {
+        try {
+            this.reporteSeleccionado = reporteDelegate.consultarReportePorId(idReporte);
+            this.mostrarDetalles = false;
+
+            if (this.reporteSeleccionado != null && this.reporteSeleccionado.getIdReporte() != null) {
+                this.imagenesReporteSeleccionado = imagenReporteDelegate.listarImagenesPorReporte(
+                        this.reporteSeleccionado.getIdReporte()
+                );
+            } else {
+                this.imagenesReporteSeleccionado = new ArrayList<>();
+            }
+
+        } catch (Exception e) {
+            this.reporteSeleccionado = null;
+            this.imagenesReporteSeleccionado = new ArrayList<>();
+            this.mostrarDetalles = false;
+            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage());
+        }
+    }
+
+    public void verDetalles() {
+        this.mostrarDetalles = !this.mostrarDetalles;
     }
 
     public void guardarReporte() {
@@ -131,7 +211,12 @@ public class ReporteBean implements Serializable {
 
     public void limpiarReporte() {
         this.reporteNuevo = new ReporteEntity();
+        this.reporteSeleccionado = null;
         this.citaSeleccionada = null;
+        this.mostrarDetalles = false;
+        this.motivoReporteSeleccionado = "";
+        this.nombrePacienteReporte = "Paciente";
+        this.imagenesReporteSeleccionado = new ArrayList<>();
 
         if (imagenReporteBean != null) {
             imagenReporteBean.limpiarImagenesPendientes();
@@ -142,6 +227,10 @@ public class ReporteBean implements Serializable {
         FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(severity, summary, detail));
     }
 
+    public String getTextoBotonDetalles() {
+        return mostrarDetalles ? "Ocultar detalles" : "Ver detalles";
+    }
+
     public ReporteEntity getReporteNuevo() {
         return reporteNuevo;
     }
@@ -150,11 +239,51 @@ public class ReporteBean implements Serializable {
         this.reporteNuevo = reporteNuevo;
     }
 
+    public ReporteEntity getReporteSeleccionado() {
+        return reporteSeleccionado;
+    }
+
+    public void setReporteSeleccionado(ReporteEntity reporteSeleccionado) {
+        this.reporteSeleccionado = reporteSeleccionado;
+    }
+
     public CitaEntity getCitaSeleccionada() {
         return citaSeleccionada;
     }
 
     public void setCitaSeleccionada(CitaEntity citaSeleccionada) {
         this.citaSeleccionada = citaSeleccionada;
+    }
+
+    public boolean isMostrarDetalles() {
+        return mostrarDetalles;
+    }
+
+    public void setMostrarDetalles(boolean mostrarDetalles) {
+        this.mostrarDetalles = mostrarDetalles;
+    }
+
+    public String getMotivoReporteSeleccionado() {
+        return motivoReporteSeleccionado;
+    }
+
+    public void setMotivoReporteSeleccionado(String motivoReporteSeleccionado) {
+        this.motivoReporteSeleccionado = motivoReporteSeleccionado;
+    }
+
+    public String getNombrePacienteReporte() {
+        return nombrePacienteReporte;
+    }
+
+    public void setNombrePacienteReporte(String nombrePacienteReporte) {
+        this.nombrePacienteReporte = nombrePacienteReporte;
+    }
+
+    public List<ImagenReporteEntity> getImagenesReporteSeleccionado() {
+        return imagenesReporteSeleccionado;
+    }
+
+    public void setImagenesReporteSeleccionado(List<ImagenReporteEntity> imagenesReporteSeleccionado) {
+        this.imagenesReporteSeleccionado = imagenesReporteSeleccionado;
     }
 }

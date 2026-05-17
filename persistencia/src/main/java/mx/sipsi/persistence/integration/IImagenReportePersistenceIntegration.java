@@ -8,4 +8,6 @@ public interface IImagenReportePersistenceIntegration {
     void guardarImagen(ImagenReporteEntity imagen) throws Exception;
 
     List<ImagenReporteEntity> listarImagenesPorReporte(Integer idReporte) throws Exception;
+
+    ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception;
 }

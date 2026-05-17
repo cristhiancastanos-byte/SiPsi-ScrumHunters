@@ -45,4 +45,36 @@ public class ReporteNegocioIntegrationImpl implements IReporteNegocioIntegration
 
         return reporteDAO.existeReportePorCita(idCita);
     }
+
+    @Override
+    public ReporteEntity consultarReportePorCita(Integer idCita) throws Exception {
+
+        if (idCita == null) {
+            throw new Exception("No se seleccionó una cita válida");
+        }
+
+        ReporteEntity reporte = reporteDAO.consultarReportePorCita(idCita);
+
+        if (reporte == null) {
+            throw new Exception("No se encontró el reporte clínico de la cita");
+        }
+
+        return reporte;
+    }
+
+    @Override
+    public ReporteEntity consultarReportePorId(Integer idReporte) throws Exception {
+
+        if (idReporte == null) {
+            throw new Exception("No se seleccionó un reporte válido");
+        }
+
+        ReporteEntity reporte = reporteDAO.consultarReportePorId(idReporte);
+
+        if (reporte == null) {
+            throw new Exception("No se encontró el reporte clínico seleccionado");
+        }
+
+        return reporte;
+    }
 }

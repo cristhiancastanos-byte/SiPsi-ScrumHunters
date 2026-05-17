@@ -21,4 +21,8 @@ public class ImagenReporteFacade {
     public List<ImagenReporteEntity> consultarImagenesPorReporte(Integer idReporte) throws Exception {
         return imagenReporteNegocioIntegration.listarImagenesPorReporte(idReporte);
     }
+
+    public ImagenReporteEntity procesarConsultaImagenPorId(Integer idImagen) throws Exception {
+        return imagenReporteNegocioIntegration.consultarImagenPorId(idImagen);
+    }
 }

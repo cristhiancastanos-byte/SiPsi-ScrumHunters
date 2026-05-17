@@ -23,4 +23,9 @@ public class ImagenReporteDAO implements IImagenReportePersistenceIntegration {
     public List<ImagenReporteEntity> listarImagenesPorReporte(Integer idReporte) throws Exception {
         return imagenReportePersistence.executeSelectImagenesPorReporte(idReporte);
     }
+
+    @Override
+    public ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception {
+        return imagenReportePersistence.executeSelectImagenById(idImagen);
+    }
 }
