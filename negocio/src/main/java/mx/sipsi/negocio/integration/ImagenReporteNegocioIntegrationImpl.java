@@ -58,4 +58,20 @@ public class ImagenReporteNegocioIntegrationImpl implements IImagenReporteNegoci
             throw new Exception("Formato no permitido. Solo se permiten imágenes JPG, JPEG o PNG.");
         }
     }
+
+    @Override
+    public ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception {
+
+        if (idImagen == null) {
+            throw new Exception("No se seleccionó una imagen válida.");
+        }
+
+        ImagenReporteEntity imagen = imagenReporteDAO.consultarImagenPorId(idImagen);
+
+        if (imagen == null) {
+            throw new Exception("No se encontró la imagen seleccionada.");
+        }
+
+        return imagen;
+    }
 }

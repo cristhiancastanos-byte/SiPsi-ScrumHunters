@@ -19,4 +19,12 @@ public class ReporteFacade {
     public boolean existeReportePorCita(Integer idCita) throws Exception {
         return reporteNegocioIntegration.existeReportePorCita(idCita);
     }
+
+    public ReporteEntity procesarConsultaReportePorId(Integer idReporte) throws Exception {
+        return reporteNegocioIntegration.consultarReportePorId(idReporte);
+    }
+
+    public ReporteEntity procesarConsultaReportePorCita(Integer idCita) throws Exception {
+        return reporteNegocioIntegration.consultarReportePorCita(idCita);
+    }
 }

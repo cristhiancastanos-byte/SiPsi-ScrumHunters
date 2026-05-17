@@ -18,4 +18,12 @@ public class ReporteDelegate {
     public boolean existeReportePorCita(Integer idCita) throws Exception {
         return reporteFacade.existeReportePorCita(idCita);
     }
+
+    public ReporteEntity consultarReportePorId(Integer idReporte) throws Exception {
+        return reporteFacade.procesarConsultaReportePorId(idReporte);
+    }
+
+    public ReporteEntity consultarReportePorCita(Integer idCita) throws Exception {
+        return reporteFacade.procesarConsultaReportePorCita(idCita);
+    }
 }
