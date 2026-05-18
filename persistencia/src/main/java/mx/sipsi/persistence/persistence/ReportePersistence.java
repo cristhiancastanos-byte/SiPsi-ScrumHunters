@@ -109,4 +109,35 @@ public class ReportePersistence {
             }
         }
     }
+
+    public void executeUpdateReporte(ReporteEntity reporte) throws Exception {
+        EntityManager em = null;
+
+        try {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            ReporteEntity reporteExistente = em.find(ReporteEntity.class, reporte.getIdReporte());
+
+            if (reporteExistente == null) {
+                throw new Exception("No se encontró el reporte clínico seleccionado.");
+            }
+
+            reporteExistente.setContenido(reporte.getContenido());
+
+            em.merge(reporteExistente);
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            throw new Exception("Error al actualizar el reporte clínico.", e);
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
 }

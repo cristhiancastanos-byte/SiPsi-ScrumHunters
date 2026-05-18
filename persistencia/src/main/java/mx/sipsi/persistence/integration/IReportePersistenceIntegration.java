@@ -11,4 +11,7 @@ public interface IReportePersistenceIntegration {
     ReporteEntity consultarReportePorCita(Integer idCita) throws Exception;
 
     ReporteEntity consultarReportePorId(Integer idReporte) throws Exception;
+
+    void actualizarReporte(ReporteEntity reporte) throws Exception;
+
 }
