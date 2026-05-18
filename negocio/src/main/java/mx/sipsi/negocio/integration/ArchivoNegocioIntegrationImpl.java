@@ -88,6 +88,10 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
 
     @Override
     public ArchivoEntity buscarPorId(Long idArchivo) throws IOException {
+        if (idArchivo == null || idArchivo <= 0) {
+            throw new IOException("No se encontró el archivo seleccionado.");
+        }
+
         try {
             return archivoPersistenciaIntegration.buscarPorId(idArchivo);
         } catch (Exception e) {
@@ -101,6 +105,45 @@ public class ArchivoNegocioIntegrationImpl implements IArchivoNegocioIntegration
             return archivoPersistenciaIntegration.listarPorPaciente(idPaciente);
         } catch (Exception e) {
             throw new IOException("Error al listar archivos del paciente.", e);
+        }
+    }
+
+    @Override
+    public void eliminarArchivo(Long idArchivo) throws IOException {
+        if (idArchivo == null || idArchivo <= 0) {
+            throw new IOException("No se encontró el archivo seleccionado.");
+        }
+
+        ArchivoEntity archivoEncontrado;
+
+        try {
+            archivoEncontrado = archivoPersistenciaIntegration.buscarPorId(idArchivo);
+        } catch (Exception e) {
+            throw new IOException("Error al consultar el archivo antes de eliminarlo.", e);
+        }
+
+        if (archivoEncontrado == null) {
+            throw new IOException("No se encontró el archivo que se desea eliminar.");
+        }
+
+        String rutaServidor = archivoEncontrado.getRutaServidor();
+
+        try {
+            archivoPersistenciaIntegration.eliminarArchivo(idArchivo);
+        } catch (Exception e) {
+            throw new IOException("Error al eliminar el registro del archivo en la base de datos.", e);
+        }
+
+        if (rutaServidor != null && !rutaServidor.trim().isEmpty()) {
+            File archivoFisico = new File(rutaServidor);
+
+            if (archivoFisico.exists() && archivoFisico.isFile()) {
+                boolean eliminado = archivoFisico.delete();
+
+                if (!eliminado) {
+                    throw new IOException("El registro fue eliminado, pero no se pudo eliminar la imagen del servidor.");
+                }
+            }
         }
     }
 
