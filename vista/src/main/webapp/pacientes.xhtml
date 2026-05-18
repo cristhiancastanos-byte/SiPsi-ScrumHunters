@@ -871,6 +871,124 @@
         .btn-modal-eliminar-nota:hover {
             background-color: #c9281b !important;
         }
+        .archivo-acciones {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .btn-eliminar-archivo,
+        .btn-eliminar-archivo.ui-button,
+        .btn-eliminar-archivo.ui-widget,
+        .btn-eliminar-archivo.ui-state-default {
+            background: #e63323 !important;
+            background-color: #e63323 !important;
+            background-image: none !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            border-radius: 5px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            font-size: 13px !important;
+            font-weight: normal !important;
+            min-width: 110px !important;
+            height: 34px !important;
+            padding: 0 !important;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.22) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .btn-eliminar-archivo:hover,
+        .btn-eliminar-archivo.ui-state-hover {
+            background: #c9281b !important;
+            background-color: #c9281b !important;
+            background-image: none !important;
+            border: none !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-eliminar-archivo .ui-button-icon-left,
+        .btn-eliminar-archivo .p-button-icon-left,
+        .btn-eliminar-archivo .p-button-icon,
+        .btn-eliminar-archivo .pi {
+            position: absolute !important;
+            left: 17px !important;
+            top: 50% !important;
+            margin: 0 !important;
+            transform: translateY(-50%) !important;
+            font-size: 14px !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-eliminar-archivo .ui-button-text,
+        .btn-eliminar-archivo .p-button-label {
+            display: block !important;
+            padding: 0 10px 0 38px !important;
+            margin: 0 !important;
+            width: 100% !important;
+            height: 34px !important;
+            line-height: 34px !important;
+            text-align: left !important;
+            box-sizing: border-box !important;
+            color: #FFFFFF !important;
+        }
+
+        .modal-eliminar-archivo {
+            width: 520px !important;
+            max-width: 92vw !important;
+        }
+
+        .modal-eliminar-archivo.ui-dialog {
+            z-index: 13000 !important;
+        }
+
+        .modal-eliminar-archivo .ui-dialog-content {
+            background-color: #FFFFFF !important;
+            padding: 30px 36px !important;
+        }
+
+        .eliminar-archivo-box {
+            padding: 10px 4px;
+            text-align: center;
+            color: #833D3D;
+            font-family: 'Archivo', Arial, sans-serif;
+        }
+
+        .eliminar-archivo-icono {
+            color: #833D3D;
+            font-size: 34px;
+            margin-bottom: 18px;
+        }
+
+        .eliminar-archivo-title {
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.35;
+            margin-bottom: 10px;
+            color: #833D3D;
+        }
+
+        .eliminar-archivo-text {
+            font-size: 17px;
+            color: #333333;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .btn-modal-eliminar-archivo {
+            background-color: #e63323 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            border-radius: 4px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            padding: 8px 26px !important;
+            min-width: 135px !important;
+        }
+
+        .btn-modal-eliminar-archivo:hover {
+            background-color: #c9281b !important;
+        }
 
     </style>
 </h:head>
@@ -1597,6 +1715,17 @@
                                                             <div class="archivo-meta">
                                                                 <strong>Subido:</strong> #{archivo.fechaSubidaFormateada}
                                                             </div>
+
+                                                            <div class="archivo-acciones">
+                                                                <p:commandButton value="Eliminar"
+                                                                                 icon="pi pi-trash"
+                                                                                 iconPos="left"
+                                                                                 actionListener="#{archivoBean.prepararEliminarArchivo(archivo.id)}"
+                                                                                 process="@this"
+                                                                                 update=":frmEliminarArchivo:pnlConfirmarEliminarArchivo :frmArchivos:msgsArchivos"
+                                                                                 oncomplete="PF('dlgEliminarArchivo').show();"
+                                                                                 styleClass="btn-eliminar-archivo" />
+                                                            </div>
                                                         </div>
 
                                                     </div>
@@ -1649,7 +1778,58 @@
 
 
 
+    <h:form id="frmEliminarArchivo">
+        <p:dialog widgetVar="dlgEliminarArchivo"
+                  modal="true"
+                  closable="false"
+                  resizable="false"
+                  header="Confirmación"
+                  showEffect="fade"
+                  hideEffect="fade"
+                  appendTo="@(body)"
+                  styleClass="modal-sipsi modal-eliminar-archivo">
 
+            <p:outputPanel id="pnlConfirmarEliminarArchivo">
+                <div class="eliminar-archivo-box">
+                    <div class="eliminar-archivo-icono">
+                        <i class="pi pi-exclamation-triangle"></i>
+                    </div>
+
+                    <div class="eliminar-archivo-title">
+                        ¿Deseas eliminar este archivo?
+                    </div>
+
+                    <div class="eliminar-archivo-text">
+                        <h:panelGroup rendered="#{not empty archivoBean.archivoEliminar}">
+                            Se eliminará el archivo:
+                            <strong>#{archivoBean.archivoEliminar.nombreOriginal}</strong>
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{empty archivoBean.archivoEliminar}">
+                            No se encontró el archivo seleccionado.
+                        </h:panelGroup>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                    <p:commandButton value="Cancelar"
+                                     actionListener="#{archivoBean.limpiarEliminacion}"
+                                     process="@this"
+                                     update=":frmEliminarArchivo:pnlConfirmarEliminarArchivo"
+                                     oncomplete="PF('dlgEliminarArchivo').hide();"
+                                     styleClass="btn-cancelar" />
+
+                    <p:commandButton value="Sí, eliminar"
+                                     icon="pi pi-trash"
+                                     actionListener="#{archivoBean.confirmarEliminarArchivo}"
+                                     process="@this"
+                                     update=":frmArchivos:msgsArchivos :frmArchivos:panelArchivos :pnlExpediente :frmEliminarArchivo:pnlConfirmarEliminarArchivo"
+                                     oncomplete="if(!args.validationFailed){PF('dlgEliminarArchivo').hide();}"
+                                     styleClass="btn-modal-eliminar-archivo" />
+                </div>
+            </p:outputPanel>
+        </p:dialog>
+    </h:form>
 
     <h:form id="frmEliminarNota">
         <p:dialog widgetVar="dlgEliminarNota"

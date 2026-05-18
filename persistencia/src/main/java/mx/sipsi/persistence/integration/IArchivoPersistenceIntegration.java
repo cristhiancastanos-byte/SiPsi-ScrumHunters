@@ -10,4 +10,6 @@ public interface IArchivoPersistenceIntegration {
     ArchivoEntity buscarPorId(Long idArchivo) throws Exception;
 
     List<ArchivoEntity> listarPorPaciente(int idPaciente) throws Exception;
+
+    void eliminarArchivo(Long idArchivo) throws Exception;
 }

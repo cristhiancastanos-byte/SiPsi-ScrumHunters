@@ -23,6 +23,9 @@ public class ArchivoBean implements Serializable {
 
     private ArchivoDelegate archivoDelegate;
 
+    private ArchivoEntity archivoEliminar;
+    private Long idArchivoEliminar;
+
     @Inject
     private PacienteBean pacienteBean;
 
@@ -87,6 +90,87 @@ public class ArchivoBean implements Serializable {
         }
     }
 
+    public void prepararEliminarArchivo(Long idArchivo) {
+        try {
+            this.idArchivoEliminar = idArchivo;
+            this.archivoEliminar = buscarArchivoEnPacienteActual(idArchivo);
+
+            if (this.archivoEliminar == null) {
+                agregarError("Error", "No se encontró el archivo seleccionado.");
+                limpiarEliminacion();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            agregarError("Error", "No se pudo preparar la eliminación del archivo.");
+            limpiarEliminacion();
+        }
+    }
+
+    public void confirmarEliminarArchivo() {
+        try {
+            if (idArchivoEliminar == null) {
+                agregarError("Error", "No se seleccionó ningún archivo para eliminar.");
+                return;
+            }
+
+            archivoDelegate.eliminarArchivo(idArchivoEliminar);
+
+            PacienteEntity pacienteActual = null;
+
+            if (pacienteBean != null) {
+                pacienteActual = pacienteBean.getPacienteExpediente();
+            }
+
+            if (pacienteActual != null && pacienteActual.getArchivos() != null) {
+                Long idEliminar = idArchivoEliminar;
+
+                pacienteActual.getArchivos().removeIf(archivo ->
+                        archivo != null
+                                && archivo.getId() != null
+                                && archivo.getId().longValue() == idEliminar.longValue()
+                );
+            }
+
+            agregarInfo("Archivo eliminado correctamente", "El archivo fue eliminado del expediente.");
+            limpiarEliminacion();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            agregarError("Error", "No se pudo eliminar el archivo seleccionado.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            agregarError("Error", "Ocurrió un problema al eliminar el archivo.");
+        }
+    }
+
+    public void limpiarEliminacion() {
+        this.archivoEliminar = null;
+        this.idArchivoEliminar = null;
+    }
+
+    private ArchivoEntity buscarArchivoEnPacienteActual(Long idArchivo) {
+        if (idArchivo == null || pacienteBean == null || pacienteBean.getPacienteExpediente() == null) {
+            return null;
+        }
+
+        PacienteEntity pacienteActual = pacienteBean.getPacienteExpediente();
+
+        if (pacienteActual.getArchivos() == null) {
+            return null;
+        }
+
+        for (ArchivoEntity archivo : pacienteActual.getArchivos()) {
+            if (archivo != null
+                    && archivo.getId() != null
+                    && archivo.getId().longValue() == idArchivo.longValue()) {
+                return archivo;
+            }
+        }
+
+        return null;
+    }
+
     private PacienteEntity obtenerPacienteActual(FileUploadEvent event) {
         try {
             if (pacienteBean != null && pacienteBean.getPacienteExpediente() != null) {
@@ -117,5 +201,21 @@ public class ArchivoBean implements Serializable {
     private void agregarError(String resumen, String detalle) {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, resumen, detalle));
+    }
+
+    public ArchivoEntity getArchivoEliminar() {
+        return archivoEliminar;
+    }
+
+    public void setArchivoEliminar(ArchivoEntity archivoEliminar) {
+        this.archivoEliminar = archivoEliminar;
+    }
+
+    public Long getIdArchivoEliminar() {
+        return idArchivoEliminar;
+    }
+
+    public void setIdArchivoEliminar(Long idArchivoEliminar) {
+        this.idArchivoEliminar = idArchivoEliminar;
     }
 }
