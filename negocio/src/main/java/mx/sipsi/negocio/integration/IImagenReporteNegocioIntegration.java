@@ -10,4 +10,6 @@ public interface IImagenReporteNegocioIntegration {
     List<ImagenReporteEntity> listarImagenesPorReporte(Integer idReporte) throws Exception;
 
     ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception;
+
+    void eliminarImagen(Integer idImagenReporte) throws Exception;
 }

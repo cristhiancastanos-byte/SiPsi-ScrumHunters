@@ -16,11 +16,11 @@ public class ReporteNegocioIntegrationImpl implements IReporteNegocioIntegration
     public void crearReporte(ReporteEntity reporte) throws Exception {
 
         if (reporte == null) {
-            throw new Exception("Ingrese texto para la nota");
+            throw new Exception("Ingrese texto para el reporte");
         }
 
         if (reporte.getContenido() == null || reporte.getContenido().trim().isEmpty()) {
-            throw new Exception("Ingrese texto para la nota");
+            throw new Exception("Ingrese texto para el reporte");
         }
 
         if (reporte.getIdCita() == null) {
@@ -76,5 +76,27 @@ public class ReporteNegocioIntegrationImpl implements IReporteNegocioIntegration
         }
 
         return reporte;
+    }
+
+    @Override
+    public void actualizarReporte(ReporteEntity reporte) throws Exception {
+
+        if (reporte == null) {
+            throw new Exception("No se seleccionó un reporte válido");
+        }
+
+        if (reporte.getIdReporte() == null) {
+            throw new Exception("No se seleccionó un reporte válido");
+        }
+
+        if (reporte.getContenido() == null || reporte.getContenido().trim().isEmpty()) {
+            throw new Exception("Ingrese texto para el reporte");
+        }
+
+        ReporteEntity reporteExistente = consultarReportePorId(reporte.getIdReporte());
+
+        reporteExistente.setContenido(reporte.getContenido().trim());
+
+        reporteDAO.actualizarReporte(reporteExistente);
     }
 }

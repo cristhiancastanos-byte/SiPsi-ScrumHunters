@@ -74,4 +74,13 @@ public class ImagenReporteNegocioIntegrationImpl implements IImagenReporteNegoci
 
         return imagen;
     }
+
+    @Override
+    public void eliminarImagen(Integer idImagenReporte) throws Exception {
+        if (idImagenReporte == null) {
+            throw new Exception("No se seleccionó un archivo válido.");
+        }
+
+        imagenReporteDAO.eliminarImagen(idImagenReporte);
+    }
 }

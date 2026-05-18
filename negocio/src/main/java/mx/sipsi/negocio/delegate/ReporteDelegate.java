@@ -26,4 +26,8 @@ public class ReporteDelegate {
     public ReporteEntity consultarReportePorCita(Integer idCita) throws Exception {
         return reporteFacade.procesarConsultaReportePorCita(idCita);
     }
+
+    public void actualizarReporte(ReporteEntity reporte) throws Exception {
+        reporteFacade.procesarActualizacionReporte(reporte);
+    }
 }
