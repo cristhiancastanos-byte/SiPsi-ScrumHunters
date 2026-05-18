@@ -25,12 +25,16 @@ public class ReporteBean implements Serializable {
 
     private ReporteEntity reporteNuevo;
     private ReporteEntity reporteSeleccionado;
+    private ReporteEntity reporteEditar;
     private CitaEntity citaSeleccionada;
+    private ImagenReporteEntity imagenEliminar;
 
     private ReporteDelegate reporteDelegate;
     private ImagenReporteDelegate imagenReporteDelegate;
 
     private boolean mostrarDetalles;
+    private boolean editandoReporte;
+
     private String motivoReporteSeleccionado;
     private String nombrePacienteReporte;
     private List<ImagenReporteEntity> imagenesReporteSeleccionado;
@@ -42,9 +46,16 @@ public class ReporteBean implements Serializable {
     public void init() {
         reporteNuevo = new ReporteEntity();
         reporteSeleccionado = null;
+        reporteEditar = null;
+        citaSeleccionada = null;
+        imagenEliminar = null;
+
         reporteDelegate = new ReporteDelegate();
         imagenReporteDelegate = new ImagenReporteDelegate();
+
         mostrarDetalles = false;
+        editandoReporte = false;
+
         motivoReporteSeleccionado = "";
         nombrePacienteReporte = "Paciente";
         imagenesReporteSeleccionado = new ArrayList<>();
@@ -157,26 +168,157 @@ public class ReporteBean implements Serializable {
     public void abrirReporte(Integer idReporte) {
         try {
             this.reporteSeleccionado = reporteDelegate.consultarReportePorId(idReporte);
+            this.reporteEditar = null;
+            this.imagenEliminar = null;
             this.mostrarDetalles = false;
+            this.editandoReporte = false;
 
-            if (this.reporteSeleccionado != null && this.reporteSeleccionado.getIdReporte() != null) {
-                this.imagenesReporteSeleccionado = imagenReporteDelegate.listarImagenesPorReporte(
-                        this.reporteSeleccionado.getIdReporte()
-                );
-            } else {
-                this.imagenesReporteSeleccionado = new ArrayList<>();
+            if (imagenReporteBean != null) {
+                imagenReporteBean.limpiarImagenesPendientes();
             }
+
+            cargarImagenesReporteSeleccionado();
 
         } catch (Exception e) {
             this.reporteSeleccionado = null;
+            this.reporteEditar = null;
+            this.imagenEliminar = null;
             this.imagenesReporteSeleccionado = new ArrayList<>();
             this.mostrarDetalles = false;
+            this.editandoReporte = false;
+
+            if (imagenReporteBean != null) {
+                imagenReporteBean.limpiarImagenesPendientes();
+            }
+
             mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage());
         }
     }
 
     public void verDetalles() {
+        if (editandoReporte) {
+            return;
+        }
+
         this.mostrarDetalles = !this.mostrarDetalles;
+    }
+
+    public void alternarEdicionReporte() {
+        if (editandoReporte) {
+            cancelarEdicionReporte();
+            return;
+        }
+
+        if (!mostrarDetalles) {
+            mostrarMensaje(FacesMessage.SEVERITY_WARN, "Aviso", "Primero muestra los detalles del reporte.");
+            return;
+        }
+
+        prepararEdicionReporte(reporteSeleccionado);
+    }
+
+    public void prepararEdicionReporte(ReporteEntity reporte) {
+        try {
+            if (reporte == null || reporte.getIdReporte() == null) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó un reporte válido.");
+                return;
+            }
+
+            ReporteEntity reporteActual = reporteDelegate.consultarReportePorId(reporte.getIdReporte());
+
+            this.reporteEditar = new ReporteEntity();
+            this.reporteEditar.setIdReporte(reporteActual.getIdReporte());
+            this.reporteEditar.setIdCita(reporteActual.getIdCita());
+            this.reporteEditar.setContenido(reporteActual.getContenido());
+            this.reporteEditar.setFechaCreacion(reporteActual.getFechaCreacion());
+
+            this.editandoReporte = true;
+            this.mostrarDetalles = true;
+
+            if (imagenReporteBean != null) {
+                imagenReporteBean.prepararCargaImagen(this.reporteEditar);
+            }
+
+        } catch (Exception e) {
+            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo cargar el reporte para editar.");
+        }
+    }
+
+    public void actualizarReporte() {
+        try {
+            if (reporteEditar == null || reporteEditar.getIdReporte() == null) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó un reporte válido.");
+                FacesContext.getCurrentInstance().validationFailed();
+                return;
+            }
+
+            if (reporteEditar.getContenido() == null || reporteEditar.getContenido().trim().isEmpty()) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "La nota de sesión no puede quedar vacía.");
+                FacesContext.getCurrentInstance().validationFailed();
+                return;
+            }
+
+            Integer idReporte = reporteEditar.getIdReporte();
+
+            reporteEditar.setContenido(reporteEditar.getContenido().trim());
+
+            reporteDelegate.actualizarReporte(reporteEditar);
+
+            ReporteEntity reporteActualizado = reporteDelegate.consultarReportePorId(idReporte);
+
+            if (imagenReporteBean != null) {
+                imagenReporteBean.guardarImagenesPendientes(reporteActualizado);
+            }
+
+            this.reporteSeleccionado = reporteDelegate.consultarReportePorId(idReporte);
+            this.reporteEditar = null;
+            this.imagenEliminar = null;
+            this.editandoReporte = false;
+            this.mostrarDetalles = true;
+
+            cargarImagenesReporteSeleccionado();
+
+            mostrarMensaje(FacesMessage.SEVERITY_INFO, "Éxito", "Reporte actualizado");
+
+        } catch (Exception e) {
+            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage());
+            FacesContext.getCurrentInstance().validationFailed();
+        }
+    }
+
+    public void cancelarEdicionReporte() {
+        this.reporteEditar = null;
+        this.imagenEliminar = null;
+        this.editandoReporte = false;
+        this.mostrarDetalles = true;
+
+        if (imagenReporteBean != null) {
+            imagenReporteBean.limpiarImagenesPendientes();
+        }
+    }
+
+    public void prepararEliminacionImagenReporte(ImagenReporteEntity imagen) {
+        this.imagenEliminar = imagen;
+    }
+
+    public void eliminarImagenReporte() {
+        try {
+            if (imagenEliminar == null || imagenEliminar.getIdImagenReporte() == null) {
+                mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se seleccionó un archivo válido.");
+                return;
+            }
+
+            imagenReporteDelegate.eliminarImagen(imagenEliminar.getIdImagenReporte());
+
+            this.imagenEliminar = null;
+
+            cargarImagenesReporteSeleccionado();
+
+            mostrarMensaje(FacesMessage.SEVERITY_INFO, "Éxito", "Archivo eliminado");
+
+        } catch (Exception e) {
+            mostrarMensaje(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo eliminar el archivo.");
+        }
     }
 
     public void guardarReporte() {
@@ -212,8 +354,11 @@ public class ReporteBean implements Serializable {
     public void limpiarReporte() {
         this.reporteNuevo = new ReporteEntity();
         this.reporteSeleccionado = null;
+        this.reporteEditar = null;
         this.citaSeleccionada = null;
+        this.imagenEliminar = null;
         this.mostrarDetalles = false;
+        this.editandoReporte = false;
         this.motivoReporteSeleccionado = "";
         this.nombrePacienteReporte = "Paciente";
         this.imagenesReporteSeleccionado = new ArrayList<>();
@@ -223,6 +368,15 @@ public class ReporteBean implements Serializable {
         }
     }
 
+    private void cargarImagenesReporteSeleccionado() throws Exception {
+        if (this.reporteSeleccionado != null && this.reporteSeleccionado.getIdReporte() != null) {
+            this.imagenesReporteSeleccionado = imagenReporteDelegate.listarImagenesPorReporte(
+                    this.reporteSeleccionado.getIdReporte()
+            );
+        } else {
+            this.imagenesReporteSeleccionado = new ArrayList<>();
+        }
+    }
 
     private String limpiarTextoMotivo(String motivo) {
         if (motivo == null || motivo.trim().isEmpty()) {
@@ -246,6 +400,14 @@ public class ReporteBean implements Serializable {
         return mostrarDetalles ? "Ocultar detalles" : "Ver detalles";
     }
 
+    public String getTextoTooltipEditar() {
+        if (!mostrarDetalles) {
+            return "Muestra los detalles para editar";
+        }
+
+        return editandoReporte ? "Cancelar edición" : "Editar reporte";
+    }
+
     public ReporteEntity getReporteNuevo() {
         return reporteNuevo;
     }
@@ -262,6 +424,14 @@ public class ReporteBean implements Serializable {
         this.reporteSeleccionado = reporteSeleccionado;
     }
 
+    public ReporteEntity getReporteEditar() {
+        return reporteEditar;
+    }
+
+    public void setReporteEditar(ReporteEntity reporteEditar) {
+        this.reporteEditar = reporteEditar;
+    }
+
     public CitaEntity getCitaSeleccionada() {
         return citaSeleccionada;
     }
@@ -270,12 +440,28 @@ public class ReporteBean implements Serializable {
         this.citaSeleccionada = citaSeleccionada;
     }
 
+    public ImagenReporteEntity getImagenEliminar() {
+        return imagenEliminar;
+    }
+
+    public void setImagenEliminar(ImagenReporteEntity imagenEliminar) {
+        this.imagenEliminar = imagenEliminar;
+    }
+
     public boolean isMostrarDetalles() {
         return mostrarDetalles;
     }
 
     public void setMostrarDetalles(boolean mostrarDetalles) {
         this.mostrarDetalles = mostrarDetalles;
+    }
+
+    public boolean isEditandoReporte() {
+        return editandoReporte;
+    }
+
+    public void setEditandoReporte(boolean editandoReporte) {
+        this.editandoReporte = editandoReporte;
     }
 
     public String getMotivoReporteSeleccionado() {

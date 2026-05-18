@@ -25,4 +25,8 @@ public class ImagenReporteFacade {
     public ImagenReporteEntity procesarConsultaImagenPorId(Integer idImagen) throws Exception {
         return imagenReporteNegocioIntegration.consultarImagenPorId(idImagen);
     }
+
+    public void procesarEliminacionImagen(Integer idImagenReporte) throws Exception {
+        imagenReporteNegocioIntegration.eliminarImagen(idImagenReporte);
+    }
 }

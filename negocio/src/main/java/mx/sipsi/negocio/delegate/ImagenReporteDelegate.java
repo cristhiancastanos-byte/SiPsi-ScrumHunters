@@ -24,4 +24,8 @@ public class ImagenReporteDelegate {
     public ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception {
         return imagenReporteFacade.procesarConsultaImagenPorId(idImagen);
     }
+
+    public void eliminarImagen(Integer idImagenReporte) throws Exception {
+        imagenReporteFacade.procesarEliminacionImagen(idImagenReporte);
+    }
 }

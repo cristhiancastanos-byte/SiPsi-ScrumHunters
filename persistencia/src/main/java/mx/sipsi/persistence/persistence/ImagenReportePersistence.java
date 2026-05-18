@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import mx.sipsi.entity.ImagenReporteEntity;
+import java.io.File;
 
 import java.util.List;
 
@@ -72,6 +73,47 @@ public class ImagenReportePersistence {
 
         } catch (Exception e) {
             throw new Exception("Error al consultar la imagen del reporte clínico.", e);
+
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
+    public void executeDeleteImagen(Integer idImagenReporte) throws Exception {
+        EntityManager em = null;
+
+        try {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+
+            ImagenReporteEntity imagen = em.find(ImagenReporteEntity.class, idImagenReporte);
+
+            if (imagen == null) {
+                throw new Exception("No se encontró el archivo seleccionado.");
+            }
+
+            String rutaServidor = imagen.getRutaServidor();
+
+            em.remove(imagen);
+
+            if (rutaServidor != null && !rutaServidor.trim().isEmpty()) {
+                File archivoFisico = new File(rutaServidor);
+
+                if (archivoFisico.exists()) {
+                    archivoFisico.delete();
+                }
+            }
+
+            em.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            throw new Exception("Error al eliminar el archivo del reporte.", e);
 
         } finally {
             if (em != null) {

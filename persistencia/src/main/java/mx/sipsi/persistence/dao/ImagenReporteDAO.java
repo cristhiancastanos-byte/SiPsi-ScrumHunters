@@ -28,4 +28,9 @@ public class ImagenReporteDAO implements IImagenReportePersistenceIntegration {
     public ImagenReporteEntity consultarImagenPorId(Integer idImagen) throws Exception {
         return imagenReportePersistence.executeSelectImagenById(idImagen);
     }
+
+    @Override
+    public void eliminarImagen(Integer idImagenReporte) throws Exception {
+        imagenReportePersistence.executeDeleteImagen(idImagenReporte);
+    }
 }

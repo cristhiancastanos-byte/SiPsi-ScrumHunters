@@ -31,4 +31,9 @@ public class ReporteDAO implements IReportePersistenceIntegration {
     public ReporteEntity consultarReportePorId(Integer idReporte) throws Exception {
         return reportePersistence.executeSelectReporteById(idReporte);
     }
+
+    @Override
+    public void actualizarReporte(ReporteEntity reporte) throws Exception {
+        reportePersistence.executeUpdateReporte(reporte);
+    }
 }
