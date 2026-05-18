@@ -641,14 +641,128 @@
             background-color: #CF8080 !important;
             border: none !important;
             color: #FFFFFF !important;
-            padding: 5px 18px !important;
-            font-size: 16px !important;
+            height: 34px !important;
+            min-height: 34px !important;
+            padding: 0 18px !important;
+            font-size: 14px !important;
             border-radius: 4px !important;
-            font-family: 'Archivo', Arial, sans-serif;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
         }
 
         .btn-detalles-reporte:hover {
-            background-color: #833D3D !important;
+            background-color: #C47474 !important;
+        }
+
+        .btn-editar-reporte {
+            background-color: #CF8080 !important;
+            border: none !important;
+            color: #FFFFFF !important;
+            width: 42px !important;
+            height: 34px !important;
+            min-height: 34px !important;
+            padding: 0 !important;
+            border-radius: 4px !important;
+            font-size: 14px !important;
+            margin-right: 10px !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+        }
+
+        .btn-editar-reporte:hover {
+            background-color: #C47474 !important;
+        }
+
+        .btn-editar-reporte:active,
+        .btn-editar-reporte.ui-state-active,
+        .btn-editar-reporte.ui-state-focus {
+            background-color: #A65353 !important;
+        }
+
+        .btn-editar-reporte.ui-state-disabled {
+            opacity: 0.45 !important;
+            cursor: not-allowed !important;
+        }
+
+        .btn-detalles-reporte.ui-state-disabled {
+            opacity: 0.55 !important;
+            cursor: not-allowed !important;
+        }
+
+        .area-editar-reporte {
+            width: 100% !important;
+            min-height: 130px !important;
+            resize: none !important;
+            border: 1px solid #EAEAEA !important;
+            border-radius: 4px !important;
+            font-size: 16px !important;
+            color: #333333 !important;
+            font-family: 'Archivo', Arial, sans-serif !important;
+            box-sizing: border-box !important;
+        }
+
+        .reporte-archivo-card-edicion {
+            display: grid !important;
+            grid-template-columns: 38px minmax(0, 1fr) auto !important;
+            gap: 8px !important;
+            align-items: center !important;
+            width: 245px !important;
+            min-height: 52px !important;
+            box-sizing: border-box !important;
+        }
+
+        .reporte-archivo-info-edicion {
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .reporte-archivo-card-edicion .reporte-archivo-nombre,
+        .reporte-archivo-card-edicion .reporte-archivo-meta {
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            word-break: normal !important;
+        }
+
+        .btn-eliminar-archivo-reporte {
+            background-color: #FFFFFF !important;
+            border: 1px solid #DDAEAC !important;
+            color: #A65353 !important;
+            min-width: 34px !important;
+            width: 34px !important;
+            height: 30px !important;
+            min-height: 30px !important;
+            padding: 0 !important;
+            border-radius: 4px !important;
+            font-size: 14px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+        }
+
+        .btn-eliminar-archivo-reporte .ui-button-text {
+            padding: 0 !important;
+            line-height: 1 !important;
+        }
+
+        .btn-eliminar-archivo-reporte:hover {
+            color: #FFFFFF !important;
+            background-color: #A65353 !important;
+            border-color: #A65353 !important;
+        }
+
+        .texto-edicion-reporte {
+            color: #808080;
+            font-size: 13px;
+            margin-top: 4px;
         }
 
         .reporte-campo-titulo {
@@ -941,7 +1055,7 @@
 
                 <p:remoteCommand name="prepararReporteDesdeAgenda"
                                  actionListener="#{reporteBean.prepararReporteDesdeAgenda}"
-                                 update="msgs :frmReporte:pnlReporte :frmReporte:msgsReporte :frmVerReporte:contenidoVerReporte :frmVerReporte:areaPrintReporte"
+                                 update="msgs :frmReporte:pnlReporte :frmReporte:msgsReporte :frmVerReporte:msgsVerReporte :frmVerReporte:contenidoVerReporte :frmVerReporte:areaPrintReporte"
                                  oncomplete="if (args.abrirCrearReporte) PF('modalReporte').show(); if (args.abrirVerReporte) PF('modalVerReporte').show();" />
 
                 <p:schedule id="calendarioCitas"
@@ -1413,7 +1527,12 @@
 
     </h:form>
 
-    <h:form id="frmVerReporte">
+    <h:form id="frmVerReporte" enctype="multipart/form-data">
+
+        <p:growl id="msgsVerReporte"
+                 showDetail="true"
+                 globalOnly="false"
+                 life="4500" />
 
         <p:dialog widgetVar="modalVerReporte"
                   modal="true"
@@ -1428,10 +1547,20 @@
                 <div class="reporte-ver-contenedor no-print">
 
                     <div class="reporte-ver-top">
+
+                        <p:commandButton icon="pi pi-pencil"
+                                         title="#{reporteBean.textoTooltipEditar}"
+                                         actionListener="#{reporteBean.alternarEdicionReporte}"
+                                         process="@this"
+                                         update="msgsVerReporte contenidoVerReporte areaPrintReporte"
+                                         disabled="#{not reporteBean.mostrarDetalles}"
+                                         styleClass="btn-editar-reporte" />
+
                         <p:commandButton value="#{reporteBean.textoBotonDetalles}"
                                          actionListener="#{reporteBean.verDetalles}"
                                          process="@this"
                                          update="contenidoVerReporte areaPrintReporte"
+                                         disabled="#{reporteBean.editandoReporte}"
                                          oncomplete="PF('modalVerReporte').show();"
                                          styleClass="btn-detalles-reporte" />
                     </div>
@@ -1452,9 +1581,23 @@
                         </div>
                     </h:panelGroup>
 
-                    <h:panelGroup rendered="#{reporteBean.mostrarDetalles}">
+                    <h:panelGroup rendered="#{reporteBean.mostrarDetalles and not reporteBean.editandoReporte}">
                         <div class="reporte-campo-texto">
                             <h:outputText value="#{reporteBean.reporteSeleccionado.contenido}" />
+                        </div>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{reporteBean.mostrarDetalles and reporteBean.editandoReporte}">
+                        <p:inputTextarea id="contenidoEditarReporte"
+                                         value="#{reporteBean.reporteEditar.contenido}"
+                                         rows="7"
+                                         maxlength="2000"
+                                         autoResize="false"
+                                         styleClass="area-editar-reporte"
+                                         placeholder="Escribir nota aquí..." />
+
+                        <div class="texto-edicion-reporte">
+                            Máximo 2000 caracteres. La nota de sesión no puede quedar vacía.
                         </div>
                     </h:panelGroup>
 
@@ -1475,7 +1618,7 @@
                             </div>
                         </h:panelGroup>
 
-                        <h:panelGroup rendered="#{not empty reporteBean.imagenesReporteSeleccionado}">
+                        <h:panelGroup rendered="#{not empty reporteBean.imagenesReporteSeleccionado and not reporteBean.editandoReporte}">
                             <div class="reporte-archivos-lista">
 
                                 <ui:repeat value="#{reporteBean.imagenesReporteSeleccionado}" var="imagen">
@@ -1504,21 +1647,144 @@
                             </div>
                         </h:panelGroup>
 
+                        <h:panelGroup rendered="#{not empty reporteBean.imagenesReporteSeleccionado and reporteBean.editandoReporte}">
+                            <div class="reporte-archivos-lista">
+
+                                <ui:repeat value="#{reporteBean.imagenesReporteSeleccionado}" var="imagen">
+
+                                    <div class="reporte-archivo-card reporte-archivo-card-edicion">
+
+                                        <div class="reporte-archivo-icono">
+                                            🖼️
+                                        </div>
+
+                                        <div class="reporte-archivo-info-edicion">
+                                            <div class="reporte-archivo-nombre">
+                                                #{imagen.nombreOriginal}
+                                            </div>
+
+                                            <div class="reporte-archivo-meta">
+                                                Archivo adjunto
+                                            </div>
+                                        </div>
+
+                                        <p:commandButton icon="pi pi-trash"
+                                                         title="Eliminar archivo"
+                                                         actionListener="#{reporteBean.prepararEliminacionImagenReporte(imagen)}"
+                                                         process="@this"
+                                                         update=":frmVerReporte:dlgConfirmarEliminarArchivoReporte"
+                                                         oncomplete="PF('dlgConfirmarEliminarArchivoReporteWV').show();"
+                                                         styleClass="btn-eliminar-archivo-reporte" />
+
+                                    </div>
+
+                                </ui:repeat>
+
+                            </div>
+                        </h:panelGroup>
+
+
+                        <h:panelGroup rendered="#{reporteBean.editandoReporte}">
+
+                            <h:outputText value="Agregar archivo:"
+                                          styleClass="reporte-campo-titulo" />
+
+                            <p:outputPanel id="pnlImagenesReporteEdicion">
+
+                                <div class="imagen-reporte-upload-box">
+
+                                    <h:panelGroup rendered="#{empty imagenReporteBean.imagenesPendientes}">
+                                        <p class="imagen-reporte-upload-title">Selecciona un archivo</p>
+
+                                        <p class="imagen-reporte-upload-text">
+                                            Formatos permitidos: JPG, JPEG, PNG
+                                        </p>
+
+                                        <p class="imagen-reporte-upload-text">
+                                            Tamaño permitido: 5MB
+                                        </p>
+                                    </h:panelGroup>
+
+                                    <p:fileUpload listener="#{imagenReporteBean.handleImagenUpload}"
+                                                  mode="advanced"
+                                                  dragDropSupport="false"
+                                                  update=":frmVerReporte:msgsVerReporte :frmVerReporte:pnlImagenesReporteEdicion"
+                                                  allowTypes="/(\.|\/)(jpe?g|png)$/"
+                                                  sizeLimit="5242880"
+                                                  fileLimit="1"
+                                                  label="Seleccionar archivo"
+                                                  uploadLabel="Agregar"
+                                                  cancelLabel="Cancelar"
+                                                  invalidFileMessage="Formato no válido. Solo se permiten imágenes JPG, JPEG o PNG."
+                                                  invalidSizeMessage="Archivo demasiado pesado. El archivo no debe superar 5MB."
+                                                  fileLimitMessage="Solo se puede subir un archivo a la vez." />
+
+                                    <h:panelGroup rendered="#{not empty imagenReporteBean.imagenesPendientes}">
+                                        <div class="imagen-reporte-lista">
+                                            <ui:repeat value="#{imagenReporteBean.imagenesPendientes}" var="imagenPendiente">
+                                                <div class="imagen-reporte-card">
+
+                                                    <div class="imagen-reporte-thumb">
+                                                        <img src="#{imagenPendiente.vistaPreviaBase64}"
+                                                             alt="#{imagenPendiente.nombreOriginal}" />
+                                                    </div>
+
+                                                    <div class="imagen-reporte-info">
+                                                        <div class="imagen-reporte-nombre">
+                                                            #{imagenPendiente.nombreOriginal}
+                                                        </div>
+
+                                                        <div class="imagen-reporte-meta">
+                                                            #{imagenPendiente.tamanoTexto} · PNG/JPG
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </ui:repeat>
+                                        </div>
+                                    </h:panelGroup>
+
+                                </div>
+
+                            </p:outputPanel>
+
+                        </h:panelGroup>
+
                     </h:panelGroup>
 
                     <div class="reporte-botones-footer no-print">
 
-                        <p:commandButton value="Imprimir"
-                                         type="button"
-                                         onclick="imprimirReporteClinico();"
-                                         styleClass="btn-guardar" />
+                        <h:panelGroup rendered="#{not reporteBean.editandoReporte}">
 
-                        <p:commandButton value="Cerrar"
-                                         process="@this"
-                                         actionListener="#{reporteBean.limpiarReporte}"
-                                         update="contenidoVerReporte areaPrintReporte"
-                                         onclick="PF('modalVerReporte').hide();"
-                                         styleClass="btn-cancelar" />
+                            <p:commandButton value="Imprimir"
+                                             type="button"
+                                             onclick="imprimirReporteClinico();"
+                                             styleClass="btn-guardar" />
+
+                            <p:commandButton value="Cerrar"
+                                             process="@this"
+                                             actionListener="#{reporteBean.limpiarReporte}"
+                                             update="contenidoVerReporte areaPrintReporte msgsVerReporte"
+                                             onclick="PF('modalVerReporte').hide();"
+                                             styleClass="btn-cancelar" />
+
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{reporteBean.editandoReporte}">
+
+                            <p:commandButton value="Cancelar"
+                                             process="@this"
+                                             actionListener="#{reporteBean.cancelarEdicionReporte}"
+                                             update="contenidoVerReporte areaPrintReporte msgsVerReporte"
+                                             styleClass="btn-cancelar" />
+
+                            <p:commandButton value="Guardar"
+                                             action="#{reporteBean.actualizarReporte}"
+                                             process="@form"
+                                             update="msgsVerReporte contenidoVerReporte areaPrintReporte"
+                                             styleClass="btn-guardar" />
+
+                        </h:panelGroup>
 
                     </div>
 
@@ -1527,6 +1793,27 @@
             </p:outputPanel>
 
         </p:dialog>
+
+        <p:confirmDialog id="dlgConfirmarEliminarArchivoReporte"
+                         widgetVar="dlgConfirmarEliminarArchivoReporteWV"
+                         header="Confirmar eliminación"
+                         message="¿Deseas eliminar este archivo del reporte?"
+                         severity="warn"
+                         appendTo="@(body)">
+
+            <p:commandButton value="Cancelar"
+                             type="button"
+                             onclick="PF('dlgConfirmarEliminarArchivoReporteWV').hide();"
+                             styleClass="btn-cancelar" />
+
+            <p:commandButton value="Eliminar"
+                             actionListener="#{reporteBean.eliminarImagenReporte}"
+                             process="@this"
+                             update=":frmVerReporte:msgsVerReporte :frmVerReporte:contenidoVerReporte :frmVerReporte:areaPrintReporte"
+                             oncomplete="PF('dlgConfirmarEliminarArchivoReporteWV').hide(); PF('modalVerReporte').show();"
+                             styleClass="btn-peligro" />
+
+        </p:confirmDialog>
 
         <p:outputPanel id="areaPrintReporte">
 
