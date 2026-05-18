@@ -28,4 +28,9 @@ public class ArchivoDAO implements IArchivoPersistenceIntegration {
     public List<ArchivoEntity> listarPorPaciente(int idPaciente) throws Exception {
         return archivoPersistence.listarPorPaciente(idPaciente);
     }
+
+    @Override
+    public void eliminarArchivo(Long idArchivo) throws Exception {
+        archivoPersistence.eliminarArchivo(idArchivo);
+    }
 }
